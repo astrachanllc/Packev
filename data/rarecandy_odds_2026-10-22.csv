@@ -1,0 +1,41 @@
+platform,category,pack_name,pack_price,band,tier_min,tier_max,odds_pct,guaranteed_candy
+Rare Candy,Instapacks,"Deep Blue",4.99,Common,1,5,59.8,250
+Rare Candy,Instapacks,"Deep Blue",4.99,Uncommon,5,7,22.1,250
+Rare Candy,Instapacks,"Deep Blue",4.99,Rare,7,8,5.3,250
+Rare Candy,Instapacks,"Deep Blue",4.99,Epic,8,10,10.9,250
+Rare Candy,Instapacks,"Deep Blue",4.99,Legendary,10,112,1.9,250
+Rare Candy,Instapacks,"Wings & Flames Chase",9.99,Common,5,8,49.6,500
+Rare Candy,Instapacks,"Wings & Flames Chase",9.99,Uncommon,8,15,35.2,500
+Rare Candy,Instapacks,"Wings & Flames Chase",9.99,Rare,15,16,5.0,500
+Rare Candy,Instapacks,"Wings & Flames Chase",9.99,Epic,16,17,6.6,500
+Rare Candy,Instapacks,"Wings & Flames Chase",9.99,Legendary,17,236,3.6,500
+Rare Candy,Instapacks,"Single Strike: Iconic Legends",24.99,Common,9,22,55.9,1250
+Rare Candy,Instapacks,"Single Strike: Iconic Legends",24.99,Uncommon,22,33,28.8,1250
+Rare Candy,Instapacks,"Single Strike: Iconic Legends",24.99,Rare,33,39,8.5,1250
+Rare Candy,Instapacks,"Single Strike: Iconic Legends",24.99,Epic,39,49,5.3,1250
+Rare Candy,Instapacks,"Single Strike: Iconic Legends",24.99,Legendary,49,720,1.5,1250
+Rare Candy,Instapacks,"Single Strike: Fan Favorites",49.99,Common,20,52,59.9,2500
+Rare Candy,Instapacks,"Single Strike: Fan Favorites",49.99,Uncommon,52,70,24.5,2500
+Rare Candy,Instapacks,"Single Strike: Fan Favorites",49.99,Rare,70,74,7.2,2500
+Rare Candy,Instapacks,"Single Strike: Fan Favorites",49.99,Epic,74,133,6.7,2500
+Rare Candy,Instapacks,"Single Strike: Fan Favorites",49.99,Legendary,133,1435,1.7,2500
+Rare Candy,Instapacks,"Boosted Pack: Iconic Pokemon",49.99,Common,28,59,59.5,2500
+Rare Candy,Instapacks,"Boosted Pack: Iconic Pokemon",49.99,Uncommon,59,74,25.1,2500
+Rare Candy,Instapacks,"Boosted Pack: Iconic Pokemon",49.99,Rare,74,83,8.7,2500
+Rare Candy,Instapacks,"Boosted Pack: Iconic Pokemon",49.99,Epic,83,88,4.8,2500
+Rare Candy,Instapacks,"Boosted Pack: Iconic Pokemon",49.99,Legendary,88,2251,1.9,2500
+Rare Candy,Instapacks,"Single Strike: Collector's Passport",99.99,Common,35,89,59.9,5000
+Rare Candy,Instapacks,"Single Strike: Collector's Passport",99.99,Uncommon,89,166,24.4,5000
+Rare Candy,Instapacks,"Single Strike: Collector's Passport",99.99,Rare,166,202,8.3,5000
+Rare Candy,Instapacks,"Single Strike: Collector's Passport",99.99,Epic,202,229,5.9,5000
+Rare Candy,Instapacks,"Single Strike: Collector's Passport",99.99,Legendary,229,3860,1.5,5000
+Rare Candy,Instapacks,"Single Strike: Modern Collector Gallery",249.99,Common,100,255,60.0,12500
+Rare Candy,Instapacks,"Single Strike: Modern Collector Gallery",249.99,Uncommon,255,322,24.9,12500
+Rare Candy,Instapacks,"Single Strike: Modern Collector Gallery",249.99,Rare,322,358,7.0,12500
+Rare Candy,Instapacks,"Single Strike: Modern Collector Gallery",249.99,Epic,358,796,6.6,12500
+Rare Candy,Instapacks,"Single Strike: Modern Collector Gallery",249.99,Legendary,796,4736,1.5,12500
+Rare Candy,Instapacks,"Only Slabs: Vintage & Gold Star Chase",499.99,Common,175,325,60.0,25000
+Rare Candy,Instapacks,"Only Slabs: Vintage & Gold Star Chase",499.99,Uncommon,325,677,24.9,25000
+Rare Candy,Instapacks,"Only Slabs: Vintage & Gold Star Chase",499.99,Rare,677,892,8.5,25000
+Rare Candy,Instapacks,"Only Slabs: Vintage & Gold Star Chase",499.99,Epic,892,1554,5.1,25000
+Rare Candy,Instapacks,"Only Slabs: Vintage & Gold Star Chase",499.99,Legendary,1554,16416,1.5,25000

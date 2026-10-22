@@ -8,7 +8,9 @@ from collections import Counter
 from data import (load_courtyard, load_packz, ARENA_CLUB_PACKS, BUYBACK_TERMS,
                   FLAGS, PLATFORM_FLAGS, STATE_RESTRICTIONS, CHANGELOG,
                   CROWN_RIPS_PACKS, CLUTCH_PACKS, CLUTCH_BAND_LABELS,
-                  CLUTCH_COLLECTED, clutch_stats,
+                  CLUTCH_COLLECTED, clutch_stats, PLATFORMS, COMPARE_ROWS,
+                  RARECANDY_PACKS, rarecandy_rows, rarecandy_stats,
+                  SWISHX_PACKS, swishx_rows, swishx_stats,
                   money, pct, COLLECTED, UPDATED)
 from layout import page, faq_block, jsonld, BASE_URL, SITE_NAME, E
 
@@ -206,16 +208,22 @@ def build_home():
   <thead><tr><th scope="col">#</th><th scope="col">Platform</th><th scope="col">What it discloses</th><th scope="col">Return</th><th scope="col">Buyback</th></tr></thead>
   <tbody>
     <tr><td class="num">1</td><td class="name"><a href="/platforms/clutch-packs/">Clutch Packs</a></td><td>Observed pull results, verified on-chain, plus a full 100-card pool per pack</td><td><strong>{clutch:.2f}&times;</strong> observed over {clutchpulls} pulls</td><td>Not disclosed</td></tr>
-    <tr><td class="num">2</td><td class="name"><a href="/platforms/courtyard/">Courtyard</a></td><td>Exact expected value and dollar-range odds on every pack</td><td>95&ndash;96% claimed</td><td>90% advertised</td></tr>
-    <tr><td class="num">3</td><td class="name"><a href="/platforms/packz/">Packz</a></td><td>Dollar-range odds, no expected value</td><td>~{pzstd} on $25+ packs, our estimate</td><td>90%, site credit only</td></tr>
-    <tr><td class="num">4</td><td class="name"><a href="/platforms/arena-club/">Arena Club</a></td><td>Per-card hit rates, no card values, no expected value</td><td>Not calculable</td><td>90% of card value, withdrawable</td></tr>
-    <tr><td class="num">5</td><td class="name"><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></td><td>Checklist of contents, no pull rates; third-party card valuations</td><td>Not calculable</td><td>84.6% effective, credit only</td></tr>
-    <tr><td class="num">6</td><td class="name"><a href="/platforms/crown-rips/">Crown Rips</a></td><td>Minimum and maximum pull value only, no rates</td><td>Not calculable</td><td>100% claimed, unverified</td></tr>
-    <tr><td class="num">7</td><td class="name"><a href="/platforms/tilt-rips/">Tilt Rips</a></td><td>Top prizes only, no rates and no floor</td><td>Not calculable</td><td>90%, withdrawable in cash or crypto</td></tr>
-    <tr><td class="num">8</td><td class="name"><a href="/platforms/pickem/">Pickem</a></td><td>Per-card pull rates in-app only; nothing published on the web</td><td>Not calculable</td><td>90%, withdrawable &mdash; within a three-hour window</td></tr>
-    <tr><td class="num">9</td><td class="name"><a href="/platforms/packed/">Packed</a></td><td>Terms require Value Band odds to be shown, but nothing is published on the web</td><td>Not calculable</td><td>100%, withdrawable &mdash; within a one-day window</td></tr>
-    <tr><td class="num">10</td><td class="name"><a href="/platforms/fast-rips/">Fast Rips</a></td><td>No prices or odds published at all</td><td>Not calculable</td><td>100% advertised; terms say credit, non-withdrawable</td></tr>
-    <tr><td class="num">11</td><td class="name"><a href="/platforms/mintpull/">MintPull</a></td><td>No prices or odds published; terms warn distribution is likely unequal</td><td>Not calculable</td><td>100% advertised; credited as pack credit, $250/week withdrawal cap</td></tr>
+    <tr><td class="num">2</td><td class="name"><a href="/platforms/swishx/">SwishX</a></td><td>Posted expected value per pack, per-tier odds with target card values, the named card pool, and a published buyback band</td><td><strong>101%</strong> posted; ~88% sold back within 24h</td><td>85&ndash;90%, then 75&ndash;80%; withdrawable</td></tr>
+    <tr><td class="num">3</td><td class="name"><a href="/platforms/courtyard/">Courtyard</a></td><td>Exact expected value and dollar-range odds on every pack</td><td>95&ndash;96% claimed</td><td>90% advertised</td></tr>
+    <tr><td class="num">4</td><td class="name"><a href="/platforms/rare-candy/">Rare Candy</a></td><td>Value-band pull rates on every pack, on the open web, plus a guaranteed 50% floor and named top hits</td><td>~98&ndash;123%, our estimate</td><td>Up to 90%, in Candy with no cash value</td></tr>
+    <tr><td class="num">5</td><td class="name"><a href="/platforms/packz/">Packz</a></td><td>Dollar-range odds, no expected value</td><td>~{pzstd} on $25+ packs, our estimate</td><td>90%, site credit only</td></tr>
+    <tr><td class="num">6</td><td class="name"><a href="/platforms/arena-club/">Arena Club</a></td><td>Per-card hit rates, no card values, no expected value</td><td>Not calculable</td><td>90% of card value, withdrawable</td></tr>
+    <tr><td class="num">7</td><td class="name"><a href="/platforms/poke-collect/">Poke-Collect</a></td><td>Per-tier pull chances and a card pool published on the web; render in-browser, not yet collected</td><td>Not yet calculated</td><td>None &mdash; a separate buylist pays store credit or PayPal</td></tr>
+    <tr><td class="num">8</td><td class="name"><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></td><td>Checklist of contents, no pull rates; third-party card valuations</td><td>Not calculable</td><td>84.6% effective, credit only</td></tr>
+    <tr><td class="num">9</td><td class="name"><a href="/platforms/crown-rips/">Crown Rips</a></td><td>Minimum and maximum pull value only, no rates</td><td>Not calculable</td><td>100% claimed, unverified</td></tr>
+    <tr><td class="num">10</td><td class="name"><a href="/platforms/tilt-rips/">Tilt Rips</a></td><td>Top prizes only, no rates and no floor</td><td>Not calculable</td><td>90%, withdrawable in cash or crypto</td></tr>
+    <tr><td class="num">11</td><td class="name"><a href="/platforms/pickem/">Pickem</a></td><td>Per-card pull rates in-app only; nothing published on the web</td><td>Not calculable</td><td>90%, withdrawable &mdash; within a three-hour window</td></tr>
+    <tr><td class="num">12</td><td class="name"><a href="/platforms/packed/">Packed</a></td><td>Terms require Value Band odds to be shown, but nothing is published on the web</td><td>Not calculable</td><td>100%, withdrawable &mdash; within a one-day window</td></tr>
+    <tr><td class="num">13</td><td class="name"><a href="/platforms/chalkboard/">Chalkboard Pulls</a></td><td>Odds shown in-app before purchase, nothing on the web; terms warn distribution is likely unequal and odds change as packs sell</td><td>Not calculable</td><td>100%, withdrawable &mdash; on an FMV the terms call &ldquo;final and non-appealable&rdquo;</td></tr>
+    <tr><td class="num">14</td><td class="name"><a href="/platforms/triumph/">Rips by Triumph</a></td><td>No prices or odds published; names its entity and its restricted states, and its clauses match MintPull&rsquo;s verbatim</td><td>Not calculable</td><td>&ldquo;100% guarantee&rdquo; in the FAQ; &sect;5.5 says no obligation</td></tr>
+    <tr><td class="num">15</td><td class="name"><a href="/platforms/fast-rips/">Fast Rips</a></td><td>No prices or odds published at all</td><td>Not calculable</td><td>100% advertised; terms say credit, non-withdrawable</td></tr>
+    <tr><td class="num">16</td><td class="name"><a href="/platforms/mintpull/">MintPull</a></td><td>No prices or odds published; terms warn distribution is likely unequal</td><td>Not calculable</td><td>100% advertised; credited as pack credit, $250/week withdrawal cap</td></tr>
+    <tr><td class="num">17</td><td class="name"><a href="/platforms/letsgo/">LETSGO</a></td><td>Nothing published on the web, no operating company named on its own site, and no terms of use we could reach</td><td>Not calculable</td><td>&ldquo;90%&rdquo; on the site, &ldquo;up to 90%&rdquo; on the App Store</td></tr>
   </tbody>
   </table>
   </div>
@@ -276,6 +284,9 @@ def build_home():
     </article>
   </div>
 
+  <h2>Compare any platforms side by side</h2>
+  <p>The <a href="/compare/">comparison tool</a> puts any two to four of the seventeen platforms next to each other on the things that decide the outcome: whether odds are published, whether buyback money can leave the platform, who sets the card's value, and how long you can hold a card before the platform acts.</p>
+
   <h2>Work out any pack yourself</h2>
   <p>The <a href="/calculator/">pack EV calculator</a> takes the odds any site publishes and returns the average card value, the expected loss per pack, and the chance of beating the pack price. It is free, needs no account, and runs entirely in your browser.</p>
 
@@ -285,6 +296,7 @@ def build_home():
     <li><a href="/guides/bonus-offers/">Bonus offers ranked by what they're worth</a> &mdash; only one is plausibly positive-EV.</li>
     <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays</a> &mdash; five sites say 90% and mean five different things.</li>
     <li><a href="/platforms/clutch-packs/">What 158,556 real pulls show</a> &mdash; the only observed return data in the category.</li>
+    <li><a href="/compare/">Compare any platforms side by side</a> &mdash; pick two to four and see the terms that matter.</li>
     <li><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a> &mdash; the two platforms that publish enough to compare directly.</li>
     <li><a href="/methodology/">How we rate platforms</a> &mdash; what goes into a score and what does not.</li>
     <li><a href="/is-card-ripping-gambling/">Is card ripping gambling?</a> &mdash; where the law currently stands.</li>
@@ -327,7 +339,7 @@ def build_platforms_index():
 <div class="wrap">
   <div class="page-head">
     <h1>Card ripping platforms</h1>
-    <p class="lede">Every platform we cover, with what it discloses and what that works out to. Clutch Packs, Courtyard, Packz and Arena Club we collected first-hand; Crown Rips is in closed beta, so its figures are reported rather than collected. Platforms we have not measured at all are listed at the bottom.</p>
+    <p class="lede">Every platform we cover, with what it discloses and what that works out to. Clutch Packs, Courtyard, Packz and Arena Club we collected first-hand; Crown Rips is in closed beta, so its figures are reported rather than collected. Platforms we have not measured at all are listed at the bottom. To put any of them side by side, use the <a href="/compare/">comparison tool</a>.</p>
   </div>
 
   <div class="card-grid">
@@ -484,6 +496,90 @@ def build_platforms_index():
       <p>Advertises a 100% buyback paid to your bank account. Its own Terms of Use say Platform Credit has no cash value outside the platform and is not withdrawable.</p>
       <p class="more"><a href="/platforms/fast-rips/">Full breakdown &rarr;</a></p>
     </article>
+
+    <article class="card">
+      <h3><a href="/platforms/chalkboard/">Chalkboard Pulls</a></h3>
+      {flag_chalkboard}
+      <dl>
+        <dt>Packs</dt><dd>No prices shown</dd>
+        <dt>Odds shown</dt><dd>In-app, pre-purchase</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>100%, withdrawable</dd>
+      </dl>
+      <p>A rip product inside a fantasy sports app. The best-documented cash route we have read &mdash; and the only terms that call the platform's own valuation &ldquo;final and non-appealable.&rdquo;</p>
+      <p class="more"><a href="/platforms/chalkboard/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/poke-collect/">Poke-Collect</a></h3>
+      {flag_poke_collect}
+      <dl>
+        <dt>Packs</dt><dd>4 digital packs</dd>
+        <dt>Prices</dt><dd>$9.99&ndash;$38.99</dd>
+        <dt>Odds shown</dt><dd>Per tier, on the web</dd>
+        <dt>Return</dt><dd>Not yet calculated</dd>
+        <dt>Buyback</dt><dd>None on the pack</dd>
+      </dl>
+      <p>A real card shop in Alabama selling digital packs. The only platform here whose vault ships you the card for free at the end instead of selling it &mdash; and the only one with no instant buyback.</p>
+      <p class="more"><a href="/platforms/poke-collect/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/letsgo/">LETSGO</a></h3>
+      {flag_letsgo}
+      <dl>
+        <dt>Packs</dt><dd>No prices shown</dd>
+        <dt>Odds shown</dt><dd>In-app only</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>90%, or &ldquo;up to&rdquo; 90%</dd>
+      </dl>
+      <p>100,000+ installs and real graded slabs, but the buyback is described two different ways, no operating company is named on the site, and the homepage warns it may be illegal where you are.</p>
+      <p class="more"><a href="/platforms/letsgo/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/rare-candy/">Rare Candy</a></h3>
+      {flag_rare_candy}
+      <dl>
+        <dt>Packs</dt><dd>8 collected</dd>
+        <dt>Prices</dt><dd>$4.99&ndash;$499.99</dd>
+        <dt>Posted EV</dt><dd>No, but calculable</dd>
+        <dt>Return</dt><dd>~98&ndash;123%, our estimate</dd>
+        <dt>Buyback</dt><dd>Up to 90%, Candy only</dd>
+      </dl>
+      <p>Publishes full value-band odds and a guaranteed 50% floor on every pack &mdash; the best disclosure we have found since Courtyard. Pays in a currency its terms say has no cash value.</p>
+      <p class="more"><a href="/platforms/rare-candy/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/swishx/">SwishX</a></h3>
+      {flag_swishx}
+      <dl>
+        <dt>Packs</dt><dd>20 listed, 5 collected</dd>
+        <dt>Prices</dt><dd>$25&ndash;$500</dd>
+        <dt>Posted EV</dt><dd>Yes, and it checks out</dd>
+        <dt>Return</dt><dd>101% posted, ~88% round trip</dd>
+        <dt>Buyback</dt><dd>85&ndash;90%, withdrawable</dd>
+      </dl>
+      <p>The most complete disclosure we have found: posted EV, per-tier odds, target card values and the named pool. Packs carry no markup &mdash; the margin is in the buyback, and they say so.</p>
+      <p class="more"><a href="/platforms/swishx/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/triumph/">Rips by Triumph</a></h3>
+      {flag_triumph}
+      <dl>
+        <dt>Packs</dt><dd>No prices shown</dd>
+        <dt>Odds shown</dt><dd>None published</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>100% claimed, &sect;5.5 differs</dd>
+      </dl>
+      <p>The largest platform we track at 1M+ installs. Headlines a 100% buyback guarantee its own &sect;5.5 says it is under no obligation to offer &mdash; and its terms are MintPull&rsquo;s, clause for clause.</p>
+      <p class="more"><a href="/platforms/triumph/">Full breakdown &rarr;</a></p>
+    </article>
   </div>
 
   <h2>Not yet measured</h2>
@@ -523,7 +619,7 @@ def build_courtyard():
         ("What is the expected value of a Courtyard pack?",
          "<p>Courtyard publishes an expected value on every pack, and on %d of its %d packs that figure is exactly 95%% of the pack price. The $2,500 and $5,000 packs post 96%%, and the $1,500 U.S. Coins Pack posts the lowest figure at 93.3%%. In plain terms, the average card in a Courtyard pack is worth about 95 cents for every dollar spent, using Courtyard's own valuations.</p>" % (CY_AT_95, CY_N)),
         ("Does Courtyard pay out in cash?",
-         "<p>Courtyard advertises an instant buyback at 90%% of a card's value, and the platform settles in USDC, a dollar-pegged stablecoin. Applying that 90%% rate to a 95%% pack gives about 85.5%% of the pack price back if you sell every card straight back. Independent tracking of recorded pulls has measured Courtyard's actual instant offers nearer 85%% of value, which would put the real figure closer to 80%%. We have not yet verified the withdrawal path ourselves.</p>"),
+         "<p>Courtyard advertises an instant buyback at 90% of a card's value, and the platform settles in USDC, a dollar-pegged stablecoin. Applying that 90% rate to a 95% pack gives about 85.5% of the pack price back if you sell every card straight back. Independent tracking of recorded pulls has measured Courtyard's actual instant offers nearer 85% of value, which would put the real figure closer to 80%. We have not yet verified the withdrawal path ourselves.</p>"),
         ("Which Courtyard pack has the best odds?",
          "<p>Every Courtyard pack returns almost the same average, so the meaningful difference is shape rather than value. The chance of pulling a card worth at least roughly the pack price ranges from %s to %s across the %d packs. The highest posted return is the %s at %s, and the lowest is the %s at %s.</p>" % (pct(CY_HIT_LO, 0), pct(CY_HIT_HI, 0), CY_N, E(best["name"]), pct(best["ev_ratio"] * 100, 1), E(worst["name"]), pct(worst["ev_ratio"] * 100, 1))),
         ("What are Courtyard's Spicy packs?",
@@ -836,7 +932,7 @@ def build_arena_club():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all eleven platforms</a>.</li>
+    <li><a href="/platforms/">Compare all seventeen platforms</a>.</li>
     <li><a href="/methodology/">How we rate platforms</a>, including how we handle a platform that publishes no values.</li>
   </ul>
 </div>
@@ -973,7 +1069,7 @@ def build_tilt():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a>, the useful contrast on valuation sourcing</li>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the only platform publishing observed results</li>
-    <li><a href="/platforms/">Compare all eleven platforms</a></li>
+    <li><a href="/platforms/">Compare all seventeen platforms</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows=rows, faq=faq_html, **{"flags_tilt_rips": flag_row("tilt-rips")})
@@ -990,7 +1086,7 @@ def build_tilt():
 def build_fanatics():
     faq_html, faq_ld = faq_block([
         ("Does Fanatics Instant Rips publish pack odds?",
-         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the eleven platforms we track.</p>"),
+         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the seventeen platforms we track.</p>"),
         ("What is the real Fanatics instant offer percentage?",
          "<p>Effectively 84.6% of a card's appraised value, not the 90% headline. Fanatics' own worked example takes a $200 card, applies the 90% rate to get $180, then deducts a 6% marketplace fee of $10.80, leaving an offer of $169.20. That is 84.6% of the card's value. The formula is 0.90 multiplied by 0.94. The 90% figure is accurate as far as it goes, but it is not what arrives.</p>"),
         ("Can you withdraw Fanatics Instant Rips credits as cash?",
@@ -1051,7 +1147,7 @@ def build_fanatics():
 
   <h2>Where Fanatics is genuinely best in class</h2>
   <p>Card valuations come from Card Ladder, a third-party sales-data service, rather than from Fanatics itself.</p>
-  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the eleven platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
+  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the seventeen platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
 
   <h2>Pack prices</h2>
   <div class="table-wrap">
@@ -1100,7 +1196,7 @@ def build_fanatics():
   <h2>Next</h2>
   <ul>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the opposite approach: 158,556 published pull outcomes</li>
-    <li><a href="/platforms/">Compare all eleven platforms</a></li>
+    <li><a href="/platforms/">Compare all seventeen platforms</a></li>
     <li><a href="/calculator/">Pack EV calculator</a></li>
   </ul>
 </div>
@@ -1147,7 +1243,7 @@ def build_clutch():
         ("How do Clutch Packs odds work?",
          "<p>Each pack page lists a pool of 100 cards at 1% each, grouped into four tiers. On the $100 Multisport Ascent pack that is 2 Epics at 2% combined, 6 Chasers at 6%, 15 Hits at 15% and 77 Commons at 77%. It is the clearest odds structure of any platform we track, because every card is equally likely and the tier percentages are simply the card counts.</p>"),
         ("Is the Clutch Packs average inflated by jackpots?",
-         "<p>On two packs, yes, and the arithmetic is checkable. A single $130,000 Series Hit appears as the maximum on both the Multisport Ascent and Multisport Moonshot packs. Spread across Ascent's 21,127 recorded pulls that one card adds $6.15 to the average, which is 6.2%% of the $100 pack price, so Ascent's stated 1.07 times becomes about 1.00 times without it. On Moonshot, with only 1,102 pulls, it adds $117.97, or 4.7%% of the price. Every other pack's average sits close to 1.00 times without needing a jackpot to get there.</p>"),
+         "<p>On two packs, yes, and the arithmetic is checkable. A single $130,000 Series Hit appears as the maximum on both the Multisport Ascent and Multisport Moonshot packs. Spread across Ascent's 21,127 recorded pulls that one card adds $6.15 to the average, which is 6.2% of the $100 pack price, so Ascent's stated 1.07 times becomes about 1.00 times without it. On Moonshot, with only 1,102 pulls, it adds $117.97, or 4.7% of the price. Every other pack's average sits close to 1.00 times without needing a jackpot to get there.</p>"),
         ("Does Clutch Packs buy cards back?",
          "<p>Not that it discloses. We found no buyback or sell-back terms on the pack pages or the transparency page, which is the one significant gap in otherwise category-leading disclosure. Since buyback quality is a quarter of our score, and the difference between withdrawable cash and site credit has mattered on every other platform, this needs answering before Clutch Packs can be rated.</p>"),
     ])
@@ -1256,7 +1352,7 @@ def build_clutch():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all eleven platforms</a></li>
+    <li><a href="/platforms/">Compare all seventeen platforms</a></li>
     <li><a href="/platforms/courtyard/">Courtyard</a>, the only other platform that publishes a return figure</li>
     <li><a href="/methodology/">How we rate platforms</a></li>
   </ul>
@@ -1402,7 +1498,7 @@ def build_crown_rips():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all eleven platforms</a></li>
+    <li><a href="/platforms/">Compare all seventeen platforms</a></li>
     <li><a href="/is-card-ripping-gambling/">Why the sweepstakes framing matters</a></li>
   </ul>
 </div>
@@ -1837,6 +1933,9 @@ def build_bonuses():
          "$0", "Referrer gets 1,000 points of undisclosed value"),
         ("Crown Rips", "5 Sweeps Cash in the closed beta", "Beta credit",
          "Not calculable", "Invite only"),
+        ("Chalkboard Pulls", "Free Packs in the Promos tab", "Free pack",
+         "Below face value",
+         "Sell-back credits &ldquo;play-through funds, not&hellip; withdrawable&rdquo;"),
         ("Fanatics", "Not confirmed", "&mdash;", "Unknown", "Terms not verified"),
     ]
     offer_rows = "".join(
@@ -1885,7 +1984,7 @@ def build_bonuses():
   <h2>Every offer, ranked</h2>
   <div class="table-wrap">
   <table>
-  <caption>Sign-up and first-pack offers across the eleven platforms we track, {collected}.</caption>
+  <caption>Sign-up and first-pack offers across the seventeen platforms we track, {collected}.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col">Offer</th><th scope="col">Type</th><th scope="col" class="num">What it's worth</th><th scope="col">Catch</th></tr></thead>
   <tbody>{offer_rows}</tbody>
   </table>
@@ -2102,7 +2201,7 @@ def build_mintpull():
   <ul>
     <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
     <li><a href="/platforms/pickem/">Pickem, where the clock runs for three hours</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=UPDATED, rows=rows, faq=faq_html, **{"flags_mintpull": flag_row("mintpull")})
@@ -2119,7 +2218,7 @@ def build_mintpull():
 def build_pickem():
     faq_html, faq_ld = faq_block([
         ("How long do you have to decide on a Pickem pull?",
-         "<p>Three hours, and the timer starts when you open the pack rather than when you buy it. If it expires, Pickem sells the card automatically at its displayed fair market value. Reporting indicates the window is shorter still in some states. It is by a wide margin the tightest decision window of the eleven platforms we track: Packed gives one day, Crown Rips reportedly seven, and Courtyard, Arena Club, Fanatics and Tilt Rips vault cards indefinitely.</p>"),
+         "<p>Three hours, and the timer starts when you open the pack rather than when you buy it. If it expires, Pickem sells the card automatically at its displayed fair market value. Reporting indicates the window is shorter still in some states. It is by a wide margin the tightest decision window of the seventeen platforms we track: Packed gives one day, Crown Rips reportedly seven, and Courtyard, Arena Club, Fanatics and Tilt Rips vault cards indefinitely.</p>"),
         ("What is the Pickem buyback rate?",
          "<p>90% of the card's displayed fair market value, rising to 100% on your first pack purchase. Proceeds go to a USD balance which can be withdrawn to a bank card, with a $6 minimum and a $2,500 cap per withdrawal. Only money from selling cards is withdrawable, so deposits and any promotional balance are not.</p>"),
         ("Does Pickem publish pack odds?",
@@ -2148,16 +2247,18 @@ def build_pickem():
 
   <div class="table-wrap">
   <table>
-  <caption>How long you can hold a card before the platform acts, across the eleven platforms we track.</caption>
+  <caption>How long you can hold a card before the platform acts, across the seventeen platforms we track.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col">Window</th><th scope="col">What happens at the end</th></tr></thead>
   <tbody>
     <tr><td class="name">Pickem</td><td><strong class="neg">3 hours</strong></td><td>Card sold automatically at Pickem's FMV</td></tr>
     <tr><td class="name">Packed</td><td><strong class="neg">1 day</strong></td><td>&ldquo;Automatically returned to Packed&rdquo; (&sect;6.1)</td></tr>
+    <tr><td class="name">Chalkboard Pulls</td><td><strong class="neg">24 hours</strong></td><td>Time-Based Buyback at 100% of Chalkboard's FMV (&sect;7.3)</td></tr>
     <tr><td class="name">Crown Rips</td><td>7 days, reportedly</td><td>Auto-sold at market value</td></tr>
     <tr><td class="name">Courtyard</td><td>Indefinite</td><td>Vaulted and insured, free</td></tr>
     <tr><td class="name">Arena Club</td><td>Indefinite</td><td>Vaulted</td></tr>
     <tr><td class="name">Fanatics Instant Rips</td><td>Indefinite</td><td>Free vault storage, no time limit</td></tr>
     <tr><td class="name">Tilt Rips</td><td>Indefinite</td><td>Free vaulting, no storage fees</td></tr>
+    <tr><td class="name">Poke-Collect</td><td><strong class="pos">1 year</strong></td><td><strong class="pos">Shipped to you automatically, free</strong></td></tr>
   </tbody>
   </table>
   </div>
@@ -2224,7 +2325,7 @@ def build_pickem():
   <ul>
     <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
     <li><a href="/platforms/packed/">Packed, the other short-clock platform</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=UPDATED, faq=faq_html, **{"flags_pickem": flag_row("pickem")})
@@ -2296,6 +2397,7 @@ def build_packed():
   <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Buyback</th><th scope="col">Withdrawable</th><th scope="col">How long you can hold a card</th></tr></thead>
   <tbody>
     <tr><td class="name">Packed</td><td class="num">100%</td><td><strong class="pos">Yes</strong>, card, bank, PayPal, Venmo</td><td><strong class="neg">1 day</strong></td></tr>
+    <tr><td class="name">Chalkboard Pulls</td><td class="num">100%</td><td><strong class="pos">Yes</strong>, ACH via Aeropay</td><td><strong class="neg">24 hours</strong></td></tr>
     <tr><td class="name">Arena Club</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, to a bank via Stripe</td><td>Indefinite</td></tr>
     <tr><td class="name">Tilt Rips</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, cash or crypto</td><td>Indefinite, free vaulting</td></tr>
     <tr><td class="name">Courtyard</td><td class="num">90% advertised</td><td>USDC, unconfirmed</td><td>Indefinite, vaulted and insured</td></tr>
@@ -2348,7 +2450,7 @@ def build_packed():
   <ul>
     <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
     <li><a href="/platforms/fast-rips/">Fast Rips, where the terms contradict the marketing</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=UPDATED, faq=faq_html, cta=affiliate_cta("packed"), **{"flags_packed": flag_row("packed")})
@@ -2479,7 +2581,7 @@ def build_fast_rips():
   <h2>Next</h2>
   <ul>
     <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays, across every platform</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
     <li><a href="/is-card-ripping-gambling/">Where the law currently stands</a></li>
   </ul>
 </div>
@@ -2494,6 +2596,1281 @@ def build_fast_rips():
         updated=UPDATED, structured=faq_ld))
 
 
+def build_chalkboard():
+    faq_html, faq_ld = faq_block([
+        ("Does Chalkboard Pulls really pay 100% of a card's value?",
+         "<p>Yes, as written, and the money can leave the platform. Section 7.1 of the Chalkboard Pulls Terms of Use provides &ldquo;a credit of one hundred percent (100%) of that Collectible's FMV to Your Account,&rdquo; and section 9.2 lets you &ldquo;request withdrawal of available Buyback Credit to an eligible external payment method.&rdquo; ACH withdrawals are processed through Aeropay, typically within ten business days. That is the clearest cash route we have read in this category. The catch is not the rate &mdash; it is who decides the number the rate is applied to.</p>"),
+        ("Who decides what a Chalkboard card is worth?",
+         "<p>Chalkboard does, and the decision cannot be appealed. Section 7.5 says &ldquo;FMV is determined by Chalkboard in its sole discretion utilizing proprietary methodologies and market data&rdquo; and that it is &ldquo;final and non-appealable.&rdquo; The help centre adds that Chalkboard's figure &ldquo;may differ from third-party marketplaces or pricing services.&rdquo; Section 7.6 states plainly that the buyback credit may be lower than what you paid for the pack. 100% of a number one party sets alone is not the same guarantee as 100% of a published market price.</p>"),
+        ("How long do you have to decide on a Chalkboard pull?",
+         "<p>One 24-hour period from the pack purchase (&sect;7.3). If you do nothing, Chalkboard processes a Time-Based Buyback at 100% of FMV automatically and the card leaves your Binder. The clock can pause for pending identity verification, delayed shipping, or a lost, damaged or unavailable card. That matches Packed's one day and is far shorter than the indefinite vaulting Courtyard, Arena Club, Fanatics and Tilt Rips offer.</p>"),
+        ("Does Chalkboard publish pack odds?",
+         "<p>Not on the web. Section 5.1 says the Collectible categories and associated statistics are disclosed before purchase, and the help centre says a pack page &ldquo;may include&rdquo; its price, value range, featured pulls and odds. So the numbers exist inside the app. Nothing appears on any public page, so a buyer researching beforehand cannot see a single figure, and we cannot calculate an expected value. Section 5.1 also warns that &ldquo;the distribution among possible outcomes may not be, and is likely not to be, equal.&rdquo;</p>"),
+        ("Are free packs on Chalkboard worth anything?",
+         "<p>Less than they look. The help centre states that value sold back from a Free Pack is credited as &ldquo;play-through funds, not as withdrawable funds,&rdquo; and becomes withdrawable only after you use it &mdash; for example by buying and opening another pack. The same article confirms that for a paid pack, &ldquo;100% of the FMV is credited straight to your withdrawable Wallet balance.&rdquo; No multiplier or dollar threshold is published for the play-through, so the real cost of converting it cannot be calculated.</p>"),
+        ("Who operates Chalkboard Pulls?",
+         "<p>Taild Sports, Inc., trading as Chalkboard. Pulls sits inside the Chalkboard daily fantasy sports app rather than being a standalone rip site &mdash; the same structure as Pickem inside a social casino and Crown Rips inside a sweepstakes casino. Disputes go to individual arbitration under the JAMS rules with a class-action waiver (&sect;18), after a required informal conference and 30 days of negotiation (&sect;17.9), and there is a 30-day opt-out from arbitration.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Chalkboard Pulls: the best cash terms we have read, on a price you cannot appeal</h1>
+    <p class="lede">Chalkboard pays 100% of fair market value into a wallet you can withdraw from &mdash; the clearest cash route in the category. The same terms make Chalkboard the sole and &ldquo;final and non-appealable&rdquo; judge of that value.</p>
+    {flags_chalkboard}
+  </div>
+
+  <div class="finding">
+    <p class="big">&sect;7.1 credits &ldquo;one hundred percent (100%) of that Collectible's FMV,&rdquo; and &sect;9.2 lets that credit be withdrawn to an external payment method. &sect;7.5 then says &ldquo;FMV is determined by Chalkboard in its sole discretion utilizing proprietary methodologies and market data&rdquo; and is &ldquo;final and non-appealable.&rdquo; &sect;7.6 adds that the credit may be lower than the price you paid.</p>
+    <p class="small muted">Read from the Chalkboard Pulls Terms of Use and the Chalkboard help centre on {collected}. No odds or pack prices are published on the web.</p>
+  </div>
+
+  <h2>Why a 100% buyback is not the whole story</h2>
+  <p>Twelve of the seventeen platforms we track advertise a buyback rate. The rate is the number in the marketing; the two things that decide what it is worth are whether the money can leave the platform, and who sets the value it is a percentage of. Chalkboard is the only platform we have read that is unambiguously best-in-class on the first and explicitly worst-case on the second.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>The two questions that decide what a buyback is worth, across the platforms whose terms we have read, {collected}.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Rate</th><th scope="col">Money can leave</th><th scope="col">Who sets the value</th><th scope="col">Disputable</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Chalkboard Pulls</td><td class="num">100%</td><td><strong class="pos">Yes</strong>, ACH via Aeropay</td><td>Chalkboard, sole discretion</td><td><strong class="neg">No</strong>, &ldquo;non-appealable&rdquo;</td></tr>
+    <tr><td class="name">Packed</td><td class="num">100%</td><td><strong class="pos">Yes</strong>, card, bank, PayPal</td><td>Packed, semi-automated</td><td>Not stated</td></tr>
+    <tr><td class="name">Arena Club</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, bank via Stripe</td><td>Arena Club, grades some itself</td><td>Not stated</td></tr>
+    <tr><td class="name">Tilt Rips</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, cash or crypto</td><td>&ldquo;Live market data,&rdquo; unnamed</td><td><strong class="neg">No</strong></td></tr>
+    <tr><td class="name">Pickem</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, bank card</td><td>Pickem's displayed FMV</td><td>Not stated</td></tr>
+    <tr><td class="name">Fanatics Instant Rips</td><td class="num">84.6%</td><td><strong class="neg">No</strong>, credit only</td><td><strong class="pos">Card Ladder</strong>, a third party</td><td><strong class="pos">Yes</strong>, vs the dataset</td></tr>
+    <tr><td class="name">MintPull</td><td class="num">100% ad.</td><td><strong class="neg">No</strong>, pack credit</td><td>&ldquo;Proprietary system&rdquo;</td><td>Not stated</td></tr>
+    <tr><td class="name">Fast Rips</td><td class="num">100% ad.</td><td><strong class="neg">No</strong> per its terms</td><td>Internal platform valuation</td><td>Not stated</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Read the top and bottom rows together. Chalkboard pays more than Fanatics, in money rather than credit, with no fee deducted. Fanatics pays less, in credit you cannot withdraw, against a number from a third-party sales database anyone can look up. Those are opposite trades, and which one is better depends on something neither platform publishes: how close each valuation actually lands to what the card sells for.</p>
+
+  <p>That is the open question on this entire site, and it is why no platform here carries a score yet. A rate is checkable from a document. A valuation is only checkable against real sold prices, and we have not yet verified a single platform's valuations against those.</p>
+
+  <h2>The 24-hour clock</h2>
+  <p>Section 7.3 gives you &ldquo;one (1) twenty-four (24) hour period&rdquo; from the pack purchase to request either shipping or a buyback. Do nothing and a Time-Based Buyback is processed at 100% of FMV, and the card is removed from your Binder. The window can pause for pending identity verification, pending or delayed shipping, or resolution of a lost, damaged or unavailable card.</p>
+
+  <p>The pause for identity verification matters more than it reads. Shipping a card requires a verified identity, so a first-time user who pulls something they want to keep is racing a clock while waiting on a verification queue. The terms do allow for that by pausing, which is better than not allowing for it &mdash; Pickem's three-hour timer makes no such provision.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Decision windows across the seventeen platforms we track.</caption>
+  <thead><tr><th scope="col">Window</th><th scope="col">Platforms</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">3 hours</th><td>Pickem</td></tr>
+    <tr><th scope="row">1 day</th><td>Packed, <strong>Chalkboard Pulls</strong></td></tr>
+    <tr><th scope="row">7 days</th><td>Crown Rips (reported), MintPull</td></tr>
+    <tr><th scope="row">Indefinite</th><td>Courtyard, Arena Club, Fanatics Instant Rips, Tilt Rips</td></tr>
+    <tr><th scope="row">Not stated</th><td>Packz, Fast Rips, Clutch Packs</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>The pattern we noted on the <a href="/platforms/pickem/">Pickem page</a> holds again. The platforms paying the highest withdrawable rates &mdash; Packed and Chalkboard at 100%, Pickem at 90% &mdash; are the three with the shortest clocks. A platform that will reliably buy a card back does not want to hold inventory, and the clock is how it avoids that. You are being paid well in exchange for deciding fast.</p>
+
+  <h2>The free pack is not free money</h2>
+  <p>Chalkboard sends Free Packs as promotional cards in the Promos tab, with no purchase required and an expiry date on each one. The pack opens like any other and you can keep the card or sell it back. The difference is in what the sell-back pays.</p>
+
+  <div class="callout">
+    <h3>Paid pack versus free pack, in Chalkboard's own words</h3>
+    <p><strong>Paid pack:</strong> &ldquo;100% of the FMV is credited straight to your withdrawable Wallet balance.&rdquo;</p>
+    <p><strong>Free pack:</strong> the sell-back value is credited as &ldquo;play-through funds, not as withdrawable funds,&rdquo; and becomes withdrawable only after you use it &mdash; for example by buying and opening another pack.</p>
+  </div>
+
+  <p>This is the standard structure of a casino bonus, and it is the first time we have seen it stated this plainly in a rip product. It is not hidden &mdash; Chalkboard publishes it in a help article specifically about free packs, which is more than most platforms do with their promotional terms. But it means a free pack's value is not its face value. No multiplier or dollar threshold is published, so how much you must cycle through before the money is yours cannot be calculated from anything public.</p>
+
+  <p>We rank bonus offers by what they are actually worth on the <a href="/guides/bonus-offers/">bonus offers page</a>, and a play-through-restricted credit sits well below a straight discount for exactly this reason.</p>
+
+  <h2>Odds exist, but not where you can see them</h2>
+  <p>Section 5.1 says the Collectible categories and associated statistics are disclosed before purchase, and the help centre says a pack page &ldquo;may include&rdquo; its price, the range of card values, featured or Signature Pulls, and odds. So the numbers are shown at the point of sale inside the app. None of them appear on any public page.</p>
+
+  <p>Two sentences in those documents deserve attention.</p>
+
+  <p>Section 5.1 warns that &ldquo;the distribution among possible outcomes may not be, and is likely not to be, equal.&rdquo; That is the same candid warning <a href="/platforms/mintpull/">MintPull</a> gives in capitals, and it is a fair one: it says that where a pack shows a value range, the outcomes inside that range are probably not evenly spread. It is also precisely the assumption our own midpoint estimates have to make when a platform publishes ranges without rates.</p>
+
+  <p>The help centre then adds that odds &ldquo;can change as packs are purchased,&rdquo; so the odds shown may differ on a later visit. That is honest, and it is a real problem for anyone trying to hold this category to account. A screenshot of a pack's odds is evidence about one moment, not about the pack. It is the same issue we hit on <a href="/platforms/arena-club/">Arena Club</a>, where not one card from the September checklist survived into October.</p>
+
+  <h2>Terms worth knowing before you deposit</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Taild Sports, Inc. d/b/a Chalkboard; Pulls sits inside the Chalkboard fantasy sports app</td></tr>
+    <tr><th scope="row">Model</th><td>Purchase. You buy an Item and the Reveal allocates a randomised Collectible (&sect;5.1). No free method of entry is described, so this is not a sweepstakes</td></tr>
+    <tr><th scope="row">Buyback</th><td>100% of FMV as Buyback Credit (&sect;7.1); final once processed (&sect;7.2); may be lower than the price paid (&sect;7.6)</td></tr>
+    <tr><th scope="row">Withdrawals</th><td>Buyback Credit only, to an eligible external payment method; ACH via Aeropay; typically within ten business days; all withdrawals final (&sect;9.6)</td></tr>
+    <tr><th scope="row">Deposits</th><td>&ldquo;Non-refundable and non-transferable&rdquo; (&sect;8.2) &mdash; a deposit cannot be withdrawn, only spent</td></tr>
+    <tr><th scope="row">Withdrawal limits</th><td>Chalkboard &ldquo;may establish minimum and maximum withdrawal amounts per transaction&rdquo; and limit totals over a rolling period, &ldquo;as disclosed on the Platform&rdquo; (&sect;9.6). No figures are published</td></tr>
+    <tr><th scope="row">Inactivity fee</th><td><strong class="neg">$4.00 per month</strong> on inactive accounts (&sect;4.5.2) &mdash; the only such fee we have found in this category</td></tr>
+    <tr><th scope="row">Buyback Credit status</th><td>&ldquo;Not a bank deposit, stored-value account, trust account, escrow account, or custodial account&rdquo; (&sect;9.3)</td></tr>
+    <tr><th scope="row">Shipping</th><td>To your own address only, not to third-party vaults; one card at a time</td></tr>
+    <tr><th scope="row">Cards</th><td>Physical sports cards, graded and encapsulated or raw and ungraded; the status is shown at Reveal</td></tr>
+    <tr><th scope="row">Refunds</th><td>Pack purchases &ldquo;final and non-refundable&rdquo; except where required by law</td></tr>
+    <tr><th scope="row">Age</th><td>18+, or the local age of majority if higher (&sect;3.1)</td></tr>
+    <tr><th scope="row">States</th><td>Not published in the documents we read. &sect;3.4 says eligibility &ldquo;is generally posted at helps.chalkboard.io&rdquo; and &ldquo;may change from time to time&rdquo;; we could not retrieve that page</td></tr>
+    <tr><th scope="row">Disputes</th><td>Individual JAMS arbitration with a class-action waiver (&sect;18); informal conference and 30 days' negotiation first (&sect;17.9); 30-day opt-out</td></tr>
+    <tr><th scope="row">Liability cap</th><td>The greater of amounts paid in the prior 180 days or $1,000 &mdash; <strong>with carve-outs for valid Buyback Credit withdrawals and Redemptions</strong> (&sect;16.4)</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Credit where it is due</h2>
+  <p>Three things here are better than the category norm, and a guide that only reported the unfavourable terms would be the wrong guide.</p>
+  <ul>
+    <li><strong>The cash path is documented.</strong> Section 9.2 names the mechanism and section 9.3 names the processor. <a href="/platforms/fast-rips/">Fast Rips</a> advertises cash and describes non-withdrawable credit in its terms; Chalkboard's marketing and contract say the same thing.</li>
+    <li><strong>The liability cap carves out withdrawals.</strong> Section 16.4 excludes valid Buyback Credit withdrawals and Redemptions from the $1,000 ceiling. A cap that applied to the money you are owed would be the more alarming clause, and it does not.</li>
+    <li><strong>The play-through on free packs is published.</strong> Promotional restrictions are usually the least documented part of these platforms. Chalkboard states this one in a help article about free packs, in plain language.</li>
+  </ul>
+  <p>None of that resolves section 7.5. A 100% rate on a valuation its payer sets alone, finally and without appeal, is a promise whose value depends entirely on the payer's restraint.</p>
+
+  <div class="callout danger">
+    <h3>If you use Chalkboard Pulls</h3>
+    <p>Screenshot the pack's odds and value range before you buy, since both can change as packs are purchased, and screenshot the FMV at Reveal. Section 7.5 makes the valuation non-appealable, so the record you keep is the only record there is. Verify your identity before you buy anything you might want shipped, not during the 24-hour window. And note the $4 monthly inactivity fee if you are trying one pack and leaving.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>No pack prices and no odds are published on the web, so no expected value can be calculated &mdash; that is three of our five scoring inputs unavailable. The buyback terms are the best documented we have read, but we have not tested a withdrawal and have not compared a single Chalkboard FMV against a real sold price, which is the measurement that would make the 100% meaningful. <a href="/methodology/">Our methodology</a> explains why we leave a cell empty rather than guess.</p>
+    <p>If you have used Chalkboard Pulls and have screenshots of in-app pack odds, or a buyback FMV you can compare against a comparable sale, we would like to see them.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+    <li><a href="/platforms/packed/">Packed, the other 100% withdrawable buyback with a one-day clock</a></li>
+    <li><a href="/guides/withdrawals/">Getting money out: every platform's withdrawal terms</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html,
+           **{"flags_chalkboard": flag_row("chalkboard")})
+
+    return pages_written("/platforms/chalkboard/", page(
+        "/platforms/chalkboard/",
+        "Chalkboard Pulls review — 100% buyback, on a value you cannot appeal",
+        "Chalkboard Pulls pays 100% of fair market value as withdrawable credit — the clearest cash route in the category. Its terms also make Chalkboard the sole, final and non-appealable judge of that value.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"),
+                (None, "Chalkboard Pulls")],
+        updated=UPDATED, structured=faq_ld))
+
+
+def build_poke_collect():
+    faq_html, faq_ld = faq_block([
+        ("What happens to a Poke-Collect card if you do nothing?",
+         "<p>You get it. The digital mystery packs page states that cards stay in your vault &ldquo;up to one year&rdquo; and that &ldquo;any cards still in your vault after one year are shipped to you automatically for free.&rdquo; That is the opposite of every other platform we track. Pickem sells the card after three hours, Packed reclaims it after one day, Chalkboard processes an automatic buyback after 24 hours, and MintPull returns it after seven days. On Poke-Collect, inaction ends with the card in your hands.</p>"),
+        ("Does Poke-Collect buy cards back?",
+         "<p>Not as part of the pack. There is no instant sell-back offer on the pack itself, which is the feature every other platform in this category is built around. Poke-Collect instead runs a separate retail buylist &mdash; &ldquo;Scan &amp; Sell (Beta)&rdquo; with &ldquo;Instant Offers&rdquo; &mdash; paying in &ldquo;Store Credit or PayPal,&rdquo; with cards &ldquo;Reviewed Within 24 Hours.&rdquo; No percentage of value is published. So there is no one-tap liquidity, and no published rate to compare against the 90% and 100% offers elsewhere.</p>"),
+        ("How much do Poke-Collect digital packs cost?",
+         "<p>Four packs are listed. The Mystery Pack is $9.99 for one card from the Poke, Great, Ultra or Master tiers. The Japanese Edition is $9.99 for one card from the Japanese pool. The Booster Edition is $12.99 for five cards revealed one at a time with the best card last. The Gold Edition is $38.99 for one high-end Near Mint English or Japanese single. That is the lowest ceiling of any platform we track &mdash; most run to $2,500 or $5,000.</p>"),
+        ("Does Poke-Collect publish pack odds?",
+         "<p>Yes, on the web, which puts it ahead of six of the platforms we track. The pack pages link to a pool page that shows the card list and, in the site's own words, &ldquo;each tier's chance per pack.&rdquo; The catch for us is that the pool renders in the browser rather than in the page source, so we have not been able to collect the figures yet and cannot publish an expected value. That is a limitation on our side, not a disclosure failure on theirs.</p>"),
+        ("Who operates Poke-Collect?",
+         "<p>A Pok&eacute;mon card shop with a physical storefront at 181 Hughes Road, Suite 5, Madison, Alabama, which also sells sealed product and singles online, runs live breaks on Whatnot, and operates a buylist. The digital packs are one line of an existing retail business rather than the whole company. It is the only operator we track with a street address you can walk into.</p>"),
+        ("What does shipping cost on Poke-Collect?",
+         "<p>$5 flat for your entire vault, free if you ship 25 or more cards at once, and free for local pickup at the Madison store. Shipping is US addresses only. Cards ship sleeved and top-loaded. Because shipping is charged per vault rather than per card, the cost of taking delivery falls the longer you accumulate &mdash; the reverse of platforms that ship one card at a time.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Poke-Collect: the only platform whose clock ends with you keeping the card</h1>
+    <p class="lede">Every other platform we track runs a timer that ends in a forced sale. Poke-Collect's vault runs for a year and then ships the card to you, free. It also has no instant buyback at all, which is the trade.</p>
+    {flags_poke_collect}
+  </div>
+
+  <div class="finding">
+    <p class="big">&ldquo;Any cards still in your vault after one year are shipped to you automatically for free.&rdquo; That one sentence inverts the structure of this entire category. Pickem sells your card after three hours, Packed reclaims it after one day, Chalkboard buys it back automatically after 24 hours, MintPull returns it after seven days. Here, doing nothing ends with a card in the post.</p>
+    <p class="small muted">Read from poke-collect.com and its digital mystery packs pages on {collected}. Tier odds are published on the pool page but render in-browser; we have not collected them yet.</p>
+  </div>
+
+  <h2>The clock, inverted</h2>
+  <p>We have written about decision windows on nearly every platform page here, always as a risk. The window is short, the default is a forced sale at a price the platform sets, and the user who goes to bed loses the choice. Poke-Collect is the first exception we have found, and it is worth being precise about why it matters.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>What happens when the window closes, across the seventeen platforms we track.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col">Window</th><th scope="col">What happens at the end</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Pickem</td><td><strong class="neg">3 hours</strong></td><td>Card sold at Pickem's FMV</td></tr>
+    <tr><td class="name">Packed</td><td><strong class="neg">1 day</strong></td><td>&ldquo;Automatically returned to Packed&rdquo;</td></tr>
+    <tr><td class="name">Chalkboard Pulls</td><td><strong class="neg">24 hours</strong></td><td>Automatic buyback at Chalkboard's FMV</td></tr>
+    <tr><td class="name">MintPull</td><td>7 days</td><td>Auto-returned at the Company's discretion</td></tr>
+    <tr><td class="name">Crown Rips</td><td>7 days, reportedly</td><td>Auto-sold at market value</td></tr>
+    <tr><td class="name">Courtyard, Arena Club, Fanatics, Tilt Rips</td><td>Indefinite</td><td>Vaulted, nothing happens</td></tr>
+    <tr><td class="name"><strong>Poke-Collect</strong></td><td><strong class="pos">1 year</strong></td><td><strong class="pos">Card shipped to you automatically, free</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Read the last row against the first three. On Pickem, Packed and Chalkboard, the platform ends the year owning the card and you holding a balance. On Poke-Collect, you end the year holding the card. Those are opposite businesses wearing similar interfaces.</p>
+
+  <p>The reason is structural rather than generous. Poke-Collect is a card shop that sells digital packs. The others are platforms built around buying cards back, and a platform that reliably buys cards back cannot afford to hold inventory indefinitely &mdash; which is exactly the point we made on the <a href="/platforms/pickem/">Pickem</a> and <a href="/platforms/chalkboard/">Chalkboard</a> pages. The clock is how a buyback business manages its float. Poke-Collect has no buyback business to manage.</p>
+
+  <h2>What you give up: there is no instant sell-back</h2>
+  <p>This is the other half of the trade, and it is a real cost. On every other platform here, a card you do not want converts to a balance in one tap. On Poke-Collect there is no such button on the pack.</p>
+
+  <p>What exists instead is a conventional retail buylist &mdash; &ldquo;Scan &amp; Sell (Beta),&rdquo; offering &ldquo;Instant Offers,&rdquo; paid in &ldquo;Store Credit or PayPal,&rdquo; with cards &ldquo;Reviewed Within 24 Hours.&rdquo; That is a human-reviewed purchase of a physical card, not an algorithmic instant offer against a vault position. No percentage of value is published anywhere.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Liquidity, compared.</caption>
+  <tbody>
+    <tr><th scope="row">Chalkboard Pulls</th><td>100% of FMV, instant, withdrawable &mdash; on a value the terms call non-appealable</td></tr>
+    <tr><th scope="row">Packed</th><td>100% of FMV, instant, withdrawable &mdash; within a one-day window</td></tr>
+    <tr><th scope="row">Arena Club, Tilt Rips, Pickem</th><td>90%, instant, withdrawable</td></tr>
+    <tr><th scope="row">Packz, Fanatics, Fast Rips, MintPull</th><td>Instant, but the proceeds cannot leave the platform</td></tr>
+    <tr><th scope="row"><strong>Poke-Collect</strong></th><td><strong>No instant offer. A separate buylist, reviewed within 24 hours, paying store credit or PayPal, at an unpublished rate</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Which of those is better depends entirely on what you are doing. If you are ripping to flip &mdash; buying packs intending to sell every card straight back &mdash; Poke-Collect is the worst platform here, because the thing you need does not exist as a product. If you are ripping to collect, it is the only one that does not quietly push you toward selling.</p>
+
+  <p>That distinction runs through this whole site. A 100% buyback is a feature for a flipper and an irrelevance for a collector, and the platforms with the most generous buybacks are also the ones with the least patience for anyone who wants to keep what they pulled.</p>
+
+  <h2>Odds: published, but we have not collected them</h2>
+  <p>The pack pages link to a pool page that lists the cards and, in the site's own words, shows &ldquo;each tier's chance per pack&rdquo; across four tiers &mdash; Poke, Great, Ultra and Master. The product pages describe these as &ldquo;live odds.&rdquo;</p>
+
+  <p>That is a real disclosure and it puts Poke-Collect ahead of <a href="/platforms/tilt-rips/">Tilt Rips</a>, <a href="/platforms/fast-rips/">Fast Rips</a>, <a href="/platforms/mintpull/">MintPull</a>, <a href="/platforms/packed/">Packed</a>, <a href="/platforms/pickem/">Pickem</a> and <a href="/platforms/chalkboard/">Chalkboard</a>, none of which publish a number on the open web. We have not been able to read it: the pool loads in the browser rather than in the page source, so our collection tooling sees only &ldquo;Loading the pool&hellip;&rdquo;</p>
+
+  <p><strong>That is our limitation, not their failure, and we say so rather than writing &ldquo;no odds published.&rdquo;</strong> If the pool also lists the individual cards, this becomes one of the few platforms where a genuine expected value can be calculated from public information &mdash; tier probabilities plus a card list plus market prices. Collecting it is on our list.</p>
+
+  <h2>The packs</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Poke-Collect digital mystery packs, {collected}.</caption>
+  <thead><tr><th scope="col">Pack</th><th scope="col" class="num">Price</th><th scope="col">What you get</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Mystery Pack</td><td class="num">$9.99</td><td>One card from the Poke, Great, Ultra or Master tiers</td></tr>
+    <tr><td class="name">Japanese Edition</td><td class="num">$9.99</td><td>One card from the Japanese pool</td></tr>
+    <tr><td class="name">Booster Edition</td><td class="num">$12.99</td><td>Five cards, revealed one at a time, best card last</td></tr>
+    <tr><td class="name">Gold Edition</td><td class="num">$38.99</td><td>One high-end Near Mint English or Japanese single</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Note the ceiling. The most expensive pack here is $38.99. Tilt Rips runs to $3,000, Arena Club to $5,000, Clutch Packs and Fanatics to $2,500. A platform whose largest pack is under $40 is a materially different risk proposition from one that will sell you a $5,000 pack, and that is worth as much as any clause in the terms.</p>
+
+  <h2>Terms worth knowing</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Poke-Collect, a retail card shop at 181 Hughes Road, Suite 5, Madison, AL 35758, with posted store hours</td></tr>
+    <tr><th scope="row">Other lines</th><td>Sealed product, singles, graded cards, a buylist, a player-to-player Vault Market, and live breaks on Whatnot</td></tr>
+    <tr><th scope="row">Draw timing</th><td>The card is &ldquo;picked the moment your payment clears&rdquo;</td></tr>
+    <tr><th scope="row">Unopened packs</th><td>Open automatically one day after purchase</td></tr>
+    <tr><th scope="row">Vault</th><td>Up to one year, then <strong class="pos">shipped to you automatically, free</strong></td></tr>
+    <tr><th scope="row">Shipping</th><td>$5 flat for the whole vault; free on 25+ cards; free local pickup; US addresses only; sleeved and top-loaded</td></tr>
+    <tr><th scope="row">Sell-back</th><td>No instant pack buyback. Separate buylist pays store credit or PayPal, reviewed within 24 hours, rate not published</td></tr>
+    <tr><th scope="row">Refunds</th><td>&ldquo;All sales final&rdquo; &mdash; packs cannot be cancelled, returned or exchanged</td></tr>
+    <tr><th scope="row">Odds</th><td>Per-tier chances published on the pool page; render in-browser, not yet collected by us</td></tr>
+    <tr><th scope="row">Age</th><td>None stated</td></tr>
+    <tr><th scope="row">States</th><td>None stated, beyond US-only shipping</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Where we would push back</h2>
+  <p>Two things are missing that every platform in this category should publish, and the fact that Poke-Collect is a real shop does not excuse them.</p>
+  <ul>
+    <li><strong>No stated age restriction.</strong> Eleven of the seventeen platforms we track require 18+ in their terms. A randomised paid pack sold to anyone of any age is the single most common criticism made of this whole category, and it is the easiest to fix.</li>
+    <li><strong>No published buylist rate.</strong> &ldquo;Instant Offers&rdquo; with no percentage and a 24-hour review is less transparent than the 90% figures elsewhere, even though those figures turn out to mean <a href="/guides/buyback-rates/">six different things</a>. A number you can check beats a number you cannot see.</li>
+  </ul>
+  <p>Neither is a term that works against the buyer in the way a $250 weekly withdrawal cap does. They are gaps, and they are worth closing.</p>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>The odds are published but we have not collected them, so no expected value can be calculated yet &mdash; and unlike most platforms here, that is a gap we can actually close. There is also no buyback rate to score, because there is no pack buyback. We will update this page once the pool data is collected.</p>
+    <p>If you have opened Poke-Collect packs and can screenshot the pool page with its tier percentages and card list, that is the single most useful thing anyone could send us right now.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+    <li><a href="/platforms/chalkboard/">Chalkboard Pulls, the opposite trade: 100% instant, 24-hour clock</a></li>
+    <li><a href="/platforms/packz/">Packz, the other Pok&eacute;mon-heavy platform, with full published odds</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html,
+           **{"flags_poke_collect": flag_row("poke-collect")})
+
+    return pages_written("/platforms/poke-collect/", page(
+        "/platforms/poke-collect/",
+        "Poke-Collect review — the one platform that ships you the card by default",
+        "Poke-Collect vaults cards for a year then ships them to you free, where every other platform auto-sells. The trade is that it has no instant buyback at all.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"),
+                (None, "Poke-Collect")],
+        updated=UPDATED, structured=faq_ld))
+
+
+def build_letsgo():
+    faq_html, faq_ld = faq_block([
+        ("Does LETSGO buy cards back at 90%?",
+         "<p>Its two public descriptions do not agree. The letsgooo.com homepage says &ldquo;Sell at 90% of fair market value.&rdquo; The App Store listing for the same product says LETSGO &ldquo;buys back cards at <strong>up to</strong> 90% of fair market value, paid to PayPal, Venmo, debit card or bank transfer,&rdquo; and repeats &ldquo;up to 90%&rdquo; a second time. Those are materially different promises: a flat 90% is a rate, and &ldquo;up to 90%&rdquo; is a ceiling with no floor. Nothing we could reach states which one governs, or what the floor is.</p>"),
+        ("Who operates LETSGO?",
+         "<p>The website does not say. There is no company name, no registered address and no country anywhere on letsgooo.com &mdash; only &ldquo;&copy; 2026 LETSGO&rdquo; and an info@ email. The privacy policy names no legal entity either. The operator appears only in the app store records: the seller is <strong>LETSGO INTERACTIVE LTD</strong>, and the Google Play developer record gives the address as &ldquo;5 Hatidhar RAANANA, 4366507 Israel.&rdquo; Every other platform we track names its operating company somewhere on its own site.</p>"),
+        ("Is LETSGO legal where I live?",
+         "<p>LETSGO does not say it is. Its own homepage carries the sentence &ldquo;The LETSGO platform may be illegal in the jurisdiction in which you are located.&rdquo; No platform we track makes a blunter statement about itself, and none publishes a list of states where it does or does not operate. We have no state-by-state restrictions to report for LETSGO because none are published. Our <a href=\"/legal/\">by-state page</a> covers what the other platforms disclose.</p>"),
+        ("Does LETSGO publish pack odds?",
+         "<p>In the app only. The homepage says &ldquo;Grails and odds shown before you rip,&rdquo; the Google Play listing claims &ldquo;transparent odds and real pricing,&rdquo; and a version 1.8.2 release note mentions a &ldquo;clearer odds display.&rdquo; No figures appear on any public page, and no pack prices do either, so no expected value can be calculated from outside the app. One App Store reviewer reports opening 100+ packs with pull rates &ldquo;in line with the stated odds,&rdquo; while also saying they could not find an expected value per pack.</p>"),
+        ("How long does LETSGO take to ship a card?",
+         "<p>A developer reply on the App Store listing says shipping &ldquo;can take up to 21 business days,&rdquo; which is about a month of calendar time and the longest figure we have seen in this category. Version 1.1.4 added an identity verification step before cards ship. Several recent user reviews on both stores report orders stuck in preparation or unfulfilled; those are unverified user claims and we repeat them as claims, not findings.</p>"),
+        ("How big is LETSGO?",
+         "<p>Larger than most of the platforms on this site. The Google Play listing shows 100,000+ installs and about 1,050 reviews averaging 4.4; the App Store listing shows 4.0 from 8 ratings. Scale is not an endorsement &mdash; it means more people are exposed to the disclosure gaps below, not fewer.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>LETSGO: the same buyback described two different ways</h1>
+    <p class="lede">The website says 90% of fair market value. The App Store listing says &ldquo;up to 90%.&rdquo; The site names no operating company at all &mdash; and its own homepage says the platform may be illegal where you are.</p>
+    {flags_letsgo}
+  </div>
+
+  <div class="finding">
+    <p class="big">letsgooo.com: &ldquo;Sell at 90% of fair market value.&rdquo; The App Store listing for the same app: LETSGO &ldquo;buys back cards at <em>up to</em> 90% of fair market value.&rdquo; A rate and a ceiling are not the same promise, and no floor is published anywhere. Separately, the homepage states: &ldquo;The LETSGO platform may be illegal in the jurisdiction in which you are located.&rdquo;</p>
+    <p class="small muted">Read from letsgooo.com, its privacy policy, and the App Store and Google Play listings on {collected}. We could not reach a terms of use document at any URL we tried.</p>
+  </div>
+
+  <h2>&ldquo;90%&rdquo; against &ldquo;up to 90%&rdquo;</h2>
+  <p>We have written this page before, about <a href="/platforms/fast-rips/">Fast Rips</a>, where the homepage advertised cash and the terms described non-withdrawable credit. This is a smaller gap and the same species of problem: two official descriptions of one product that a buyer cannot reconcile.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>LETSGO's buyback, as described in each place it is described, {collected}.</caption>
+  <thead><tr><th scope="col">Source</th><th scope="col">Wording</th><th scope="col">What it promises</th></tr></thead>
+  <tbody>
+    <tr><td class="name">letsgooo.com</td><td>&ldquo;Sell at 90% of fair market value&rdquo;</td><td>A rate. Every card returns 90%</td></tr>
+    <tr><td class="name">App Store listing</td><td>&ldquo;buys back cards at <strong>up to</strong> 90% of fair market value&rdquo;</td><td>A ceiling. 90% is the best case; the floor is unstated</td></tr>
+    <tr><td class="name">Google Play listing</td><td>&ldquo;instant buyback&rdquo; at &ldquo;fair market value&rdquo;</td><td>No percentage at all</td></tr>
+    <tr><td class="name">Terms of use</td><td>&mdash;</td><td>We could not reach one</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>This matters more than the five-point spreads we normally write about. Across the platforms we track, the difference between the best and worst advertised 90% works out to a few dollars per hundred of card value. The difference between &ldquo;90%&rdquo; and &ldquo;up to 90%&rdquo; is unbounded, because the second phrase sets no floor. A buyback that returns 90% on one card and 40% on the next is fully consistent with &ldquo;up to 90%.&rdquo;</p>
+
+  <p>We are not alleging that LETSGO pays less than 90%. Several app reviews describe buybacks working. We are saying that the company has published two different promises and a buyer has no way to know which is the real one &mdash; and that the one place this would normally be settled, a terms of use document, is the one place we could not find.</p>
+
+  <h2>The operator is not named on its own site</h2>
+  <p>This is the part we would want to know before depositing anything.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">letsgooo.com</th><td>No company name, no registered address, no country. &ldquo;&copy; 2026 LETSGO&rdquo; and info@letsgooo.com</td></tr>
+    <tr><th scope="row">Privacy policy</th><td>Names &ldquo;LETSGO and its affiliated companies&rdquo; as the Company. No legal entity, no address, no country, no governing law. Header dated August 11, 2026; footer says September 2026</td></tr>
+    <tr><th scope="row">App Store</th><td>Seller: <strong>LETSGO INTERACTIVE LTD</strong></td></tr>
+    <tr><th scope="row">Google Play</th><td>Developer: LETSGO INTERACTIVE LTD &mdash; &ldquo;5 Hatidhar RAANANA, 4366507 Israel&rdquo;</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>So the operator is identifiable, but only from Apple's and Google's records, which those companies require and LETSGO does not volunteer. That makes it the second non-US operator we have covered, after <a href="/platforms/mintpull/">MintPull</a> in Hong Kong &mdash; and unlike MintPull, which names its entity, its address and its governing law in its own terms, LETSGO discloses none of that itself.</p>
+
+  <p>Being incorporated outside the United States is not wrongdoing, and plenty of good products are built abroad. It is a material fact about who holds your money and which courts would hear a dispute, and a platform selling to US buyers should state it on its own website rather than leaving it to an app store form. We could not find a governing-law clause at all, which means we cannot tell you where a dispute would be heard.</p>
+
+  <h2>The sentence on their own homepage</h2>
+  <div class="callout danger">
+    <h3>&ldquo;The LETSGO platform may be illegal in the jurisdiction in which you are located.&rdquo;</h3>
+    <p>That is quoted from letsgooo.com, not from a critic. No other platform we track says this about itself. <a href="/platforms/pickem/">Pickem</a> publishes a list of five states it excludes; <a href="/platforms/mintpull/">MintPull</a> names Nevada; several others say nothing. LETSGO neither excludes states nor claims legality &mdash; it puts the question back on the buyer and moves on.</p>
+    <p>We read it as honest rather than sinister: the legal position of paid randomised packs is genuinely unsettled, which is the subject of our <a href="/is-card-ripping-gambling/">is card ripping gambling</a> page. But a warning with no list attached gives a buyer nothing to act on.</p>
+  </div>
+
+  <h2>What it does well</h2>
+  <p>Two things here are at the better end of the category, and both are real.</p>
+  <ul>
+    <li><strong>The cash-out methods are specific.</strong> &ldquo;Paid to PayPal, Venmo, debit card or bank transfer&rdquo; is a concrete list, and only <a href="/platforms/packed/">Packed</a> matches it for breadth. Four of the seventeen platforms we track pay credit that cannot be withdrawn at all; this is not one of them.</li>
+    <li><strong>Cards are real and the grading is named.</strong> The listings describe professionally graded slabs from PSA, BGS or CGC with the grade and certification number shown, and state that nothing is simulated. A certification number is checkable against the grader's own database, which is a verification route most platforms here do not offer.</li>
+  </ul>
+
+  <h2>Shipping is slow, and reviews say so</h2>
+  <p>A developer reply on the App Store says shipping &ldquo;can take up to 21 business days&rdquo; &mdash; roughly a month. Version 1.1.4 added identity verification before cards ship, which adds time at the front. For comparison, <a href="/platforms/poke-collect/">Poke-Collect</a> ships a whole vault for $5 flat and <a href="/platforms/arena-club/">Arena Club</a> and Fanatics vault indefinitely.</p>
+
+  <p>Recent reviews on both stores report orders stuck in preparation and at least one unfulfilled refund. Those are unverified claims from individual users and we treat them as claims. We mention them because the 21-business-day figure is the company's own, and the complaints are consistent with it rather than contradicting it.</p>
+
+  <p>One reviewer also states the app &ldquo;forces you to auto-sell if you hold it in your collection past 3 days,&rdquo; which would contradict the homepage's &ldquo;free vault storage&rdquo; with no stated limit. We could not confirm it either way, and we are not publishing it as a finding &mdash; it is on our open questions list.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>LETSGO INTERACTIVE LTD, &ldquo;5 Hatidhar RAANANA, 4366507 Israel&rdquo; per Google Play; not named on its own site</td></tr>
+    <tr><th scope="row">Categories</th><td>Pok&eacute;mon, NBA, MLB, NFL, One Piece TCG</td></tr>
+    <tr><th scope="row">Cards</th><td>Physical cards and graded slabs from PSA, BGS or CGC, with grade and certification number shown</td></tr>
+    <tr><th scope="row">Pack prices</th><td>Not published anywhere public</td></tr>
+    <tr><th scope="row">Odds</th><td>Shown in-app before a rip; nothing published on the web</td></tr>
+    <tr><th scope="row">Buyback</th><td>&ldquo;90%&rdquo; on the website, &ldquo;up to 90%&rdquo; on the App Store; no floor published</td></tr>
+    <tr><th scope="row">Payouts</th><td>PayPal, Venmo, debit card or bank transfer</td></tr>
+    <tr><th scope="row">Who sets the value</th><td>Not stated on the website, the app listings, or any document we could reach</td></tr>
+    <tr><th scope="row">Vault</th><td>&ldquo;Climate-controlled, insured storage,&rdquo; free, no time limit stated</td></tr>
+    <tr><th scope="row">Shipping</th><td>&ldquo;Insured, tracked to your door&rdquo;; up to 21 business days per a developer reply; identity verification required</td></tr>
+    <tr><th scope="row">Promotions</th><td>A free pack via an invite link; conditions not clearly stated, and whether free-pack proceeds are withdrawable is not confirmed</td></tr>
+    <tr><th scope="row">Scale</th><td>100,000+ Google Play installs; ~1,050 Play reviews at 4.4; 8 App Store ratings at 4.0</td></tr>
+    <tr><th scope="row">Age</th><td>18+ on the site and both store listings</td></tr>
+    <tr><th scope="row">States</th><td>None published. The homepage says the platform &ldquo;may be illegal in the jurisdiction in which you are located&rdquo;</td></tr>
+    <tr><th scope="row">Governing law</th><td>Not found</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <h3>If you use LETSGO</h3>
+    <p>Screenshot the buyback offer before accepting it, and keep the certification number on any graded slab &mdash; it is checkable against PSA, BGS or CGC directly, which is the one claim here you can verify yourself without trusting the platform. Ask support in writing whether the buyback is 90% or &ldquo;up to 90%,&rdquo; and what the floor is. Verify your identity before you want anything shipped, and expect the better part of a month.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>No pack prices and no odds are published outside the app, so no expected value can be calculated. The buyback rate is stated two different ways and we cannot tell which governs. No terms of use document was reachable, so storage limits, withdrawal caps, valuation methodology and governing law are all unknown. Four of our five scoring inputs are unavailable. <a href="/methodology/">Our methodology</a> explains why we leave a cell empty rather than guess.</p>
+    <p>We have written to LETSGO asking which buyback figure is correct and where the terms of use can be read, and will update this page with any response. If you have in-app screenshots of pack odds, prices, or the terms, we would like to see them.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/fast-rips/">Fast Rips, where the marketing and the terms disagree more sharply</a></li>
+    <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays, across every platform</a></li>
+    <li><a href="/guides/withdrawals/">Who pays real money and who pays credit</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html,
+           **{"flags_letsgo": flag_row("letsgo")})
+
+    return pages_written("/platforms/letsgo/", page(
+        "/platforms/letsgo/",
+        "LETSGO review — is the buyback 90% or “up to 90%”?",
+        "LETSGO's website says it buys cards back at 90% of fair market value. Its App Store listing says “up to 90%.” The site names no operating company, and warns the platform may be illegal where you are.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "LETSGO")],
+        updated=UPDATED, structured=faq_ld))
+
+
+def build_triumph():
+    faq_html, faq_ld = faq_block([
+        ("Does Rips by Triumph really have a 100% buyback guarantee?",
+         "<p>Its FAQ headlines one. Its terms do not contain one. The FAQ is headed &ldquo;100% BUYBACK GUARANTEE&rdquo; and promises buyback at the fair market value in effect at purchase for at least seven days. Section 5.5 of the Terms of Use says Triumph &ldquo;is under no obligation to&rdquo; offer a Return, that Returns are final, and that Triumph may offer or end them at any time. The FAQ also reserves the right to change the guarantee on seven days' notice. Those are not the same promise, and the terms are the document that governs.</p>"),
+        ("Can you withdraw money from Rips by Triumph?",
+         "<p>Yes, and the rails are specific: debit card, bank account, or PayPal and Venmo subject to availability. The minimum is $6. Triumph may limit you to &ldquo;no more than $10,000 in withdrawals in any single day&rdquo; at its discretion, and Venmo is capped at &ldquo;no more than $4,000 per rolling twenty-four (24) hours.&rdquo; Section 6.3 says withdrawals process &ldquo;within two weeks of the request&rdquo; while the FAQ says instant withdrawals average about ten minutes. An instant-withdrawal fee applies; the amount is not published.</p>"),
+        ("How long can you keep a card on Rips by Triumph?",
+         "<p>Seven days. Section 5.3 states, in capitals, &ldquo;YOU MAY ONLY STORE A COLLECTIBLE FOR A MAXIMUM OF SEVEN DAYS.&rdquo; After that it becomes a Return at Triumph's discretion and you are credited the FMV as of when you received it. Triumph gives at least 24 hours' notice by push notification and may extend the deadline. Promotional cards are different: they carry no buyback value at all and may simply be removed after seven days unless shipped.</p>"),
+        ("Does Rips by Triumph publish pack odds?",
+         "<p>No. Section 5.2.1 requires a pack to show its producer, series or type, cost and number of collectibles, and says other details such as the chance of a given value tier &ldquo;may be&rdquo; provided. No figures appear anywhere public. The same section warns, in capitals, that &ldquo;THE DISTRIBUTION BETWEEN RANGES MAY NOT (AND IS LIKELY NOT TO BE) EQUAL.&rdquo; With no prices and no rates published, no expected value can be calculated.</p>"),
+        ("Where is Rips by Triumph not available?",
+         "<p>Nevada. Section 2.3 defines Eligible Locations as &ldquo;currently the United States except the State of Nevada,&rdquo; and Triumph's own help article confirms it. Three further states &mdash; Illinois, Utah and North Carolina &mdash; have the 50/50 pack feature restricted rather than the platform as a whole. That is the most detailed state disclosure of any platform we track, and it is on our <a href=\"/legal/\">by-state page</a>.</p>"),
+        ("Who operates Rips by Triumph?",
+         "<p>The Terms of Use name Triumph TCG, LLC, trading as &ldquo;Rips by Triumph,&rdquo; under Delaware law. The Google Play listing gives the developer as Triumph Labs, Inc., at &ldquo;2093 Philadelphia Pike Ste 4204 Claymont, DE 19703-2424.&rdquo; Disputes go to individual AAA arbitration, by default in San Francisco, with a $225 consumer filing fee, a class-action waiver and a 60-day informal resolution step first.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Rips by Triumph: the biggest platform here, and its terms are MintPull's</h1>
+    <p class="lede">A million-plus installs, a &ldquo;100% BUYBACK GUARANTEE&rdquo; in the FAQ, and a &sect;5.5 saying Triumph is under no obligation to buy anything back. Its clauses match MintPull's word for word, section number for section number.</p>
+    {flags_triumph}
+  </div>
+
+  <div class="finding">
+    <p class="big">The FAQ is headed &ldquo;100% BUYBACK GUARANTEE.&rdquo; Section 5.5 of the Terms of Use says Triumph &ldquo;is under no obligation to&rdquo; offer a Return and may offer or end Returns at any time. The FAQ separately reserves the right to change the guarantee on seven days' notice, by editing the FAQ.</p>
+    <p class="small muted">Read from docs.triumpharcade.com, the Triumph help centre and the Google Play listing on {collected}. No pack prices or odds are published anywhere public.</p>
+  </div>
+
+  <h2>The largest platform on this site</h2>
+  <p>Scale first, because it changes what the rest of this page means. The Google Play listing shows <strong>1,000,000+ installs</strong> and about 64,500 reviews averaging 4.5. <a href="/platforms/letsgo/">LETSGO</a>, the next largest we have measured, shows 100,000+. Triumph is an order of magnitude bigger than anything else here, which means the terms below apply to more people than every other platform on this site combined.</p>
+
+  <p>It is also, in several respects, better documented than most. It names its entity, publishes a state-by-state restriction list, specifies its withdrawal rails and caps, and requires identity verification with a liveness test. Those are real disclosures and we are not going to pretend otherwise.</p>
+
+  <h2>The guarantee that the terms do not contain</h2>
+  <div class="table-wrap">
+  <table class="clauses">
+  <caption>Rips by Triumph's buyback, as described in each document, {collected}.</caption>
+  <thead><tr><th scope="col">Source</th><th scope="col">What it says</th></tr></thead>
+  <tbody>
+    <tr><td class="name">FAQ heading</td><td>&ldquo;100% BUYBACK GUARANTEE&rdquo;</td></tr>
+    <tr><td class="name">FAQ body</td><td>Buyback at the FMV in effect at purchase, for at least seven days after the card enters Inventory &mdash; changeable on seven days' notice by updating the FAQ</td></tr>
+    <tr><td class="name">Google Play listing</td><td>Sold cards are priced at &ldquo;100% fair market value&rdquo;</td></tr>
+    <tr><td class="name">Terms of Use &sect;5.5</td><td><strong class="neg">Triumph &ldquo;is under no obligation to&rdquo; offer a Return; Returns are final; Triumph may offer or end them at any time</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>We have written this page before, about <a href="/platforms/fast-rips/">Fast Rips</a> and <a href="/platforms/letsgo/">LETSGO</a>. The pattern is the same: a confident number in the marketing, a discretionary clause in the contract, and nothing reconciling them.</p>
+
+  <p>In fairness to Triumph, a discretionary clause is not evidence that the buyback fails in practice, and 64,500 reviews at 4.5 stars suggests it generally works. The point is narrower and still worth making: <strong>the word &ldquo;guarantee&rdquo; describes something the governing document declines to guarantee.</strong> If Triumph intends to honour it, writing it into section 5.5 would cost nothing.</p>
+
+  <h2>The clauses are MintPull's, verbatim</h2>
+  <p>This is the part we did not expect. Reading Triumph's terms against <a href="/platforms/mintpull/">MintPull's</a>, which we published two days ago, the overlap is not thematic. It is textual, and it runs through the same section numbers.</p>
+
+  <div class="table-wrap">
+  <table class="clauses">
+  <caption>Clauses appearing in both platforms' Terms of Use.</caption>
+  <thead><tr><th scope="col">&sect;</th><th scope="col">Rips by Triumph</th><th scope="col">MintPull</th></tr></thead>
+  <tbody>
+    <tr><td class="name">5.3</td><td>&ldquo;YOU MAY ONLY STORE A COLLECTIBLE FOR A MAXIMUM OF SEVEN DAYS&rdquo;</td><td>&ldquo;YOU MAY ONLY STORE A COLLECTIBLE FOR A MAXIMUM OF SEVEN DAYS&rdquo;</td></tr>
+    <tr><td class="name">5.2</td><td>&ldquo;THE DISTRIBUTION BETWEEN RANGES MAY NOT (AND IS LIKELY NOT TO BE) EQUAL&rdquo;</td><td>&ldquo;THE DISTRIBUTION BETWEEN RANGES MAY NOT (AND LIKELY IS NOT) BE EQUAL&rdquo;</td></tr>
+    <tr><td class="name">5.2</td><td>Pack shows producer, series or type, cost, number of collectibles; other details &ldquo;may be&rdquo; shown</td><td>Packs may show the producer, series, cost and item count; odds details may also be shown</td></tr>
+    <tr><td class="name">5.4</td><td>&ldquo;The FMV that Triumph uses may not match published market values&rdquo;; &ldquo;subject to change at any time&rdquo;</td><td>&ldquo;May not match published market values&rdquo;; &ldquo;subject to change at any time&rdquo;</td></tr>
+    <tr><td class="name">5.5</td><td>Returns are final; Triumph under no obligation to offer them</td><td>Returns credited as additional pack purchase credits</td></tr>
+    <tr><td class="name">&mdash;</td><td>Eligible Locations: the United States except Nevada</td><td>Restricted: Nevada, and outside the United States</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Same capitalised sentences, same section numbering, same Nevada carve-out, same FMV disclaimer. Two platforms that share no branding, no website and no stated corporate link are working from one document.</p>
+
+  <div class="callout">
+    <h3>What this does and does not mean</h3>
+    <p>It does <strong>not</strong> establish that Triumph and MintPull are the same company, and we are not saying they are. Triumph TCG, LLC operates under Delaware law; MintPull is Arcane Answers Studio Limited in Hong Kong. A shared template can come from common counsel, a vendor's boilerplate, or one operator copying another's public terms.</p>
+    <p>It does mean something for readers. When you see &ldquo;seven-day storage limit&rdquo; and &ldquo;proprietary FMV that may not match published market values&rdquo; on a third platform, that is not independent convergence on fair terms &mdash; it is one document propagating. The clauses that favour the operator are the ones being copied, and they are spreading faster than the disclosure practices on <a href="/platforms/swishx/">SwishX</a> or <a href="/platforms/courtyard/">Courtyard</a>.</p>
+  </div>
+
+  <h2>Two places the documents contradict themselves</h2>
+  <p>Separate from the guarantee, we found two internal inconsistencies while reading. Neither is severe. Both are the kind of thing that gets fixed once someone points at it.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Tax threshold</th><td>The FAQ says withdrawals pause once you exceed <strong>$600</strong> in a year until tax forms are completed. Section 6.3 of the terms says tax forms may be required for withdrawals over <strong>$2,000</strong> in a calendar year</td></tr>
+    <tr><th scope="row">Shipping insurance</th><td>One FAQ answer says Rips pays the insurance when FMV is over $1,000. Another says the buyer must purchase it. Insurance is optional below $1,000 and required at or above it</td></tr>
+    <tr><th scope="row">Withdrawal speed</th><td>&sect;6.3: &ldquo;within two weeks of the request.&rdquo; FAQ: instant withdrawals average about ten minutes</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>That last pairing is familiar &mdash; <a href="/platforms/packed/">Packed</a> has the same ten-minutes-versus-two-weeks split. The terms set an outer bound and the FAQ describes the norm, which is defensible, but a reader deciding whether to leave a balance on the platform is entitled to see both numbers in the same place.</p>
+
+  <h2>What it does disclose well</h2>
+  <ul>
+    <li><strong>State restrictions, specifically.</strong> Nevada is excluded outright, and Illinois, Utah and North Carolina have the 50/50 pack feature restricted rather than the whole platform. That is the most granular state disclosure we have found anywhere in this category, and most platforms publish nothing at all.</li>
+    <li><strong>Withdrawal mechanics, with numbers.</strong> $6 minimum, up to $10,000 a day at Triumph's discretion, Venmo capped at $4,000 per rolling 24 hours, four payout rails named. Compare <a href="/platforms/fast-rips/">Fast Rips</a>, which advertises cash and documents none of this.</li>
+    <li><strong>A named entity and a real address.</strong> Triumph TCG, LLC in the terms; Triumph Labs, Inc. at a Claymont, Delaware address on Google Play. <a href="/platforms/letsgo/">LETSGO</a> names nothing on its own site at all.</li>
+    <li><strong>Identity verification is described honestly</strong> &mdash; 18+, government ID, a liveness test, usually 24 hours, with manual review and possible notarised documents if it fails.</li>
+  </ul>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Triumph TCG, LLC d/b/a Rips by Triumph (terms); Triumph Labs, Inc., 2093 Philadelphia Pike Ste 4204, Claymont, DE 19703 (Google Play)</td></tr>
+    <tr><th scope="row">Scale</th><td><strong>1,000,000+ Google Play installs</strong>; ~64,500 reviews averaging 4.5 &mdash; the largest platform we track</td></tr>
+    <tr><th scope="row">Governing law</th><td>Delaware (&sect;14.1); AAA individual arbitration, San Francisco by default, $225 consumer filing fee, class waiver, 60-day informal step (&sect;14)</td></tr>
+    <tr><th scope="row">Pack prices</th><td>Not published</td></tr>
+    <tr><th scope="row">Odds</th><td>Not published. &sect;5.2.1 requires producer, series, cost and item count; tier chances &ldquo;may be&rdquo; shown</td></tr>
+    <tr><th scope="row">Buyback</th><td>FAQ: 100% of the FMV in effect at purchase, seven days. &sect;5.5: no obligation to offer Returns at all</td></tr>
+    <tr><th scope="row">Promotional cards</th><td><strong class="neg">No buyback value</strong>; may be removed after seven days unless shipped</td></tr>
+    <tr><th scope="row">FMV</th><td>&ldquo;Realtime sales statistics&rdquo; and &ldquo;a proprietary system&rdquo;; &ldquo;may not match published market values&rdquo;; no dispute process described (&sect;5.4)</td></tr>
+    <tr><th scope="row">Storage</th><td>&ldquo;YOU MAY ONLY STORE A COLLECTIBLE FOR A MAXIMUM OF SEVEN DAYS&rdquo; (&sect;5.3), then auto-returned at the locked FMV, with 24 hours' push notice</td></tr>
+    <tr><th scope="row">Withdrawals</th><td>Debit, bank, PayPal or Venmo; $6 minimum; up to $10,000/day at discretion; Venmo $4,000 per rolling 24h; instant-withdrawal fee, amount not published</td></tr>
+    <tr><th scope="row">Shipping</th><td>Buyer pays shipping, tracking and sales tax, debited from balance before release; insurance optional under $1,000 FMV, required at $1,000+</td></tr>
+    <tr><th scope="row">Verification</th><td>18+, government ID and liveness test before any withdrawal or shipment</td></tr>
+    <tr><th scope="row">Age</th><td>18+ in the terms (&sect;2.1(a)); the Google Play rating is Mature 17+</td></tr>
+    <tr><th scope="row">States</th><td><strong>Not available in Nevada</strong>; the 50/50 pack is restricted in Illinois, Utah and North Carolina</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <div class="callout danger">
+    <h3>If you use Rips by Triumph</h3>
+    <p>Mind the seven days. The window is longer than most of this category, but it ends in an automatic sale at a value locked when you pulled the card, not at today's price. Screenshot the FMV at the pull. Verify your identity before you want to ship or withdraw, not after. And treat promotional cards as entertainment only &mdash; they carry no buyback value and can be removed.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>No pack prices and no odds are published anywhere public, so no expected value can be calculated &mdash; three of our five inputs are unavailable. The buyback is stated two different ways in two of the platform's own documents, so the fourth cannot be scored with confidence either. <a href="/methodology/">Our methodology</a> explains why we leave a cell empty rather than guess.</p>
+    <p>We have written to Triumph asking whether &sect;5.5 or the FAQ heading governs, and will publish the answer. If you have in-app screenshots of pack prices or tier odds, we would like to see them.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/mintpull/">MintPull, whose terms these are</a></li>
+    <li><a href="/compare/?p=triumph,mintpull,swishx">Compare Triumph, MintPull and SwishX side by side</a></li>
+    <li><a href="/legal/">Where each platform is restricted, state by state</a></li>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html,
+           **{"flags_triumph": flag_row("triumph")})
+
+    return pages_written("/platforms/triumph/", page(
+        "/platforms/triumph/",
+        "Rips by Triumph review — a 100% guarantee its terms do not contain",
+        "Rips by Triumph headlines a 100% buyback guarantee; §5.5 of its terms says it is under no obligation to offer one. Its clauses match MintPull's verbatim.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"),
+                (None, "Rips by Triumph")],
+        updated=UPDATED, structured=faq_ld))
+
+
+def build_swishx():
+    rows = swishx_rows()
+    s = swishx_stats()
+
+    ev_rows = "".join(
+        '<tr><td class="name">%s</td><td class="num">%s</td>'
+        '<td class="num">%s</td><td class="num"><strong>%s</strong></td>'
+        '<td class="num">%s</td><td class="num">%s</td>'
+        '<td class="num"><strong class="neg">%s</strong></td></tr>'
+        % (r["name"], money(r["price"]), money(r["stated"]),
+           pct(r["posted_ratio"] * 100, 1), pct(r["calc_ratio"] * 100, 1),
+           "%s&ndash;%s" % (pct(r["fast_lo"] * 100, 0), pct(r["fast_hi"] * 100, 0)),
+           "%s&ndash;%s" % (pct(r["slow_lo"] * 100, 0), pct(r["slow_hi"] * 100, 0)))
+        for r in rows)
+
+    def tier_table(r):
+        body = "".join(
+            '<tr><td class="name">%s</td><td class="num">%s&ndash;%s</td>'
+            '<td class="num">%s</td><td class="num">%s</td>'
+            '<td class="num">%s</td></tr>'
+            % (t[0], money(t[1]), money(t[2]), money(t[3]), pct(t[4], 2),
+               money(t[3] * t[4] / 100.0))
+            for t in r["tiers"])
+        return (
+            '<div class="table-wrap"><table>'
+            '<caption>%s, %s &mdash; SwishX\'s published tiers, target fair '
+            'market values and odds, collected %s. The last column is each '
+            'tier\'s contribution to the expected value.</caption>'
+            '<thead><tr><th scope="col">Tier</th>'
+            '<th scope="col" class="num">FMV range</th>'
+            '<th scope="col" class="num">Target FMV</th>'
+            '<th scope="col" class="num">Odds</th>'
+            '<th scope="col" class="num">Contributes</th></tr></thead>'
+            '<tbody>%s</tbody>'
+            '<tfoot><tr><th scope="row">Total</th><td class="num">&mdash;</td>'
+            '<td class="num">&mdash;</td><td class="num">%s</td>'
+            '<td class="num"><strong>%s</strong></td></tr></tfoot>'
+            '</table></div>'
+            % (r["name"], money(r["price"]), UPDATED, body,
+               pct(r["psum"], 2), money(r["calc"])))
+
+    faq_html, faq_ld = faq_block([
+        ("Does SwishX publish pack odds?",
+         "<p>More completely than any platform we track. Every pack page carries each tier's name, a fair market value range, an explicit <em>target</em> FMV, and the odds percentage &mdash; plus a posted expected value for the pack and the named card pool behind each tier, down to the player, year and set. Only <a href=\"/platforms/clutch-packs/\">Clutch Packs</a>, which publishes observed results rather than projections, makes a stronger claim.</p>"),
+        ("Is the SwishX expected value accurate?",
+         "<p>It checks out against their own numbers. We recomputed the posted expected value from the published target FMVs and odds on five packs and landed within %s of the posted figure every time. That is the first time on this site we have been able to verify a platform's posted EV from its own disclosure. It is not the same as verifying it against real sold prices, which nobody has done for any platform here, including this one.</p>"
+         % pct(s["max_gap"] * 100, 1)),
+        ("How much does SwishX pay to buy a card back?",
+         "<p>The FAQ states it plainly: buyback offers &ldquo;can vary between 85-90% depending on the pack purchased,&rdquo; and after the initial 24-hour window a new offer &ldquo;will vary between 75-80%.&rdquo; Those are published bands rather than a fixed rate, so you cannot know your exact rate before buying, but a published band is more than any other platform here gives you.</p>"),
+        ("What happens after 24 hours on SwishX?",
+         "<p>Nothing is taken from you. Unlike <a href=\"/platforms/pickem/\">Pickem</a>, <a href=\"/platforms/packed/\">Packed</a> and <a href=\"/platforms/chalkboard/\">Chalkboard</a>, SwishX does not sell your card when the clock runs out. The card stays in your Vault and you can request a fresh buyback offer at any time &mdash; it is just worth less, at 75-80% instead of 85-90%. The deadline costs you about ten points rather than the card.</p>"),
+        ("Can you withdraw money from SwishX?",
+         "<p>Yes. The FAQ says withdrawals are &ldquo;processed to your linked payout method and verified through Stripe,&rdquo; from the Wallet. That puts SwishX among the minority of platforms we track where buyback proceeds become money rather than credit.</p>"),
+        ("Who operates SwishX, and who can use it?",
+         "<p>The site names no legal entity &mdash; the footer reads &ldquo;&copy; 2026 SwishX&rdquo; and the FAQ page is marked &ldquo;Powered by Swish Breaks.&rdquo; You must be 18 or older and may hold only one account. No state restrictions are published anywhere we could find.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>SwishX: the pack is worth what you paid. The exit is what costs you.</h1>
+    <p class="lede">SwishX posts an expected value on every pack, publishes the odds and target card values behind it, and says packs are &ldquo;designed to a 100% value target.&rdquo; We checked the arithmetic and it holds. Then the buyback takes 12 to 22% back.</p>
+    {flags_swishx}
+  </div>
+
+  <div class="finding">
+    <p class="big">Across the {n} packs we collected, the posted expected value averages <strong>{posted}</strong> of the pack price &mdash; the only platform we track that does not price a margin into the pack. It takes the margin at the other end instead: the FAQ says buybacks &ldquo;can vary between 85-90% depending on the pack purchased,&rdquo; falling to &ldquo;75-80%&rdquo; on a re-quote after 24 hours.</p>
+    <p class="small muted">Collected from swishx.co pack pages and FAQ on {collected}. Expected values are SwishX's own, computed from SwishX's own card valuations.</p>
+  </div>
+
+  <h2>What they publish</h2>
+  <p>Most of this site is an exercise in working out what platforms will not tell you. This page is the opposite problem. SwishX publishes, on every pack page, with no account:</p>
+  <ul>
+    <li>A <strong>posted expected value</strong> for the pack, in dollars.</li>
+    <li>Five tiers, each with a fair market value <strong>range</strong> and an explicit <strong>target</strong> FMV.</li>
+    <li>The <strong>odds</strong> for each tier.</li>
+    <li>The <strong>named card pool</strong> behind each tier &mdash; player, year, set and grade.</li>
+  </ul>
+
+  <p>That last item is rare. <a href="/platforms/fanatics-instant-rips/">Fanatics</a> publishes a checklist with no rates; <a href="/platforms/arena-club/">Arena Club</a> publishes rates with no values. SwishX publishes both, attached to each other.</p>
+
+  {tier_cheap}
+
+  <p>Because the target FMVs are published alongside the odds, the posted expected value is <strong>checkable</strong>. The contributions in the last column sum to the figure at the bottom, and that figure should match what SwishX posts at the top of the page.</p>
+
+  <h2>We checked it on every pack</h2>
+  <p>It matches. Recomputing the posted expected value from SwishX's own target FMVs and odds lands within <strong>{gap}</strong> of the posted figure on all {n} packs.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>SwishX packs: posted expected value, our recomputation from the published odds, and what a sell-back actually returns, {collected}.</caption>
+  <thead><tr>
+    <th scope="col">Pack</th><th scope="col" class="num">Price</th>
+    <th scope="col" class="num">Posted EV</th>
+    <th scope="col" class="num">Posted as % of price</th>
+    <th scope="col" class="num">Our recomputation</th>
+    <th scope="col" class="num">Sold back in 24h</th>
+    <th scope="col" class="num">Sold back later</th>
+  </tr></thead>
+  <tbody>{evs}</tbody>
+  </table>
+  </div>
+
+  <p>This is the first platform on this site whose posted expected value we have been able to verify from its own disclosure. <a href="/platforms/courtyard/">Courtyard</a> posts an expected value too, but does not publish the per-tier card values that would let you rebuild it. That difference matters: a number you can recompute is a commitment, and a number you cannot is a claim.</p>
+
+  <div class="callout">
+    <h3>What this does and does not prove</h3>
+    <p>It proves SwishX's posted EV is consistent with SwishX's published odds and SwishX's own card valuations. It does not prove those valuations match what the cards actually sell for, and nobody &mdash; us included &mdash; has tested that for any platform in this category. A perfectly consistent expected value built on optimistic FMVs would look exactly like this.</p>
+  </div>
+
+  <h2>Where the money is made, in their own words</h2>
+  <p>A platform returning 100% of the pack price in card value cannot make money on the pack. SwishX does not hide where it makes it instead. From the FAQ, under &ldquo;How much of what I pay goes into the cards?&rdquo;:</p>
+
+  <blockquote>
+    <p>&ldquo;Every pack on SwishX is designed to a 100% value target &mdash; built so the combined fair market value of the cards in its pool matches the price of the pack. The full value of your purchase lives in the cards you can pull, not in a markup on top of them.&rdquo;</p>
+  </blockquote>
+
+  <p>And under &ldquo;How is the instant buyback amount determined?&rdquo;:</p>
+
+  <blockquote>
+    <p>&ldquo;Buyback offers are set at a defined rate relative to the card's current fair market value &mdash; this can vary between 85-90% depending on the pack purchased. Note that after the initial 24-hour buyback period, you can request a new buyback offer, which will vary between 75-80%.&rdquo;</p>
+  </blockquote>
+
+  <p>So the model is explicit: no margin on the pack, a {fastspread} margin on the way out if you sell within a day, and a {slowspread} margin if you sell later. For a buyer who intends to sell everything back, the round trip averages <strong>{fast}</strong> inside the window and <strong>{slow}</strong> outside it.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Round trip compared: what you get back if you sell every card straight back, across the platforms where both figures are known.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Pack EV</th><th scope="col" class="num">Buyback</th><th scope="col" class="num">Round trip</th><th scope="col">Form</th></tr></thead>
+  <tbody>
+    <tr><td class="name">SwishX, within 24h</td><td class="num">~101%</td><td class="num">85&ndash;90%</td><td class="num"><strong class="pos">~88%</strong></td><td>Cash via Stripe</td></tr>
+    <tr><td class="name">Courtyard</td><td class="num">95%</td><td class="num">90% advertised, ~85% measured</td><td class="num">~81&ndash;85%</td><td>USDC, unverified</td></tr>
+    <tr><td class="name">SwishX, after 24h</td><td class="num">~101%</td><td class="num">75&ndash;80%</td><td class="num">~78%</td><td>Cash via Stripe</td></tr>
+    <tr><td class="name">Packz</td><td class="num">~100%</td><td class="num">90%</td><td class="num">~90%</td><td><strong class="neg">Site credit only</strong></td></tr>
+    <tr><td class="name">Rare Candy</td><td class="num">~98&ndash;123%</td><td class="num">Up to 90%</td><td class="num">Not comparable</td><td><strong class="neg">Candy, no cash value</strong></td></tr>
+    <tr><td class="name">Fanatics Instant Rips</td><td class="num">Not calculable</td><td class="num">84.6% effective</td><td class="num">Unknown</td><td><strong class="neg">Credit only</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Read the first two rows together. SwishX returns more on a round trip than Courtyard <em>and</em> pays it in withdrawable money <em>and</em> publishes more of the working. On the numbers each platform discloses about itself, it is the best round trip we have measured.</p>
+
+  <h2>The clock costs points, not the card</h2>
+  <p>SwishX has a 24-hour window, which on most of this site is bad news. Here it works differently, and the difference is worth stating precisely.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>What the deadline actually does.</caption>
+  <tbody>
+    <tr><th scope="row">Pickem</th><td>3 hours, then <strong class="neg">your card is sold</strong> at Pickem's price</td></tr>
+    <tr><th scope="row">Packed</th><td>1 day, then <strong class="neg">the card returns to Packed</strong></td></tr>
+    <tr><th scope="row">Chalkboard Pulls</th><td>24 hours, then <strong class="neg">an automatic buyback</strong> is processed</td></tr>
+    <tr><th scope="row"><strong>SwishX</strong></th><td>24 hours, then <strong>the offer drops from 85&ndash;90% to 75&ndash;80%</strong>. The card stays yours in the Vault and you can request a new offer whenever you like</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>That is a materially better design. Falling asleep on SwishX costs you about ten points on an optional transaction. Falling asleep on Pickem costs you the card. We have criticised short windows on five platform pages now; this is the version of the mechanic that does not punish inattention.</p>
+
+  <h2>What we would still push on</h2>
+  <ul>
+    <li><strong>The buyback is a band, not a rate.</strong> &ldquo;85-90% depending on the pack purchased&rdquo; means the rate is known to SwishX before you buy and not to you. Publishing it per pack, next to the expected value already there, would cost nothing and close the last real gap.</li>
+    <li><strong>The odds sum to slightly over 100%.</strong> We measured {minsum} to {maxsum} across the packs. This is almost certainly rounding &mdash; the posted expected values match our recomputation once the rounding is normalised &mdash; but a disclosure this good deserves rates that total exactly 100%.</li>
+    <li><strong>The valuations are still SwishX's own.</strong> Every figure on this page, including the ones we verified, rests on SwishX's fair market values. That is the same unresolved question we have raised on all seventeen platforms.</li>
+    <li><strong>No operating company is named.</strong> The footer says &ldquo;&copy; 2026 SwishX&rdquo; and the FAQ is &ldquo;Powered by Swish Breaks.&rdquo; We could not find a legal entity, a registered address or a governing-law clause. For a platform that discloses this much about its product, disclosing nothing about itself is a strange omission.</li>
+  </ul>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Not named; &ldquo;&copy; 2026 SwishX&rdquo;, FAQ marked &ldquo;Powered by Swish Breaks&rdquo;</td></tr>
+    <tr><th scope="row">Categories</th><td>Basketball, baseball, football, Pok&eacute;mon, multisport, wax packs</td></tr>
+    <tr><th scope="row">Packs</th><td>20 listed, {minp}&ndash;{maxp}; {n} collected in full</td></tr>
+    <tr><th scope="row">Odds</th><td><strong class="pos">Per tier, with FMV range, target FMV and the named card pool</strong>, on the open web</td></tr>
+    <tr><th scope="row">Posted EV</th><td><strong class="pos">Yes, on every pack</strong>, and it reconciles with the published odds</td></tr>
+    <tr><th scope="row">Value target</th><td>&ldquo;Designed to a 100% value target&rdquo;; FAQ says the real figure floats around it, &ldquo;sometimes a touch under (say, 98.5%), sometimes over (say, 102%)&rdquo;</td></tr>
+    <tr><th scope="row">Buyback</th><td>85&ndash;90% within 24 hours; 75&ndash;80% on a re-quote afterwards</td></tr>
+    <tr><th scope="row">Decision window</th><td>24 hours at the higher rate; <strong class="pos">the card is never taken from you</strong></td></tr>
+    <tr><th scope="row">Withdrawals</th><td>From the Wallet to a linked payout method, verified through Stripe</td></tr>
+    <tr><th scope="row">Shipping</th><td>Sales tax by shipping address; shipping shown before you confirm; no published rate card</td></tr>
+    <tr><th scope="row">Age</th><td>18+, one account per person</td></tr>
+    <tr><th scope="row">States</th><td>None published</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  {tier_dear}
+
+  <div class="callout">
+    <h3>Why this page still has no rating</h3>
+    <p>It is the best-disclosed platform we have found, and it would score well. But every score on this site is held back by one missing measurement: whether a platform's stated card values match real sold prices. SwishX's whole proposition is that the pack contains its price in card value, which makes that question more load-bearing here than anywhere else, not less. We will not publish a score until someone has tested it. <a href="/methodology/">Our methodology</a> explains why.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/compare/?p=swishx,courtyard,rare-candy">Compare SwishX, Courtyard and Rare Candy side by side</a></li>
+    <li><a href="/platforms/courtyard/">Courtyard, the other platform that posts an expected value</a></li>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+    <li><a href="/calculator/">Run these tiers through the pack EV calculator</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html, evs=ev_rows, n=s["n"],
+           posted=pct(s["posted_avg"] * 100, 1),
+           gap=pct(s["max_gap"] * 100, 1),
+           fast=pct(s["fast_avg"] * 100, 0), slow=pct(s["slow_avg"] * 100, 0),
+           fastspread="10 to 15%", slowspread="20 to 25%",
+           minsum=pct(s["min_oversum"], 2), maxsum=pct(s["max_oversum"], 2),
+           minp=money(s["min_price"]), maxp=money(s["max_price"]),
+           tier_cheap=tier_table(rows[0]), tier_dear=tier_table(rows[-1]),
+           **{"flags_swishx": flag_row("swishx")})
+
+    ld = [faq_ld, jsonld({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "SwishX published pack odds and posted expected values",
+        "description": "Per-tier odds, fair market value ranges, target FMVs and posted expected values for %d SwishX packs, collected %s, with independent recomputation." % (s["n"], UPDATED),
+        "url": BASE_URL + "/platforms/swishx/",
+        "creator": {"@type": "Organization", "name": SITE_NAME},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+    })]
+
+    return pages_written("/platforms/swishx/", page(
+        "/platforms/swishx/",
+        "SwishX review — posted EV, published odds, and an 85-90% buyback",
+        "SwishX posts an expected value on every pack and publishes the odds and card values behind it. We recomputed all five and they match. The margin is in the buyback.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "SwishX")],
+        updated=UPDATED, structured=ld))
+
+
+def build_rarecandy():
+    rows = rarecandy_rows()
+    s = rarecandy_stats()
+
+    legfloor = []
+    for r in rows:
+        v = sum(((lo + hi) / 2.0 if lab != "Legendary" else lo) * p / 100.0
+                for lab, lo, hi, p in r["bands"])
+        legfloor.append(v / r["price"])
+    lf_avg = sum(legfloor) / len(legfloor)
+
+    pack_rows = "".join(
+        '<tr><td class="name">%s</td><td class="num">%s</td>'
+        '<td class="num">%s</td><td class="num"><strong>%s</strong></td>'
+        '<td class="num">%s</td><td class="num">%s</td></tr>'
+        % (r["name"], money(r["price"]), pct(r["ratio_low"] * 100, 0),
+           pct(r["ratio_mid"] * 100, 0), pct(r["ratio_high"] * 100, 0),
+           pct(lf * 100, 0))
+        for r, lf in zip(rows, legfloor))
+
+    # The widest band on each pack, and what share of EV it carries.
+    leg_rows = []
+    for r in rows:
+        lab, lo, hi, p = [b for b in r["bands"] if b[0] == "Legendary"][0]
+        share = ((lo + hi) / 2.0 * p / 100.0) / r["mid"]
+        leg_rows.append(
+            '<tr><td class="name">%s</td><td class="num">%s</td>'
+            '<td class="num">%s&ndash;%s</td><td class="num">%.0f&times;</td>'
+            '<td class="num"><strong class="neg">%s</strong></td></tr>'
+            % (r["name"], pct(p, 1), money(lo), money(hi), hi / float(lo),
+               pct(share * 100, 0)))
+    leg_share = sum(
+        (([b for b in r["bands"] if b[0] == "Legendary"][0][1]
+          + [b for b in r["bands"] if b[0] == "Legendary"][0][2]) / 2.0
+         * [b for b in r["bands"] if b[0] == "Legendary"][0][3] / 100.0)
+        / r["mid"] for r in rows) / len(rows)
+
+    # Full published bands for the cheapest and dearest packs.
+    def band_table(r):
+        body = "".join(
+            '<tr><td class="name">%s</td><td class="num">%s&ndash;%s</td>'
+            '<td class="num">%s</td></tr>'
+            % (lab, money(lo), money(hi), pct(p, 1))
+            for lab, lo, hi, p in r["bands"])
+        return (
+            '<div class="table-wrap"><table>'
+            '<caption>%s, %s &mdash; Rare Candy\'s published pull rates by '
+            'total pack value, collected %s.</caption>'
+            '<thead><tr><th scope="col">Band</th>'
+            '<th scope="col" class="num">Pack value</th>'
+            '<th scope="col" class="num">Chance</th></tr></thead>'
+            '<tbody>%s</tbody></table></div>'
+            % (r["name"], money(r["price"]), UPDATED, body))
+
+    faq_html, faq_ld = faq_block([
+        ("Does Rare Candy publish pack odds?",
+         "<p>Yes, and more completely than almost anyone in this category. Every Instapack page carries a &ldquo;Pull Rates by Pack Value&rdquo; table with five bands, a dollar range and a percentage for each, plus a named list of top hits with their values. It is on the open web, with no app and no account needed. All eight packs we collected have rates summing to exactly 100%. Only Courtyard, which posts an exact expected value, discloses more.</p>"),
+        ("What is the Rare Candy guaranteed minimum?",
+         "<p>Every pack guarantees a floor in Candy if you exchange the whole pack, and on all eight packs we collected it is exactly 50% of the pack price. The $4.99 Deep Blue pack guarantees 250 Candy, the $499.99 Only Slabs pack guarantees 25,000 Candy, and 100 Candy equals $1 throughout. A published, checkable floor is something no other platform we track offers, and it is the most useful single number on the page.</p>"),
+        ("Can you withdraw money from Rare Candy?",
+         "<p>No. The exchange pays in Candy, and section 8.1 of the terms says Candies &ldquo;have no cash or monetary value and are not redeemable, refundable, or exchangeable for&rdquo; US dollars, cryptocurrency, outside goods or any monetary payment. Section 8.1 also says Rare Candy will not be required to redeem Candies for cash. Candy buys more packs. The only way value leaves Rare Candy is as a physical card you pay to ship.</p>"),
+        ("What is Rare Candy's expected value?",
+         "<p>Somewhere near break-even, but the published bands cannot pin it down. Taking the midpoint of every band gives an average of %s of the pack price across the eight packs, which cannot be right &mdash; an operator returning more than 100%% on every pack would lose money on every sale. The reason is the Legendary band: it is %.0f times wider than its own floor on average and carries about %s of the midpoint expected value while firing on %s to %s of packs. Valuing Legendary at its floor instead gives %s. The true figure is somewhere in that range and depends entirely on where cards actually sit inside that top band.</p>"
+         % (pct(s["mid_avg"] * 100, 0), 13, pct(leg_share * 100, 0),
+            pct(s["legendary_min"], 1), pct(s["legendary_max"], 1),
+            pct(lf_avg * 100, 0))),
+        ("What happens if you do nothing after opening a Rare Candy pack?",
+         "<p>You keep the card. The FAQ says you have 48 hours to exchange a card, and if you do not, it is automatically kept in your collection. That makes Rare Candy the second platform we track, after <a href=\"/platforms/poke-collect/\">Poke-Collect</a>, where inaction leaves you holding the card rather than a balance. Pickem, Packed and Chalkboard all sell the card for you when their clocks run out.</p>"),
+        ("Who operates Rare Candy?",
+         "<p>Rare Candy Auctions, Inc., a Delaware corporation, with the vault in Dallas, Texas. Texas law governs and disputes go to AAA consumer arbitration seated in Dallas County, after at least 60 days of informal negotiation, with a class-action waiver. Instapacks are US-only and exclude Washington state. Rare Candy also runs a card scanner app and a marketplace; Instapacks is one product line of several.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Rare Candy: the best odds disclosure we have found since Courtyard, paid in a currency worth nothing outside the app</h1>
+    <p class="lede">Every Instapack publishes five value bands with percentages and a guaranteed 50% floor, on the open web. Then section 8.1 says the Candy it all pays out in has no cash value.</p>
+    {flags_rare_candy}
+  </div>
+
+  <div class="finding">
+    <p class="big">We collected full published pull rates for all {n} Instapacks &mdash; the first new odds dataset we have been able to gather since Courtyard and Packz. Every pack guarantees a floor of exactly 50% of its price. And &sect;8.1 of the terms says Candies &ldquo;have no cash or monetary value and are not redeemable, refundable, or exchangeable for&rdquo; dollars or any monetary payment.</p>
+    <p class="small muted">Collected from packs.rarecandy.com and rarecandy.com/terms on {collected}. Rates are Rare Candy's own; card values are Rare Candy's own.</p>
+  </div>
+
+  <h2>What they publish, and why it is better than the category norm</h2>
+  <p>Ten of the seventeen platforms we track publish no odds on the open web at all. Rare Candy publishes, on every pack page, with no account and no app: five named bands, a dollar range for each, a percentage for each, a guaranteed floor, and a list of top hits with named cards, grades and values.</p>
+
+  <p>One detail makes this unusually honest. The bands are stated as <strong>total pack value</strong>, not per card. A platform wanting to flatter itself would quote per-card ranges and let the reader assume they stack. Rare Candy quotes the whole pack, which is the number that actually decides whether you are ahead.</p>
+
+  {band_cheap}
+
+  <p>That is a complete, checkable disclosure for a $4.99 purchase. The rates sum to exactly 100%, as they do on all {n} packs.</p>
+
+  <h2>What it works out to</h2>
+  <p>Here is every Instapack, with the expected value as a percentage of the pack price. We give three estimates because one number would be misleading.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Rare Candy Instapacks: expected pack value as a share of pack price, from the published bands, {collected}.</caption>
+  <thead><tr>
+    <th scope="col">Pack</th><th scope="col" class="num">Price</th>
+    <th scope="col" class="num">All bands at floor</th>
+    <th scope="col" class="num">All at midpoint</th>
+    <th scope="col" class="num">All at ceiling</th>
+    <th scope="col" class="num">Top band at floor</th>
+  </tr></thead>
+  <tbody>{packs}</tbody>
+  </table>
+  </div>
+
+  <p>The midpoint column averages <strong>{mid}</strong>, and that cannot be true. A platform returning more than the pack price on every pack, on average, loses money on every sale. So the midpoint assumption is wrong here, and it is worth understanding exactly why, because the same flaw affects every value-range disclosure in this category.</p>
+
+  <h2>The problem is the top band</h2>
+  <p>Four of the five bands on each pack are narrow and well behaved. The Legendary band is not.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>The Legendary band on each pack: how often it fires, how wide it is, and how much of the midpoint expected value it carries.</caption>
+  <thead><tr>
+    <th scope="col">Pack</th><th scope="col" class="num">Chance</th>
+    <th scope="col" class="num">Band</th><th scope="col" class="num">Width</th>
+    <th scope="col" class="num">Share of EV</th>
+  </tr></thead>
+  <tbody>{legs}</tbody>
+  </table>
+  </div>
+
+  <p><strong>A band that fires on {legmin} to {legmax} of packs carries about {legshare} of the entire midpoint expected value, and it spans a range eleven times wide on average.</strong> On the Boosted Pack the Legendary band runs from $88 to $2,251 &mdash; twenty-six times. Where cards actually sit inside that range decides everything, and it is the one thing not published.</p>
+
+  <p>Value the Legendary band at its floor and keep the midpoint everywhere else, and the average falls to <strong>{lf}</strong> &mdash; a touch under break-even, which is what you would expect a commercial pack to be. That is our best estimate, and it is an estimate, not a measurement.</p>
+
+  <div class="callout">
+    <h3>This is the midpoint problem, stated plainly</h3>
+    <p>Every expected value on this site that comes from value ranges rather than exact odds &mdash; <a href="/platforms/packz/">Packz</a> included &mdash; rests on assuming cards sit in the middle of their band. Rare Candy's data shows how badly that assumption can fail when one band is wide and rare. <a href="/platforms/mintpull/">MintPull's terms</a> warn about exactly this, in capitals: &ldquo;THE DISTRIBUTION BETWEEN RANGES MAY NOT (AND LIKELY IS NOT) BE EQUAL.&rdquo;</p>
+    <p>The fix is not for us to guess better. It is for platforms to publish the distribution inside the band, or an expected value, as <a href="/platforms/courtyard/">Courtyard</a> does.</p>
+  </div>
+
+  <h2>The guaranteed floor is real, and nobody else offers one</h2>
+  <p>Every Instapack page carries a guarantee: exchange the whole pack and you receive a stated minimum in Candy. We checked all {n} packs and the figure is exactly 50% of the pack price every time, with 100 Candy equal to $1 throughout.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Deep Blue, $4.99</th><td>Guaranteed 250 Candy = $2.50 = <strong>50%</strong></td></tr>
+    <tr><th scope="row">Iconic Legends, $24.99</th><td>Guaranteed 1,250 Candy = $12.50 = <strong>50%</strong></td></tr>
+    <tr><th scope="row">Modern Collector Gallery, $249.99</th><td>Guaranteed 12,500 Candy = $125 = <strong>50%</strong></td></tr>
+    <tr><th scope="row">Only Slabs, $499.99</th><td>Guaranteed 25,000 Candy = $250 = <strong>50%</strong></td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>No other platform we track publishes a floor at all. <a href="/platforms/crown-rips/">Crown Rips</a> discloses a per-pack minimum pull value, which is the closest thing, and its floor is far lower in proportional terms. A guaranteed 50% means the worst case is knowable before you pay, which is genuinely more than the category offers.</p>
+
+  <p>It is a floor in Candy, though, which brings us to the part that matters most.</p>
+
+  <h2>Candy is not money, and the terms say so</h2>
+  <div class="callout danger">
+    <h3>&sect;8.1 of the Rare Candy terms</h3>
+    <p>Candies &ldquo;have no cash or monetary value and are not redeemable, refundable, or exchangeable for&rdquo; US dollars, cryptocurrency, outside goods, or any monetary payment. Rare Candy will not be &ldquo;required to redeem Candies for cash or any monetary equivalent.&rdquo;</p>
+  </div>
+
+  <p>So the exchange, described in the FAQ as a trade-in &ldquo;worth up to 90% of the card's market value,&rdquo; pays in a currency that only buys more packs. This puts Rare Candy in the same group as <a href="/platforms/packz/">Packz</a>, <a href="/platforms/fanatics-instant-rips/">Fanatics</a>, <a href="/platforms/fast-rips/">Fast Rips</a> and <a href="/platforms/mintpull/">MintPull</a> &mdash; five of seventeen platforms where buyback proceeds cannot become money.</p>
+
+  <p>Note the phrasing too: section 3 defines the Exchange Price as &ldquo;calculated <em>up to</em> 90% of the Item's Fair Market Value.&rdquo; That is the same open-ended wording we flagged on <a href="/platforms/letsgo/">LETSGO</a>, and it means 90% is a ceiling rather than a rate.</p>
+
+  <p>What you <em>can</em> take out is the card. Shipping runs $9.99 for 1&ndash;10 cards, $17.99 for 11&ndash;25 and $32.99 for 26&ndash;50, with most orders shipping within 10 business days. On a $4.99 pack, taking delivery costs twice the pack.</p>
+
+  <h2>Three things it does better than almost anyone</h2>
+  <ul>
+    <li><strong>The clock ends in your favour.</strong> You have 48 hours to exchange; do nothing and the card is kept in your collection. Only <a href="/platforms/poke-collect/">Poke-Collect</a> also defaults to you keeping the card. Pickem, Packed and Chalkboard all sell it for you.</li>
+    <li><strong>You keep legal title.</strong> Section 9.2 says title to the card remains with you, with Rare Candy holding it as bailee in its Dallas vault, and storage is currently free. No other platform we have read states this. A card you own outright is a different asset from a balance on a platform's books.</li>
+    <li><strong>The terms admit their own limits.</strong> Section 6.2 calls Rare Candy's valuations &ldquo;inherently subjective&rdquo; and says they are not appraisals or guarantees. Section 4.2 declines to warrant that the published card list is accurate. We would rather a platform publish numbers and be candid about their status than publish nothing.</li>
+  </ul>
+
+  <h2>And one defect worth fixing</h2>
+  <p>The arbitration clause in section 18.1 requires a user to send a Notice of Dispute before arbitrating. The address it must be sent to is an unfilled template placeholder: <strong>&ldquo;[insert physical or electronic mailing address]&rdquo;</strong>. A second bracketed placeholder appears in the same section.</p>
+
+  <p>That is almost certainly an oversight rather than anything deliberate, and the practical effect is small because a user can contact support. But it is the gate to the only dispute process the contract provides, and it currently points nowhere. It belongs on this page for the same reason the rest does: it is what the document actually says.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Rare Candy Auctions, Inc., a Delaware corporation (&sect;1); vault in Dallas, Texas (&sect;9.1)</td></tr>
+    <tr><th scope="row">Governing law</th><td>Texas (&sect;17); AAA consumer arbitration in Dallas County, 60 days' informal negotiation first, class-action waiver (&sect;18)</td></tr>
+    <tr><th scope="row">Categories</th><td>Pok&eacute;mon, Magic: The Gathering, Lorcana, One Piece, Gundam</td></tr>
+    <tr><th scope="row">Packs</th><td>{n} collected, {minp}&ndash;{maxp}; priced in dollars or Candy at 100 Candy = $1</td></tr>
+    <tr><th scope="row">Odds</th><td>Five value bands per pack with percentages, on the open web; a &ldquo;Pack Print Run&rdquo; fixes contents at print with a unique ID (&sect;4.2)</td></tr>
+    <tr><th scope="row">Guaranteed floor</th><td><strong class="pos">50% of pack price in Candy</strong>, on every pack we checked</td></tr>
+    <tr><th scope="row">Exchange</th><td>&ldquo;Calculated up to 90%&rdquo; of FMV (&sect;3), paid in Candy; no additional exchange fees</td></tr>
+    <tr><th scope="row">Candy</th><td><strong class="neg">No cash value; not redeemable for money</strong> (&sect;8.1). Buys more packs only</td></tr>
+    <tr><th scope="row">Decision window</th><td>48 hours; do nothing and the card is kept in your collection</td></tr>
+    <tr><th scope="row">Vault</th><td>Free at present; title stays with you, Rare Candy as bailee (&sect;9.2); report discrepancies within 30 days (&sect;9.3)</td></tr>
+    <tr><th scope="row">Shipping</th><td>$9.99 for 1&ndash;10 cards, $17.99 for 11&ndash;25, $32.99 for 26&ndash;50; most orders within 10 business days; US only</td></tr>
+    <tr><th scope="row">Age</th><td>18+ (&sect;2)</td></tr>
+    <tr><th scope="row">States</th><td><strong>Excludes Washington</strong>, plus any others Rare Candy designates (&sect;2.1)</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>For once, the missing piece is not disclosure. Rare Candy publishes enough to calculate with, and we have. What we cannot do is pin the expected value inside the {lf}&ndash;{mid} range the bands allow, because the distribution inside the Legendary band is not published; and we have not tested whether its stated card values match real sold prices, which is the measurement that would make any of these figures mean something.</p>
+    <p>If you have opened Instapacks and can share what you pulled against what the pack cost, that is the data that would close the gap. <a href="/methodology/">Our methodology</a> explains why we publish a range rather than a single number.</p>
+  </div>
+
+  {band_dear}
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/calculator/">Run these bands through the pack EV calculator yourself</a></li>
+    <li><a href="/platforms/courtyard/">Courtyard, the only platform that posts an exact expected value</a></li>
+    <li><a href="/platforms/packz/">Packz, the other platform publishing full value-band odds</a></li>
+    <li><a href="/compare/?p=rare-candy,courtyard,packz">Compare Rare Candy, Courtyard and Packz side by side</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html, packs=pack_rows,
+           legs="".join(leg_rows), n=s["n"],
+           mid=pct(s["mid_avg"] * 100, 0), lf=pct(lf_avg * 100, 0),
+           legshare=pct(leg_share * 100, 0),
+           legmin=pct(s["legendary_min"], 1), legmax=pct(s["legendary_max"], 1),
+           minp=money(s["min_price"]), maxp=money(s["max_price"]),
+           band_cheap=band_table(rows[0]), band_dear=band_table(rows[-1]),
+           **{"flags_rare_candy": flag_row("rare-candy")})
+
+    ld = [faq_ld, jsonld({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Rare Candy Instapacks published pull rates",
+        "description": "Published value-band pull rates, guaranteed floors and derived expected values for %d Rare Candy Instapacks, collected %s." % (s["n"], UPDATED),
+        "url": BASE_URL + "/platforms/rare-candy/",
+        "creator": {"@type": "Organization", "name": SITE_NAME},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+    })]
+
+    return pages_written("/platforms/rare-candy/", page(
+        "/platforms/rare-candy/",
+        "Rare Candy Instapacks review — full odds, 50% floor, no cash value",
+        "Rare Candy publishes value-band pull rates and a guaranteed 50% floor on every Instapack. Its terms say the Candy it pays out in has no cash value. Full odds for all 8 packs.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Rare Candy")],
+        updated=UPDATED, structured=ld))
+
+
+def build_compare_tool():
+    DEFAULT = ["courtyard", "chalkboard", "poke-collect"]
+
+    def cell(v):
+        """A field is either (text, class) or a plain string."""
+        if isinstance(v, tuple):
+            text, kind = v
+            cls = {"ok": "pos", "neg": "neg"}.get(kind, "")
+            return '<strong class="%s">%s</strong>' % (cls, text) if cls else text
+        return v
+
+    # Column headers: one per platform, each carrying its slug for the picker.
+    heads = "".join(
+        '<th scope="col" class="cmp-col" data-p="%s"><a href="%s">%s</a></th>'
+        % (p["slug"], p["path"], p["name"]) for p in PLATFORMS)
+
+    # One row per comparable field, every platform rendered into the HTML.
+    body_rows = []
+    for key, label in COMPARE_ROWS:
+        cells = "".join(
+            '<td class="cmp-col" data-p="%s">%s</td>' % (p["slug"], cell(p[key]))
+            for p in PLATFORMS)
+        body_rows.append(
+            '<tr><th scope="row">%s</th>%s</tr>' % (E(label), cells))
+
+    # Flags and a deep link, as the last two rows.
+    flagcells = "".join(
+        '<td class="cmp-col" data-p="%s">%s</td>' % (p["slug"], flag_row(p["slug"]))
+        for p in PLATFORMS)
+    body_rows.append('<tr><th scope="row">Trust flags</th>%s</tr>' % flagcells)
+    linkcells = "".join(
+        '<td class="cmp-col" data-p="%s"><a href="%s">Full breakdown &rarr;</a></td>'
+        % (p["slug"], p["path"]) for p in PLATFORMS)
+    body_rows.append('<tr><th scope="row">Read more</th>%s</tr>' % linkcells)
+
+    chips = "".join(
+        '<label class="chip-opt"><input type="checkbox" value="%s"%s> %s</label>'
+        % (p["slug"], " checked" if p["slug"] in DEFAULT else "", E(p["name"]))
+        for p in PLATFORMS)
+
+    summaries = "".join(
+        '<li data-p="%s"><a href="%s"><strong>%s</strong></a> &mdash; %s</li>'
+        % (p["slug"], p["path"], E(p["name"]), p["blurb"]) for p in PLATFORMS)
+
+    faq_html, faq_ld = faq_block([
+        ("How do I compare card ripping sites?",
+         "<p>Compare four things, in this order. First, whether the platform publishes odds at all &mdash; only Clutch Packs, SwishX, Courtyard, Packz, Poke-Collect and Rare Candy publish anything on the open web, and six publish nothing anywhere public. Second, whether the buyback money can leave the platform: eight of the seventeen pay into something withdrawable, five pay credit that cannot, and the rest do not say. Third, who sets the card's value, because a 100% buyback on a number the platform alone decides is worth less than 90% on a checkable one. Fourth, how long you can hold a card before the platform acts &mdash; windows run from three hours to indefinite.</p>"),
+        ("Which card ripping site is best?",
+         "<p>We do not publish a single answer, because the right platform depends on what you are doing. If you want to calculate before you buy, Courtyard posts an exact expected value on every pack. If you intend to sell every card straight back, Packed and Chalkboard Pulls pay 100% into withdrawable balances. If you intend to keep what you pull, Poke-Collect ships the card to you by default and Arena Club, Fanatics and Tilt Rips vault indefinitely. We leave platforms unrated where the data to rate them is not published.</p>"),
+        ("Why are so many cells on this table blank or unknown?",
+         "<p>Because the platforms do not publish the figures. Six of the seventeen publish no pack prices on the open web at all, and only six publish odds there, so no expected value can be calculated for most of them. We leave those cells as &ldquo;not calculable&rdquo; rather than estimating. <a href=\"/methodology/\">Our methodology</a> explains why an empty cell is more useful than a guessed one.</p>"),
+        ("Can I share a comparison?",
+         "<p>Yes. The web address updates as you change the selection, so copying it from the address bar shares exactly the platforms you picked. The full table for all seventeen platforms is in the page itself, so it also works with JavaScript turned off.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Compare card ripping sites</h1>
+    <p class="lede">Pick any two to four platforms and put their odds disclosure, buyback terms, valuation source and decision windows side by side. Every figure comes from the platform's own published material.</p>
+  </div>
+
+  <div class="picker" id="picker">
+    <p class="picker-label"><strong>Choose platforms to compare</strong> <span class="muted small">(2&ndash;4)</span></p>
+    <div class="chip-opts">{chips}</div>
+    <p class="small muted" id="picker-msg"></p>
+  </div>
+
+  <div class="table-wrap">
+  <table class="cmp" id="cmp">
+  <caption>Card ripping platforms compared, from each platform's own published material, {collected}.</caption>
+  <thead><tr><th scope="col">&nbsp;</th>{heads}</tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <p class="small muted">With JavaScript off, this table shows all seventeen platforms at once &mdash; scroll it sideways. Nothing here is hidden from readers or crawlers.</p>
+
+  <h2>What these columns actually mean</h2>
+  <p>Four rows carry most of the decision, and they are not the ones the marketing emphasises.</p>
+
+  <ul>
+    <li><strong>Odds published.</strong> Four platforms publish something on the open web. The rest show odds only inside an app, or not at all. If you cannot see the odds before you pay, you cannot calculate anything.</li>
+    <li><strong>Can the money leave.</strong> An advertised buyback rate tells you nothing until you know this. Four platforms pay credit that can only buy more packs, which is not money at any rate.</li>
+    <li><strong>Who sets the card's value.</strong> On most platforms the company paying the buyback also decides what the card is worth. Fanatics is the only one that outsources the number to a third party. Chalkboard's terms call its own figure &ldquo;final and non-appealable.&rdquo;</li>
+    <li><strong>How long you can hold a card.</strong> Windows run from three hours to indefinite, and on one platform the clock ends by shipping the card to you rather than selling it. The platforms paying the highest buyback rates have the shortest windows, which is not a coincidence.</li>
+  </ul>
+
+  <h2>Every platform in one line</h2>
+  <ul class="plain-list" id="summaries">{summaries}</ul>
+
+  <h2>Want to run the numbers yourself?</h2>
+  <p>The <a href="/calculator/">pack EV calculator</a> takes whatever odds a platform publishes and returns the average card value, the expected loss per pack and the chance of beating the pack price. For a worked head-to-head on the two platforms that publish enough to compare directly, see <a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a>.</p>
+
+  <h2>Frequently asked</h2>
+  {faq}
+</div>
+
+<script>
+(function () {{
+  var MIN = 2, MAX = 4;
+  var picker = document.getElementById('picker');
+  if (!picker) return;
+  var table = document.getElementById('cmp');
+  if (table) table.classList.add('js-on');
+  var boxes = [].slice.call(picker.querySelectorAll('input[type=checkbox]'));
+  var msg = document.getElementById('picker-msg');
+  var all = boxes.map(function (b) {{ return b.value; }});
+
+  function apply(sel) {{
+    var set = {{}};
+    sel.forEach(function (s) {{ set[s] = 1; }});
+    [].forEach.call(document.querySelectorAll('[data-p]'), function (el) {{
+      el.hidden = !set[el.getAttribute('data-p')];
+    }});
+    boxes.forEach(function (b) {{ b.checked = !!set[b.value]; }});
+    msg.textContent = sel.length + ' selected. Tick up to ' + MAX + '.';
+    boxes.forEach(function (b) {{
+      b.disabled = !b.checked && sel.length >= MAX;
+    }});
+    try {{
+      history.replaceState(null, '', '?p=' + sel.join(','));
+    }} catch (e) {{}}
+  }}
+
+  function chosen() {{
+    return boxes.filter(function (b) {{ return b.checked; }})
+                .map(function (b) {{ return b.value; }});
+  }}
+
+  var params = new URLSearchParams(location.search);
+  var fromUrl = (params.get('p') || '').split(',').filter(function (s) {{
+    return all.indexOf(s) !== -1;
+  }});
+  var start = fromUrl.length >= MIN ? fromUrl.slice(0, MAX) : chosen();
+
+  boxes.forEach(function (b) {{
+    b.addEventListener('change', function () {{
+      var sel = chosen();
+      if (sel.length < MIN) {{
+        b.checked = true;
+        msg.textContent = 'Keep at least ' + MIN + ' selected.';
+        return;
+      }}
+      apply(sel);
+    }});
+  }});
+
+  apply(start);
+}})();
+</script>
+""".format(chips=chips, heads=heads, rows="".join(body_rows),
+           summaries=summaries, faq=faq_html, collected=UPDATED)
+
+    ld = [faq_ld, jsonld({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Card ripping platform comparison",
+        "description": "Odds disclosure, buyback rates, withdrawal routes, valuation sources, decision windows, operators and jurisdictions for 14 online card ripping platforms, compiled from each platform's own published material.",
+        "url": BASE_URL + "/compare/",
+        "creator": {"@type": "Organization", "name": SITE_NAME},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "variableMeasured": [label for _k, label in COMPARE_ROWS],
+    })]
+
+    return pages_written("/compare/", page(
+        "/compare/",
+        "Compare card ripping sites — odds, buyback and withdrawal terms",
+        "Pick any two to four card ripping platforms and compare their odds disclosure, buyback rates, withdrawal routes, valuation sources and decision windows side by side.",
+        body, crumbs=[("/", "Home"), (None, "Compare")],
+        updated=UPDATED, structured=ld))
+
+
 def build_buyback():
     def ratecell(v):
         return pct(v * 100, 1).replace(".0%", "%") if v is not None else "Not disclosed"
@@ -2504,6 +3881,8 @@ def build_buyback():
             cashcell = '<strong class="pos">Yes</strong>'
         elif cash is False:
             cashcell = '<strong class="neg">No</strong>'
+        elif cash == "n/a":
+            cashcell = "N/A"
         else:
             cashcell = "Unconfirmed"
         gap = ""
@@ -2561,25 +3940,25 @@ def build_buyback():
         ("What do you actually get back if you sell a card straight back?",
          "<p>On a $100 Courtyard pack, about $80.75. The pack's posted expected value is 95% of the price, so the average card is worth about $95, and applying the measured ~85% instant offer to that leaves roughly $80.75. On Packz the same round trip returns about $90, but in credit that can only buy more packs rather than money you can take out. Those are averages across many packs, not what any single pack returns.</p>"),
         ("Can you withdraw money from card ripping sites?",
-         "<p>It depends entirely on the platform, and the advertised buyback rate tells you nothing about it. Arena Club and Tilt Rips pay into withdrawable wallets. Packz and Fanatics pay credit locked to the platform. Courtyard settles in USDC, though we have not verified the withdrawal path ourselves. On the platforms that pay credit, the only route to actual money is to decline the offer, have the physical card shipped, and sell it yourself &mdash; which costs shipping and time, and on a low-value pull usually costs more than the card is worth.</p>"),
+         "<p>It depends entirely on the platform, and the advertised buyback rate tells you nothing about it. Arena Club, Tilt Rips, Pickem, LETSGO and SwishX pay into withdrawable wallets, as do Packed and Chalkboard Pulls at 100%. Packz and Fanatics pay credit locked to the platform. Courtyard settles in USDC, though we have not verified the withdrawal path ourselves. On the platforms that pay credit, the only route to actual money is to decline the offer, have the physical card shipped, and sell it yourself &mdash; which costs shipping and time, and on a low-value pull usually costs more than the card is worth.</p>"),
     ])
 
     body = """
 <div class="wrap narrow">
   <div class="page-head">
     <h1>Every site advertises a 90% buyback. Here is what you actually get back.</h1>
-    <p class="lede">Five of the eleven platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
+    <p class="lede">Six of the seventeen platforms we track advertise a 90% buyback. On close reading the phrase means six different things, and on two of them the money cannot leave the platform at all.</p>
   </div>
 
   <div class="finding">
-    <p class="big">Five platforms advertise 90%. One of them pays 84.6% after fees. Three pay in credit that cannot be withdrawn. Only two &mdash; Arena Club and Tilt Rips &mdash; pay 90% into a wallet you can actually take money out of. The headline rate is the least informative number on the page.</p>
+    <p class="big">Six platforms advertise 90%. One of them pays 84.6% after fees. Two pay in credit that cannot be withdrawn, and one settles in USDC by a route we have not verified. Three &mdash; Arena Club, Tilt Rips and Pickem &mdash; pay 90% into a wallet you can actually take money out of, and two platforms beat all six by paying 100% withdrawable. The headline rate is the least informative number on the page.</p>
     <p class="small muted">Compiled from each platform's own published terms and worked examples, {collected}. Rates change; check before you buy.</p>
   </div>
 
   <h2>The headline against the reality</h2>
   <div class="table-wrap">
   <table>
-  <caption>Advertised and effective buyback rates across the eleven platforms we track, {collected}.</caption>
+  <caption>Advertised and effective buyback rates across the seventeen platforms we track, {collected}.</caption>
   <thead><tr>
     <th scope="col">Platform</th><th scope="col" class="num">Advertised</th>
     <th scope="col" class="num">Effective</th><th scope="col" class="num">Withdrawable</th>
@@ -2600,7 +3979,7 @@ def build_buyback():
   </table>
   </div>
 
-  <p>The spread between the best and worst of the five that say 90% is $5.40 on every $100 of card value. That is the small part. The large part is that on Packz and Fanatics, the $90 and $84.60 are not money &mdash; they are a balance that can only be spent back inside the platform.</p>
+  <p>The spread between the best and worst of the six that say 90% is $5.40 on every $100 of card value. That is the small part. The large part is that on Packz and Fanatics, the $90 and $84.60 are not money &mdash; they are a balance that can only be spent back inside the platform.</p>
 
   <h2>Credit is not cash</h2>
   <p>This is the single biggest thing the headline rates conceal, and it is worth being precise about.</p>
@@ -2661,7 +4040,7 @@ def build_buyback():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">How the Fanatics 90% becomes 84.6%</a></li>
     <li><a href="/platforms/packz/">Why the Packz buyback pays credit, not cash</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows="".join(rows), conv="".join(conv),
@@ -2792,7 +4171,7 @@ def build_legal():
   <h2>Next</h2>
   <ul>
     <li><a href="/is-card-ripping-gambling/">Is card ripping gambling? The legal arguments and the live cases</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=UPDATED, rows="".join(rows), faq=faq_html)
@@ -2879,7 +4258,7 @@ def build_alternatives(slug):
              " ".join("<strong>%s</strong> if %s" % (E(n), why[0].lower() + why[1:])
                       for _s, n, why in a["picks"][:2]))),
         ("Are there card ripping sites with better buyback terms than %s?" % a["name"],
-         "<p>Our <a href=\"/guides/buyback-rates/\">buyback comparison</a> ranks all eleven platforms by what the headline rate actually converts to. The short version: Arena Club and Tilt Rips pay 90% into wallets you can withdraw from, Packed pays 100% withdrawable but gives you one day to decide, and Packz and Fanatics pay credit that cannot be withdrawn at all.</p>"),
+         "<p>Our <a href=\"/guides/buyback-rates/\">buyback comparison</a> ranks all seventeen platforms by what the headline rate actually converts to. The short version: Arena Club and Tilt Rips pay 90% into wallets you can withdraw from, Packed pays 100% withdrawable but gives you one day to decide, and Packz and Fanatics pay credit that cannot be withdrawn at all.</p>"),
     ])
 
     body = """
@@ -2903,7 +4282,7 @@ def build_alternatives(slug):
     <li><strong>If you want to keep what you pull:</strong> Courtyard, Arena Club, Fanatics and Tilt Rips vault indefinitely. Pickem gives you three hours, Packed one day, Crown Rips and MintPull seven.</li>
   </ul>
 
-  <p>The <a href="/guides/buyback-rates/">full buyback comparison</a> and the <a href="/platforms/">platform directory</a> cover all eleven.</p>
+  <p>The <a href="/guides/buyback-rates/">full buyback comparison</a> and the <a href="/platforms/">platform directory</a> cover all seventeen.</p>
 
   <h2>Frequently asked</h2>
   {faq}
@@ -2930,6 +4309,8 @@ def build_withdrawals():
             verdict, cls = "Yes", "pos"
         elif cash is False:
             verdict, cls = "No", "neg"
+        elif cash == "n/a":
+            verdict, cls = "No balance", ""
         else:
             verdict, cls = "Unconfirmed", ""
         rows.append('<tr><td class="name">%s</td>'
@@ -2938,7 +4319,7 @@ def build_withdrawals():
 
     faq_html, faq_ld = faq_block([
         ("Which card ripping sites let you withdraw real money?",
-         "<p>Four of the eleven we track pay into something you can withdraw from. Arena Club pays 90% to a bank account or debit card through Stripe. Tilt Rips pays 90% in US dollars or several cryptocurrencies. Packed pays 100% to a debit card, bank, PayPal or Venmo. Pickem pays 90% to a bank card, capped at $2,500 per withdrawal. Packz, Fanatics, Fast Rips and MintPull all pay credit that cannot be withdrawn, and Courtyard settles in USDC with a withdrawal path we have not verified.</p>"),
+         "<p>Eight of the seventeen we track pay into something you can withdraw from. Arena Club pays 90% to a bank account or debit card through Stripe. Tilt Rips pays 90% in US dollars or several cryptocurrencies. Packed pays 100% to a debit card, bank, PayPal or Venmo. Chalkboard Pulls pays 100% as Buyback Credit, withdrawable by ACH through Aeropay. Pickem pays 90% to a bank card, capped at $2,500 per withdrawal. LETSGO pays to PayPal, Venmo, debit card or bank transfer. SwishX pays from its Wallet through Stripe. Packz, Fanatics, Fast Rips and MintPull all pay credit that cannot be withdrawn, and Courtyard settles in USDC with a withdrawal path we have not verified.</p>"),
         ("Which card ripping site pays to PayPal?",
          "<p>Packed is the only platform we track that lists PayPal and Venmo as withdrawal options, alongside debit card and bank transfer, with a minimum around $5 to $10. Tilt Rips pays in US dollars or cryptocurrency. Arena Club and Pickem pay to a bank account or card. No other platform we track publishes PayPal as an option.</p>"),
         ("Are there withdrawal limits on card ripping sites?",
@@ -2951,18 +4332,18 @@ def build_withdrawals():
 <div class="wrap">
   <div class="page-head">
     <h1>Which card ripping sites actually pay out money</h1>
-    <p class="lede">Four of the eleven platforms we track let you withdraw. The rest pay credit you can only spend on more packs, or do not say. Here is who pays what, by which method, and with which limits.</p>
+    <p class="lede">Seven of the seventeen platforms we track let you withdraw. The rest pay credit you can only spend on more packs, or do not say. Here is who pays what, by which method, and with which limits.</p>
   </div>
 
   <div class="finding">
-    <p class="big">Four platforms of eleven pay into an account you can withdraw from: Arena Club, Tilt Rips, Packed and Pickem. Four pay credit that cannot be withdrawn at all. Two are unconfirmed, and one &mdash; MintPull &mdash; pays withdrawable proceeds but caps them at $250 per seven days.</p>
+    <p class="big">Seven platforms of seventeen pay into an account you can withdraw from: Arena Club, Tilt Rips, Packed, Pickem, Chalkboard Pulls, LETSGO and SwishX. Four pay credit that cannot be withdrawn at all. Two are unconfirmed, and one &mdash; MintPull &mdash; pays withdrawable proceeds but caps them at $250 per seven days.</p>
     <p class="small muted">From published terms and FAQs, {collected}.</p>
   </div>
 
   <h2>Can you get money out?</h2>
   <div class="table-wrap">
   <table>
-  <caption>Whether buyback proceeds reach money you control, across all eleven platforms.</caption>
+  <caption>Whether buyback proceeds reach money you control, across all seventeen platforms.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Withdrawable</th><th scope="col">How it is paid</th></tr></thead>
   <tbody>{rows}</tbody>
   </table>
@@ -3009,7 +4390,7 @@ def build_withdrawals():
   <h2>Next</h2>
   <ul>
     <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays</a></li>
-    <li><a href="/platforms/">All eleven platforms compared</a></li>
+    <li><a href="/platforms/">All seventeen platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=UPDATED, rows="".join(rows), faq=faq_html)
@@ -3017,7 +4398,7 @@ def build_withdrawals():
     return pages_written("/guides/withdrawals/", page(
         "/guides/withdrawals/",
         "Card ripping withdrawals — which sites actually pay out",
-        "Four of eleven card ripping platforms let you withdraw real money. Which pay to bank, PayPal or crypto, which pay credit only, and what the limits are.",
+        "Eight of seventeen card ripping platforms let you withdraw real money. Which pay to bank, PayPal or crypto, which pay credit only, and what the limits are.",
         body, crumbs=[("/", "Home"), (None, "Withdrawals")],
         updated=UPDATED, structured=faq_ld))
 
@@ -3065,7 +4446,7 @@ def build_changelog():
     return pages_written("/changelog/", page(
         "/changelog/",
         "Changelog — what we have found, and when",
-        "A dated record of every platform collected, figure published and change caught across eleven card ripping platforms.",
+        "A dated record of every platform collected, figure published and change caught across seventeen card ripping platforms.",
         body, crumbs=[("/", "Home"), (None, "Changelog")], updated=UPDATED))
 
 
@@ -3129,7 +4510,7 @@ def build_gambling():
         ("Are there lawsuits against pack ripping sites?",
          "<p>Yes. A California False Claims Act suit filed in 2025 targets Whatnot and Fanatics Live over what it characterises as unlicensed box-break lotteries. PackDraw faces suits in Minnesota and New York alleging it drew a minor into offshore crypto gambling. Those allegations are untested in court and none of the cases has produced a final ruling, so they indicate regulatory attention rather than a settled legal conclusion.</p>"),
         ("Is ripping a good way to make money?",
-         "<p>No. Every pack we have measured returns less than it costs on average, which is by design: operators set the return below the price the same way a casino sets a house edge. Published odds across the platforms we have checked imply returns of roughly 92%% to 100%% of the pack price, and after a buyback of 90%% or less the realistic cash return is in the low-to-mid 80s. Treat money spent ripping as the cost of entertainment rather than an investment.</p>"),
+         "<p>No. Every pack we have measured returns less than it costs on average, which is by design: operators set the return below the price the same way a casino sets a house edge. Published odds across the platforms we have checked imply returns of roughly 92% to 100% of the pack price, and after a buyback of 90% or less the realistic cash return is in the low-to-mid 80s. Treat money spent ripping as the cost of entertainment rather than an investment.</p>"),
     ])
 
     body = """
@@ -3205,12 +4586,18 @@ def build_data():
       <td>{collected}</td>
       <td><a href="/data/packz_odds_2026-09-21.csv">CSV</a></td>
     </tr>
+    <tr>
+      <td class="name">Rare Candy Instapack odds</td>
+      <td>8 packs: price, five value bands by total pack value, odds per band, and the guaranteed Candy floor</td>
+      <td>{collected}</td>
+      <td><a href="/data/rarecandy_odds_2026-10-22.csv">CSV</a></td>
+    </tr>
   </tbody>
   </table>
   </div>
 
   <h3>Format</h3>
-  <p>Both files use the same columns: <code>platform</code>, <code>category</code>, <code>pack_name</code>, <code>pack_price</code>, <code>tier_min</code>, <code>tier_max</code>, <code>odds_pct</code>, one row per value tier. The Courtyard file additionally carries a row per pack in the form <code>EV,[pack_name],[value]</code> holding the expected value Courtyard publishes for that pack.</p>
+  <p>All three files use the same columns: <code>platform</code>, <code>category</code>, <code>pack_name</code>, <code>pack_price</code>, <code>tier_min</code>, <code>tier_max</code>, <code>odds_pct</code>, one row per value tier. The Courtyard file additionally carries a row per pack in the form <code>EV,[pack_name],[value]</code> holding the expected value Courtyard publishes for that pack. The Rare Candy file carries two extra columns, <code>band</code> and <code>guaranteed_candy</code>, because its bands are named and its tiers describe total pack value rather than a single card; 100 Candy equals $1.</p>
 
   <h3>Licence and citation</h3>
   <p>Free to use with attribution, under a <a href="https://creativecommons.org/licenses/by/4.0/" rel="nofollow">CC BY 4.0</a> licence. Please cite as: {site}, &ldquo;{cy} pack odds,&rdquo; collected {collected}, {base}/data/.</p>
@@ -3404,6 +4791,13 @@ def main():
         build_pickem(),
         build_packed(),
         build_fast_rips(),
+        build_chalkboard(),
+        build_poke_collect(),
+        build_letsgo(),
+        build_rarecandy(),
+        build_swishx(),
+        build_triumph(),
+        build_compare_tool(),
         build_buyback(),
         build_calculator(),
         build_methodology(),
@@ -3425,6 +4819,17 @@ def main():
     write_indexnow_script(paths)
 
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
+    with open(os.path.join(OUT, "data", "rarecandy_odds_2026-10-22.csv"),
+              "w", encoding="utf-8") as fh:
+        fh.write("platform,category,pack_name,pack_price,band,tier_min,"
+                 "tier_max,odds_pct,guaranteed_candy\n")
+        import html as _h
+        for nm, price, guar, bands in RARECANDY_PACKS:
+            clean = _h.unescape(nm).replace('"', "'")
+            for lab, lo, hi, p in bands:
+                fh.write('Rare Candy,Instapacks,"%s",%.2f,%s,%s,%s,%s,%d\n'
+                         % (clean, price, lab, lo, hi, p, guar))
+
     for f in ("courtyard_odds_2026-09-21.csv", "packz_odds_2026-09-21.csv"):
         shutil.copy(f, os.path.join(OUT, "data", f))
 

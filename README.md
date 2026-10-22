@@ -4,7 +4,7 @@ A static site. No build step, no dependencies, no framework. Every table is
 rendered into the HTML at build time, so crawlers that don't run JavaScript —
 including most AI crawlers — still see all the numbers.
 
-15 pages covering 7 platforms.
+34 pages covering 17 platforms.
 
 ## Deploy
 
@@ -51,8 +51,27 @@ platforms/arena-club/                   Per-card odds, Collect Safe
 platforms/fanatics-instant-rips/        The 90% offer is really 84.6%
 platforms/crown-rips/                   Sweepstakes rips, lowest floor
 platforms/tilt-rips/                    60 packs, no published odds
+platforms/pickem/                       Three-hour decision window
+platforms/packed/                       100% withdrawable, one-day clock
+platforms/fast-rips/                    Marketing vs its own terms
+platforms/mintpull/                     $250/week withdrawal cap, Hong Kong law
+platforms/chalkboard/                   100% withdrawable on a non-appealable FMV
+platforms/poke-collect/                 Ships you the card by default, no buyback
+platforms/letsgo/                       "90%" vs "up to 90%", Israeli operator
+platforms/rare-candy/                   Full band odds, 50% floor, Candy has no cash value
+platforms/swishx/                       Posted EV that reconciles; margin is in the buyback
+platforms/triumph/                      1M+ installs; terms match MintPull's verbatim
+compare/                                Dynamic comparison tool, pick 2-4
 compare/courtyard-vs-packz/             Head-to-head
+alternatives/courtyard/                 Alternatives pages (3)
+alternatives/fanatics-instant-rips/
+alternatives/packz/
 guides/chase-card-odds/                 Cooper Flagg: 1 in 5,000
+guides/bonus-offers/                    Offers ranked by what they're worth
+guides/buyback-rates/                   What a 90% buyback actually pays
+guides/withdrawals/                     Who pays money and who pays credit
+legal/                                  All 50 states, sourced restrictions only
+changelog/                              Dated record, corrections, open questions
 calculator/                             Pack EV calculator (only page using JS)
 methodology/                            Scoring weights, sources, affiliate policy
 is-card-ripping-gambling/               Legal position and the maths

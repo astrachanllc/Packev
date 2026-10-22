@@ -27,7 +27,7 @@ def analytics_tag():
 
 NAV = [
     ("/platforms/", "Platforms"),
-    ("/compare/courtyard-vs-packz/", "Courtyard vs Packz"),
+    ("/compare/", "Compare"),
     ("/calculator/", "Pack EV calculator"),
     ("/guides/buyback-rates/", "Buyback rates"),
     ("/legal/", "By state"),
@@ -37,6 +37,7 @@ NAV = [
 FOOTER_NAV = [
     ("/", "Home"),
     ("/platforms/", "Platforms"),
+    ("/compare/", "Compare platforms"),
     ("/calculator/", "Pack EV calculator"),
     ("/guides/chase-card-odds/", "Chase card odds"),
     ("/guides/bonus-offers/", "Bonus offers"),
