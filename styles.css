@@ -160,6 +160,18 @@ select:focus,input:focus{border-color:var(--cert);outline:none}
 .card p{margin:0;font-size:.92rem}
 .card .more{margin-top:auto;padding-top:6px;font-weight:600;font-size:.92rem}
 
+/* ---------- Affiliate CTA ---------- */
+.affiliate{
+  background:var(--cert-soft);
+  border:1px solid var(--cert);
+  border-radius:var(--radius);
+  padding:18px 22px;
+  margin:28px 0;
+}
+.affiliate p{margin:0 0 .7em;max-width:68ch}
+.affiliate p:last-child{margin-bottom:0;margin-top:14px}
+.affiliate .btn.primary{text-decoration:none}
+
 /* ---------- Callouts ---------- */
 .callout{background:var(--panel);border-left:4px solid var(--warn);padding:16px 20px;border-radius:0 8px 8px 0;margin:24px 0}
 .callout.danger{border-left-color:var(--loss)}

@@ -61,4 +61,4 @@ Allow: /
 User-agent: YouBot
 Allow: /
 
-Sitemap: https://packev.io/sitemap.xml
+Sitemap: https://packev.xyz/sitemap.xml

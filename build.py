@@ -12,6 +12,7 @@ from data import (load_courtyard, load_packz, ARENA_CLUB_PACKS,
 from layout import page, faq_block, jsonld, BASE_URL, SITE_NAME, E
 
 OUT = "site"
+INDEXNOW_KEY = "0e70e4ee2f9418e242c9b285c48147ff"
 CY = load_courtyard()
 PZ = load_packz()
 
@@ -32,6 +33,42 @@ PZ_UNCOMMON = next(p for p in PZ if p["price"] == 10)
 PZ_HIT = pz_std[0]["at_or_above"]
 
 CL = clutch_stats()
+
+# ---------------------------------------------------------------- affiliates
+# Outbound links we earn from. `offer` describes what the READER gets; `we_get`
+# describes what we get, and is shown to the reader too. Leave a platform out
+# entirely rather than linking without terms.
+AFFILIATE = {
+    "packz": {
+        "name": "Packz",
+        "url": "https://packz.io/?ref=BMMI93WM",
+        "kind": "referral link",
+        "offer": "a scratch card worth either $7 or $100 in bonus funds after "
+                 "your first pack purchase, which pays out automatically "
+                 "within 48 hours if you don't scratch it",
+        "we_get": "the same scratch card",
+    },
+}
+
+
+def affiliate_cta(key):
+    """Render a disclosed outbound link, or nothing if we have no deal."""
+    a = AFFILIATE.get(key)
+    if not a:
+        return ""
+    return (
+        '<div class="affiliate">'
+        '<p><strong>Signing up with our %s:</strong> %s gives you %s. '
+        'We get %s, which is why this is marked as a %s and not a '
+        'recommendation.</p>'
+        '<p class="small muted">Using it costs you nothing extra and changes '
+        'nothing on this page. Read the findings above before you decide &mdash; '
+        'we would rather you skip the link than buy a pack you regret.</p>'
+        '<p><a class="btn primary" href="%s" rel="sponsored nofollow noopener" '
+        'target="_blank">Visit %s</a></p>'
+        '</div>' % (E(a["kind"]), E(a["name"]), a["offer"], E(a["we_get"]),
+                    E(a["kind"]), E(a["url"]), E(a["name"]))
+    )
 
 
 def pages_written(path, content):
@@ -228,6 +265,8 @@ def build_home():
 
   <h2>Start here</h2>
   <ul>
+    <li><a href="/guides/chase-card-odds/">The real odds of pulling the Cooper Flagg card</a> &mdash; 1 in 5,000, and what that costs.</li>
+    <li><a href="/guides/bonus-offers/">Bonus offers ranked by what they're worth</a> &mdash; only one is plausibly positive-EV.</li>
     <li><a href="/platforms/clutch-packs/">What 158,556 real pulls show</a> &mdash; the only observed return data in the category.</li>
     <li><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a> &mdash; the two platforms that publish enough to compare directly.</li>
     <li><a href="/methodology/">How we rate platforms</a> &mdash; what goes into a score and what does not.</li>
@@ -546,6 +585,8 @@ def build_packz():
     <p>Packz publishes value ranges rather than exact card values, so an exact expected value cannot be calculated from its pages. The headline figures here assume cards sit at the middle of their range. Real card values tend to cluster toward the bottom of a range, because cheap cards are more numerous than expensive ones, so the true return is likely at or below our midpoint estimate. The table below shows the full possible span for each pack.</p>
   </div>
 
+  {cta}
+
   <h2>All {pzn} Packz packs</h2>
   {table}
 
@@ -578,7 +619,7 @@ def build_packz():
            com=pct(PZ_COMMON["ratio_mid"] * 100, 0),
            unc=pct(PZ_UNCOMMON["ratio_mid"] * 100, 0),
            pzhit=pct(PZ_HIT, 1), loss=pct(100 - PZ_HIT, 1),
-           table=packz_table(), faq=faq_html)
+           table=packz_table(), faq=faq_html, cta=affiliate_cta("packz"))
 
     ds = jsonld({
         "@context": "https://schema.org", "@type": "Dataset",
@@ -1533,6 +1574,326 @@ def build_calculator():
         structured=ld))
 
 
+def build_chase():
+    grail = 0.0002
+    lineup = 0.0196
+
+    def at_least_one(p, n):
+        return (1 - (1 - p) ** n) * 100
+
+    prob_rows = "".join(
+        '<tr><td class="num">%s</td><td class="num">%s</td>'
+        '<td class="num"><strong>%s</strong></td></tr>'
+        % ("{:,}".format(n), money(n * 100), pct(at_least_one(grail, n), 2))
+        for n in (1, 10, 50, 100, 500, 1000, 3465, 5000)
+    )
+
+    top_rows = "".join(
+        '<tr><td class="name">%s</td><td>%s</td><td class="num">%s</td>'
+        '<td class="num">%s</td><td class="num"><strong>%s</strong></td>'
+        '<td class="num">%s</td></tr>' % (p, k, money(pr), t, m, o)
+        for p, k, pr, t, m, o in [
+            ("Clutch Packs", "Multisport Ascent", 100, "$130,000", "1,300&times;", "Observed once in 21,127 pulls"),
+            ("Tilt Rips", "Pro Pack", 100, "$90,000", "900&times;", "Not published"),
+            ("Crown Rips", "Diamond", 2500, "$100,000", "40&times;", "Not published"),
+            ("Courtyard", "Pokémon Legend (Spicy)", 2499, "$79,900", "32&times;", "0.5% for the top band"),
+            ("Courtyard", "Sports Cosmic", 10000, "$160,000", "16&times;", "0.1% for the top band"),
+            ("Packz", "Pokémon Starter", 25, "$500", "20&times;", "0.1%"),
+            ("Arena Club", "Basketball Gold", 100, "Not published", "&mdash;", "0.02% per Grail card"),
+        ])
+
+    faq_html, faq_ld = faq_block([
+        ("What are the odds of pulling the Cooper Flagg card?",
+         "<p>On Arena Club's $100 Basketball Gold pack, the Cooper Flagg PSA 9 listed in the Grail tier carries a published hit rate of 0.02%, which is 1 in 5,000 packs. At $100 a pack that is $500,000 of packs for one expected hit, and you would need about 3,465 packs, or $346,539, for a coin-flip chance of seeing one. A Cooper Flagg PSA 10 also appears twice in the common Lineup tier at 1.96% each, so the chance of pulling some Cooper Flagg card is 3.94%, or about 1 in 25 packs.</p>"),
+        ("How much do you have to spend to hit a grail card?",
+         "<p>At a 0.02% hit rate on a $100 pack, the expected spend for one grail is $500,000, and there is no point at which it becomes due. Each pack is independent, so 4,999 misses do not improve the 5,000th. Over 100 packs, which is $10,000 spent, the chance of seeing at least one is 1.98%. Over 1,000 packs, or $100,000, it is 18.13%.</p>"),
+        ("Which platform has the biggest top prize?",
+         "<p>Relative to the pack price, Clutch Packs: a $130,000 Series Hit on a $100 pack is 1,300 times the price, and it is the only top prize in the category that has been observed to actually land, appearing once in 21,127 recorded pulls. Tilt Rips advertises a $90,000 card on a $100 pack, or 900 times, with no published odds. In absolute terms Courtyard's $10,000 Sports Cosmic Pack tops out at $160,000, but that is only 16 times the price.</p>"),
+        ("Do chase cards change a pack's expected value?",
+         "<p>Barely, on most platforms, and that is the point most buyers miss. On Courtyard's packs the top two tiers combined add only about 19 cents to the average value of a $5 pack. Packz's top tier, at 0.1%, contributes a comparable fraction. The money in these products sits in the common tiers, which is why a pack can advertise a six-figure ceiling and still return 95 cents on the dollar. The two exceptions we have found are Clutch Packs' Multisport Ascent and Moonshot packs, whose published averages are measurably inflated by a single $130,000 pull.</p>"),
+    ])
+
+    body = """
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1>What are the real odds of pulling the Cooper Flagg card?</h1>
+    <p class="lede">Every ripping platform leads with its grails. Arena Club puts a Cooper Flagg rookie at the top of a $100 basketball pack; Clutch Packs dangles a $130,000 Tom Brady. Here is what the published numbers actually say about your chances of seeing either.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">The Cooper Flagg PSA 9 in Arena Club's Grail tier is listed at 0.02%, or 1 in 5,000 packs. At $100 a pack that is $500,000 of packs for one expected hit, and $346,539 for a coin-flip chance. Meanwhile a Cooper Flagg PSA 10 sits twice in the same pack's common tier at 1.96% each, so "pulling a Cooper Flagg" is about 1 in 25 &mdash; roughly 197 times more likely than pulling the one on the poster.</p>
+    <p class="small muted">Calculated from Arena Club's own published per-card hit rates, collected {collected}.</p>
+  </div>
+
+  <h2>The grail maths</h2>
+  <p>Arena Club publishes a hit rate against every individual card, which makes this one of the few chase cards in the category whose odds can be checked at all. On the $100 Basketball Gold pack the three Grail cards are listed at 0.02% each: a Victor Wembanyama PSA 10, a Jalen Brunson BGS 9.5, and the Cooper Flagg PSA 9.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Chance of pulling the 0.02% Cooper Flagg Grail at least once, by number of $100 packs opened.</caption>
+  <thead><tr><th scope="col" class="num">Packs</th><th scope="col" class="num">Spent</th><th scope="col" class="num">Chance of at least one</th></tr></thead>
+  <tbody>{prob_rows}</tbody>
+  </table>
+  </div>
+
+  <p><strong>There is no point at which it becomes due.</strong> Each pack is independent of the last, so 4,999 misses do not improve the odds on the 5,000th. The 1-in-5,000 figure describes a long-run frequency, not a queue you are advancing through. If you open ten packs you have a 0.2% chance, and opening ten more leaves you with a 0.4% chance in total rather than a better one.</p>
+
+  <p><strong>The whole Grail tier is barely more likely.</strong> Three cards at 0.02% each is 0.06% combined, or 1 in 1,667 packs. The Chase tier, eight cards at 0.25%, comes to 2%, which is roughly one pack in fifty. Everything else &mdash; 98% of pulls &mdash; comes from the Lineup.</p>
+
+  <h2>The same player in two different tiers</h2>
+  <p>Here is the part worth understanding before you chase anything. On that Basketball Gold checklist, Cooper Flagg appears three times:</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <thead><tr><th scope="col">Listed as</th><th scope="col">Tier</th><th scope="col" class="num">Hit rate</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Cooper Flagg, PSA 9</th><td>Grail</td><td class="num">0.02%</td></tr>
+    <tr><th scope="row">Cooper Flagg, PSA 10</th><td>Lineup</td><td class="num">1.96%</td></tr>
+    <tr><th scope="row">Cooper Flagg, PSA 10</th><td>Lineup</td><td class="num">1.96%</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>A lower-graded copy sits in the rarest tier while two higher-graded copies sit in the commonest. That is not a contradiction &mdash; almost certainly these are entirely different cards, a scarce parallel or autograph in the Grail slot and base rookies in the Lineup. But you cannot tell that from the checklist, because <strong>the checklist lists only a player name and a grade</strong>. No set, no year, no card number.</p>
+
+  <p>So a buyer looking at that page sees Cooper Flagg three times and has no way to work out that one of those entries is worth perhaps a hundred times the other two. The same problem blocked us from pricing Arena Club's packs at all: player plus grade is not enough to identify a card, which is why we cannot publish an expected value for any Arena Club pack. For a chase card, it means the name on the marketing is not the thing you are likely to pull.</p>
+
+  <h2>Top prizes across the category</h2>
+  <p>Ceilings are the easiest thing in this business to advertise. Measured against the pack price rather than in raw dollars, they look like this:</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Advertised top prizes and their published odds, where any exist.</caption>
+  <thead><tr>
+    <th scope="col">Platform</th><th scope="col">Pack</th><th scope="col" class="num">Price</th>
+    <th scope="col" class="num">Top prize</th><th scope="col" class="num">Multiple</th>
+    <th scope="col">Odds</th>
+  </tr></thead>
+  <tbody>{top_rows}</tbody>
+  </table>
+  </div>
+
+  <p><strong>Only one of these has been observed to land.</strong> Clutch Packs records every opening on-chain, and the $130,000 Tom Brady Refractor shows up as the maximum recorded pull on its Multisport Ascent pack &mdash; once, across 21,127 pulls. That is the only top prize in the category with any evidence behind it, and at that observed rate it implies roughly $2.1 million of packs per hit. A $35,000 LeBron Exquisite sits in the same series.</p>
+
+  <p><strong>Four of the seven publish no odds on their top prize at all.</strong> Tilt Rips lists a $90,000 card on a $100 pack with no probability attached anywhere. Crown Rips gives a $100,000 maximum with no rates. A ceiling without a rate tells you what is theoretically in the building, not what you are buying.</p>
+
+  <h2>The chase barely moves the expected value</h2>
+  <p>This is the counterintuitive part, and it is the single most useful thing to know. A six-figure top prize is nearly irrelevant to what a pack returns on average.</p>
+
+  <p>On Courtyard's $5 Pok&eacute;mon pack, the top two tiers combined contribute about 19 cents to the pack's average value. Packz's 0.1% top tier contributes a similarly small slice. The money in these products sits in the common tiers, which is exactly how a pack can advertise a 1,300x ceiling and still return 95 cents on the dollar. If you are buying for value, the grail is a rounding error.</p>
+
+  <p>The two exceptions prove it. Clutch Packs' Multisport Ascent posts a 1.07 times average return, but that single $130,000 Brady adds $6.15 per pack across 21,127 recorded pulls, which is 6.2% of the pack price. Strip it out and Ascent returns about 1.00 times. Its Moonshot pack is in the same position. When a jackpot does move the average, it moves it because it actually landed, not because it was advertised.</p>
+
+  <h2>So what should you actually do</h2>
+  <p><strong>If you want the chase, buy it knowingly.</strong> High-variance packs exist and are honestly labelled on some platforms: Courtyard's Spicy packs drop their floor to around half the pack price in exchange for a much higher ceiling, at the same average return. That is a real, disclosed trade between floor and ceiling. Paying for variance is a legitimate choice; just know that is what you are buying.</p>
+
+  <p><strong>If you want value, ignore the grails entirely</strong> and look at the floor, the buyback and the share of pulls below 1x. On the only platform publishing observed results, 74% of recorded pulls came back worth less than the pack price. That number tells you far more about your next pack than any ceiling does.</p>
+
+  <p><strong>And check whether the card you are chasing is even identifiable.</strong> If a checklist gives you a player and a grade but no set, year or certificate number, you cannot look up what it is worth, and you cannot tell the grail apart from its common namesake in the same pack.</p>
+
+  <div class="callout danger">
+    <h3>A note on chasing</h3>
+    <p>A 1-in-5,000 card is not a goal, it is a lottery ticket attached to a product that loses money on average. Decide what you are willing to spend before you start, treat it as the cost of the entertainment, and do not buy another pack to recover the last one &mdash; the odds on the next pack are identical regardless of what just happened.</p>
+    <p>If it has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Go deeper</h2>
+  <ul>
+    <li><a href="/platforms/arena-club/">Arena Club's full odds structure</a></li>
+    <li><a href="/platforms/clutch-packs/">The 158,556 pulls behind the only observed return data</a></li>
+    <li><a href="/calculator/">Work out any pack's odds yourself</a></li>
+  </ul>
+</div>
+""".format(collected=COLLECTED, prob_rows=prob_rows, top_rows=top_rows,
+           faq=faq_html)
+
+    art = jsonld({
+        "@context": "https://schema.org", "@type": "Article",
+        "headline": "What are the real odds of pulling the Cooper Flagg card?",
+        "description": "Arena Club lists the Cooper Flagg Grail at 0.02%, or 1 in 5,000 packs. What that means in spend, and how every platform's advertised top prize compares.",
+        "datePublished": UPDATED, "dateModified": UPDATED,
+        "author": {"@type": "Organization", "name": SITE_NAME},
+        "publisher": {"@type": "Organization", "name": SITE_NAME},
+        "mainEntityOfPage": BASE_URL + "/guides/chase-card-odds/",
+    })
+
+    return pages_written("/guides/chase-card-odds/", page(
+        "/guides/chase-card-odds/",
+        "Cooper Flagg pack odds — the real chance of pulling a grail card",
+        "Arena Club lists its Cooper Flagg Grail at 0.02%, or 1 in 5,000 packs, which is $346,539 for a coin-flip chance. Every platform's top prize and published odds, compared.",
+        body, crumbs=[("/", "Home"), (None, "Chase card odds")],
+        updated=COLLECTED, structured=[faq_ld, art]))
+
+
+def build_bonuses():
+    s = clutch_stats()
+    disc = 0.20
+    edge = s["w_avg"] / (1 - disc)
+
+    offers = [
+        ("Clutch Packs", "20% off your first pack", "Discount",
+         "<strong>+26%</strong> expected", "Best offer in the category"),
+        ("Tilt Rips", "Buy any pack, get a $10 pack free", "Free pack",
+         "Not calculable", "No odds published, so the free pack's value is unknown"),
+        ("Packz", "100% buyback on first pack, capped at $100", "Better buyback",
+         "~$10 in credit", "Credit only; capped, so pack size matters"),
+        ("Packz", "Referral scratch card, $7 or $100 in bonus funds", "Bonus funds",
+         "$7 typical", "Bonus funds are site credit"),
+        ("Arena Club", "Collect Safe add-on, +10% for an 80% floor", "Paid insurance",
+         "Situational", "Not a bonus &mdash; you pay for it"),
+        ("Courtyard", "None for new users", "&mdash;",
+         "$0", "Referrer gets 1,000 points of undisclosed value"),
+        ("Crown Rips", "5 Sweeps Cash in the closed beta", "Beta credit",
+         "Not calculable", "Invite only"),
+        ("Fanatics", "Not confirmed", "&mdash;", "Unknown", "Terms not verified"),
+    ]
+    offer_rows = "".join(
+        '<tr><td class="name">%s</td><td>%s</td><td>%s</td>'
+        '<td class="num">%s</td><td>%s</td></tr>' % r for r in offers)
+
+    best = [p for p in CLUTCH_PACKS if p[3] >= 1000]
+    best.sort(key=lambda x: -x[4] / x[2])
+    pack_rows = "".join(
+        '<tr><td class="name">%s %s</td><td class="num">%s</td>'
+        '<td class="num">%s</td><td class="num">%s</td>'
+        '<td class="num">%.3f&times;</td>'
+        '<td class="num"><strong class="pos">%.2f&times;</strong></td></tr>'
+        % (E(c), E(n), "{:,}".format(pulls), money(pr), money(pr * 0.8),
+           a / pr, a / pr / 0.8)
+        for c, n, pr, pulls, a, _ in best[:6])
+
+    faq_html, faq_ld = faq_block([
+        ("Which card ripping site has the best sign-up bonus?",
+         "<p>Clutch Packs, on the arithmetic. A 20% discount on your first pack means you pay 80% of face value for a pack whose observed average return across 158,556 recorded pulls is 1.01 times face. That works out to about a 26% expected return on what you actually spend, and it is the only offer in the category we can calculate at all, because Clutch Packs is the only platform publishing observed results. The catch is that the return is in card value, and Clutch Packs discloses no buyback terms, so converting that card into money is an open question.</p>"),
+        ("Does Courtyard have a welcome bonus?",
+         "<p>No. Courtyard has no welcome offer for new users and no promo code is needed to sign up. Its referral programme pays the referrer up to 1,000 points once the referred user verifies identity and buys packs (sources differ on whether the threshold is $20 or $25), capped at six referrals. Courtyard does not publish what a point is worth in dollars, and the new user appears to get nothing, so there is no calculable value on either side.</p>"),
+        ("What is the optimal first pack to buy with a bonus?",
+         "<p>It depends on how the offer is capped. Clutch Packs' 20% discount has no stated cap, so the discount scales with the pack price &mdash; but so does the variance, and on its largest packs more than half of recorded pulls come back worth under half the pack price. Packz's 100% first-pack buyback is capped at $100, so a $25 first pack leaves three-quarters of the bonus unused while a $100 pack captures all of it. Tilt Rips' free pack is a fixed $10 regardless of what you buy, so the minimum $10 qualifying purchase extracts it most efficiently.</p>"),
+        ("Are card ripping bonuses actually worth taking?",
+         "<p>Each one is worth taking once, and none of them is a strategy. Every offer here is new-customer-only and single-use, so whatever edge exists applies to one pack and then disappears. After that you are buying the underlying product, where the average return is below 100% everywhere we have measured and roughly three-quarters of individual pulls come back worth less than the pack price. A bonus that turns one pack positive does not make the next one positive.</p>"),
+    ])
+
+    body = """
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1>Pack ripping bonuses, ranked by what they are actually worth</h1>
+    <p class="lede">Every sign-up offer we could verify across seven platforms, with the arithmetic. One of them is plausibly worth more than it costs. Most are worth less than they look, and one platform that everyone lists as having an offer does not have one.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Clutch Packs' 20% first-pack discount is the only offer in the category that produces a calculable positive expected return: you pay 80% of face value for a pack whose observed average across {pulls} recorded pulls is {wavg:.2f} times face, which is about <strong>{edge:+.0%}</strong> on what you spend. It is also the only platform publishing observed results, which is the only reason the sum can be done at all.</p>
+    <p class="small muted">All figures below come from published promotional terms and secondary reporting, read {collected}. We have not verified any of them directly with the platforms. Bonus terms change without notice; check before you buy.</p>
+  </div>
+
+  <div class="callout">
+    <h3>Correction</h3>
+    <p>An earlier version of our research described a Courtyard referral offer guaranteeing a $25 buyback on a $25 starter pack for both parties. We could not substantiate that. Current reporting says Courtyard has <strong>no welcome offer at all</strong>, and its referral pays the referrer in points of undisclosed value. We have corrected it here rather than leave it standing.</p>
+  </div>
+
+  <h2>Every offer, ranked</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Sign-up and first-pack offers across the seven platforms we track, {collected}.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col">Offer</th><th scope="col">Type</th><th scope="col" class="num">What it's worth</th><th scope="col">Catch</th></tr></thead>
+  <tbody>{offer_rows}</tbody>
+  </table>
+  </div>
+
+  <h2>Clutch Packs: the one with real maths behind it</h2>
+  <p>A discount is worth more than a credit bonus, because it reduces what you pay rather than adding something you can only spend inside the platform. And because Clutch Packs publishes observed pull results, this is the only offer in the category where a discount can be set against a known return.</p>
+
+  <p>The pull-weighted average across all {npacks} packs is {wavg:.3f} times face value. Paying 80% of face for that gives an expected {edge:.2f} times on outlay. Stripping out the jackpot inflation we identified on two of its packs and using a flat 1.00 times instead still leaves about +25%.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Clutch Packs packs with at least 1,000 recorded pulls, best observed return first, with the 20% discount applied.</caption>
+  <thead><tr>
+    <th scope="col">Pack</th><th scope="col" class="num">Pulls</th>
+    <th scope="col" class="num">Face price</th><th scope="col" class="num">You pay</th>
+    <th scope="col" class="num">Observed return</th><th scope="col" class="num">On outlay</th>
+  </tr></thead>
+  <tbody>{pack_rows}</tbody>
+  </table>
+  </div>
+
+  <h3>Three things that cut against it</h3>
+  <p><strong>The return is in card value, not money.</strong> This is the big one. Clutch Packs discloses no buyback or sell-back terms anywhere on its pack pages or its transparency page. A 1.01 times average in card value is only a 1.01 times average in cash if you can convert at par, and nothing published says you can. On every other platform this is exactly where the headline erodes: Fanatics pays 84.6% effective, Packz pays credit you cannot withdraw. Until Clutch answers this, treat the +26% as the ceiling rather than the expectation.</p>
+
+  <p><strong>Roughly 63% of single pulls still lose money.</strong> The discount moves your break-even from a card worth 1.0 times face to one worth 0.8 times. On the Multisport Ascent pack, about 26% of recorded pulls cleared 1.0 times and perhaps another 11% of the 0.5-to-1 band clears 0.8. So about 37% of pulls beat the discounted price. A positive average and a likely individual loss coexist comfortably here.</p>
+
+  <p><strong>The edge exists once.</strong> New customers only, one use per account, and it cannot be combined with other Clutch promotions. After that pack you are buying a break-even product with a 74% chance per pull of getting back less than you paid.</p>
+
+  <h3>Conditions worth knowing</h3>
+  <ul>
+    <li><strong>Card or debit only.</strong> Crypto, Zelle, transferred balances and promotional balances do not qualify.</li>
+    <li><strong>No stated cap</strong> on the discount, so it scales with pack price &mdash; and so does variance. On the $2,500 Moonshot pack, 53.4% of recorded pulls came back worth under half the pack price.</li>
+    <li>New users only, 18+, eligible locations, one use per account.</li>
+  </ul>
+
+  <h2>The rest, briefly</h2>
+
+  <h3>Tilt Rips: a free $10 pack</h3>
+  <p>Fund $10, buy a $10 pack, get a second $10 pack free, with phone verification required. Doubling your packs sounds like a 100% bonus, and in face-value terms it is. But Tilt Rips publishes no odds, no floors and no expected value for any of its roughly 60 packs, so the free pack's actual worth cannot be calculated. The efficient play is the minimum $10 qualifying purchase, since the free pack is a fixed $10 regardless of what you spend.</p>
+
+  <h3>Packz: a better buyback on one pack</h3>
+  <p>The first pack qualifies for a 100% buyback instead of the standard 90%, capped at $100. Since Packz's own published odds imply roughly 100% of face in card value on its $25-and-up packs, that extra 10 points is worth about $10 on a $100 first pack and about $2.50 on a $25 one.</p>
+  <p><strong>The cap is the whole strategy here:</strong> a $25 first pack leaves three-quarters of the bonus on the table. One caveat we could not resolve &mdash; it is unclear whether the $100 cap applies to the pack price or to the payout, which changes the advice if you pull something large. And the payout is site credit that cannot be withdrawn, so the $10 can only buy more packs.</p>
+
+  <h3>Courtyard: nothing</h3>
+  <p>No welcome offer, no promo code needed. The referral pays the referrer up to 1,000 points after the referred user verifies identity and buys packs, capped at six referrals. Courtyard does not publish a dollar value for a point, and the new user appears to receive nothing. Several affiliate sites list Courtyard among their promo pages anyway, which tells you something about how those pages are assembled.</p>
+
+  <h3>Arena Club: an add-on, not a bonus</h3>
+  <p>Collect Safe costs 10% of the pack price and guarantees a buyback floor of 80% of that price. On the $25 Pok&eacute;mon Bronze pack that is $2.50 for a $20 floor. It pays for itself whenever the revealed card is worth less than about 89% of the pack price &mdash; which, on a product where the average card is worth less than the pack, is often. We cannot put a number on it because Arena Club publishes no card values. <a href="/platforms/arena-club/">Full analysis here.</a></p>
+
+  <h3>Crown Rips and Fanatics</h3>
+  <p>Crown Rips gives beta participants 5 Sweeps Cash to start, but the beta is invite-only and limited to 500 users. We could not verify any current Fanatics Instant Rips offer.</p>
+
+  <div class="callout danger">
+    <h3>Read this before chasing any of it</h3>
+    <p>Every offer here is new-customer-only and single-use. Whatever edge exists applies to one pack and then vanishes, after which you are buying a product whose average return is below 100% on every platform we have measured, and where roughly three-quarters of individual pulls come back worth less than the pack price.</p>
+    <p>A bonus that makes one pack positive does not make the next one positive, and "I'm up on the bonus" is the most common reason people keep buying. Decide your budget before you start.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Go deeper</h2>
+  <ul>
+    <li><a href="/platforms/clutch-packs/">The 158,556 pulls behind the Clutch Packs figures</a></li>
+    <li><a href="/platforms/packz/">Packz's odds template and credit-only buyback</a></li>
+    <li><a href="/calculator/">Run a discounted pack through the calculator</a></li>
+  </ul>
+</div>
+""".format(pulls="{:,}".format(s["pulls"]), wavg=s["w_avg"], edge=edge - 1,
+           npacks=s["n_packs"], collected=CLUTCH_COLLECTED,
+           offer_rows=offer_rows, pack_rows=pack_rows, faq=faq_html)
+
+    # the {edge:.2f} in prose needs the raw multiple, not the delta
+    body = body.replace("expected %.2f times on outlay" % (edge - 1),
+                        "expected %.2f times on outlay" % edge)
+
+    art = jsonld({
+        "@context": "https://schema.org", "@type": "Article",
+        "headline": "Pack ripping bonuses, ranked by what they are actually worth",
+        "description": "Every card ripping sign-up offer we could verify, with the arithmetic. Clutch Packs' 20% first-pack discount is the only one with a calculable positive expected return.",
+        "datePublished": UPDATED, "dateModified": UPDATED,
+        "author": {"@type": "Organization", "name": SITE_NAME},
+        "publisher": {"@type": "Organization", "name": SITE_NAME},
+        "mainEntityOfPage": BASE_URL + "/guides/bonus-offers/",
+    })
+
+    return pages_written("/guides/bonus-offers/", page(
+        "/guides/bonus-offers/",
+        "Card ripping bonuses ranked — which sign-up offers are actually worth it",
+        "Every pack ripping sign-up offer, with the maths. Clutch Packs' 20% first-pack discount works out to about +26% on outlay; Courtyard has no welcome offer at all.",
+        body, crumbs=[("/", "Home"), (None, "Bonus offers")],
+        updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
+
+
 def build_methodology():
     body = """
 <div class="wrap">
@@ -1798,6 +2159,48 @@ def write_sitemap(paths):
         fh.write(xml)
 
 
+def write_indexnow_script(paths):
+    """A one-shot script that submits every URL to IndexNow (Bing, Yandex, et al)."""
+    urls = ",\n    ".join('"%s%s"' % (BASE_URL, x) for x in paths)
+    host = BASE_URL.replace("https://", "")
+    body = '''#!/usr/bin/env python3
+"""Submit every page to IndexNow. Run after a deploy.
+
+    python3 indexnow.py
+
+IndexNow notifies Bing, Yandex, Seznam and Naver within minutes. Google does
+not participate, so use Search Console for Google.
+"""
+import json
+import urllib.request
+
+KEY = "%s"
+HOST = "%s"
+URLS = [
+    %s
+]
+
+payload = json.dumps({
+    "host": HOST,
+    "key": KEY,
+    "keyLocation": "https://" + HOST + "/" + KEY + ".txt",
+    "urlList": URLS,
+}).encode()
+
+req = urllib.request.Request(
+    "https://api.indexnow.org/IndexNow",
+    data=payload,
+    headers={"Content-Type": "application/json; charset=utf-8"},
+)
+with urllib.request.urlopen(req) as r:
+    print("IndexNow responded " + str(r.status) + " for "
+          + str(len(URLS)) + " URLs")
+    print("200 or 202 means accepted.")
+''' % (INDEXNOW_KEY, host, urls)
+    with open(os.path.join(OUT, "indexnow.py"), "w", encoding="utf-8") as fh:
+        fh.write(body)
+
+
 def main():
     if os.path.isdir(OUT):
         shutil.rmtree(OUT)
@@ -1814,6 +2217,8 @@ def main():
         build_crown_rips(),
         build_tilt(),
         build_compare(),
+        build_chase(),
+        build_bonuses(),
         build_calculator(),
         build_methodology(),
         build_gambling(),
@@ -1821,11 +2226,17 @@ def main():
     ]
 
     shutil.copy("styles.css", os.path.join(OUT, "styles.css"))
+
+    # IndexNow: key file must be served at the site root.
+    with open(os.path.join(OUT, INDEXNOW_KEY + ".txt"), "w",
+              encoding="utf-8") as fh:
+        fh.write(INDEXNOW_KEY)
     with open(os.path.join(OUT, "favicon.svg"), "w", encoding="utf-8") as fh:
         fh.write(FAVICON)
     with open(os.path.join(OUT, "robots.txt"), "w", encoding="utf-8") as fh:
         fh.write(ROBOTS)
     write_sitemap(paths)
+    write_indexnow_script(paths)
 
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     for f in ("courtyard_odds_2026-09-21.csv", "packz_odds_2026-09-21.csv"):

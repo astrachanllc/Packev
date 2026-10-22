@@ -4,21 +4,41 @@ import json
 
 SITE_NAME = "PackEV"
 # Change this one constant when the real domain is registered.
-BASE_URL = "https://packev.io"
+BASE_URL = "https://packev.xyz"
 TAGLINE = "Card ripping sites, rated by the math"
+
+# Google tag (GA4 measurement ID, e.g. "G-XXXXXXXXXX"). Empty = no tag emitted.
+GA_ID = "G-BCTDNF4LCD"
+
+
+def analytics_tag():
+    """Google tag snippet, or nothing if no ID is configured."""
+    if not GA_ID:
+        return ""
+    return (
+        '<script async src="https://www.googletagmanager.com/gtag/js?id=%s"></script>\n'
+        "<script>\n"
+        "  window.dataLayer = window.dataLayer || [];\n"
+        "  function gtag(){dataLayer.push(arguments);}\n"
+        "  gtag('js', new Date());\n"
+        "  gtag('config', '%s');\n"
+        "</script>" % (GA_ID, GA_ID)
+    )
 
 NAV = [
     ("/platforms/", "Platforms"),
     ("/compare/courtyard-vs-packz/", "Courtyard vs Packz"),
     ("/calculator/", "Pack EV calculator"),
+    ("/guides/bonus-offers/", "Bonuses"),
     ("/methodology/", "How we rate"),
-    ("/data/", "Data"),
 ]
 
 FOOTER_NAV = [
     ("/", "Home"),
     ("/platforms/", "Platforms"),
     ("/calculator/", "Pack EV calculator"),
+    ("/guides/chase-card-odds/", "Chase card odds"),
+    ("/guides/bonus-offers/", "Bonus offers"),
     ("/methodology/", "How we rate"),
     ("/is-card-ripping-gambling/", "Is it gambling?"),
     ("/data/", "Open data"),
@@ -120,6 +140,7 @@ def page(path, title, description, body, extra_head="", crumbs=None,
 <link rel="stylesheet" href="/styles.css">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 {ld}
+{analytics}
 {extra_head}
 </head>
 <body>
@@ -137,7 +158,7 @@ def page(path, title, description, body, extra_head="", crumbs=None,
 <footer class="site-footer">
   <div class="wrap">
     <nav class="footer-nav" aria-label="Footer">{footer}</nav>
-    <p><strong>Affiliate disclosure:</strong> some links on {site} are affiliate links. If you sign up or buy through them we may earn a commission at no extra cost to you. Commissions never change a rating, a ranking, or a published number.</p>
+    <p><strong>Affiliate disclosure:</strong> some outbound links on {site} are affiliate or referral links, and we may earn a commission or a sign-up bonus if you use them. They cost you nothing extra. Where we have such a link, we say so on the page and state what we receive. No commission, bonus or agreement changes a rating, a ranking, or a published number, and we publish unfavourable findings about platforms we earn from.</p>
     <p>{site} is independent and not affiliated with any platform listed here. Platform and product names are trademarks of their owners. Nothing here is financial or legal advice. Intended for adults; check your local laws before using any pack ripping site.{updated}</p>
     <p>&copy; 2026 {site}</p>
   </div>
@@ -148,6 +169,7 @@ def page(path, title, description, body, extra_head="", crumbs=None,
         title=E(title), desc=E(description), canonical=E(canonical),
         site=E(SITE_NAME), nav=nav_links, footer=footer_links,
         body=body, extra_head=extra_head, crumbs=crumb_html,
+        analytics=analytics_tag(),
         ld="\n".join(ld),
         updated=(" Data on this page collected %s." % updated) if updated else "",
     )
