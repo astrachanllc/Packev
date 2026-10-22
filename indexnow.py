@@ -24,6 +24,7 @@ URLS = [
     "https://packev.xyz/compare/courtyard-vs-packz/",
     "https://packev.xyz/guides/chase-card-odds/",
     "https://packev.xyz/guides/bonus-offers/",
+    "https://packev.xyz/platforms/pickem/",
     "https://packev.xyz/platforms/packed/",
     "https://packev.xyz/platforms/fast-rips/",
     "https://packev.xyz/guides/buyback-rates/",

@@ -229,6 +229,10 @@ BUYBACK_TERMS = [
     ("Clutch Packs", None, None, None,
      "No buyback or sell-back terms disclosed anywhere",
      "Market value at the time of the pull, source not named"),
+    ("Pickem", 0.90, 0.90, True,
+     "USD balance, withdrawable to a bank card ($6 minimum, $2,500 per "
+     "withdrawal); only sale proceeds can be withdrawn",
+     "Pickem's displayed fair market value"),
     ("Packed", 1.00, 1.00, True,
      "Withdrawable to debit card, bank, PayPal or Venmo &mdash; but only "
      "within a storage window the terms set at one day",

@@ -211,8 +211,9 @@ def build_home():
     <tr><td class="num">5</td><td class="name"><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></td><td>Checklist of contents, no pull rates; third-party card valuations</td><td>Not calculable</td><td>84.6% effective, credit only</td></tr>
     <tr><td class="num">6</td><td class="name"><a href="/platforms/crown-rips/">Crown Rips</a></td><td>Minimum and maximum pull value only, no rates</td><td>Not calculable</td><td>100% claimed, unverified</td></tr>
     <tr><td class="num">7</td><td class="name"><a href="/platforms/tilt-rips/">Tilt Rips</a></td><td>Top prizes only, no rates and no floor</td><td>Not calculable</td><td>90%, withdrawable in cash or crypto</td></tr>
-    <tr><td class="num">8</td><td class="name"><a href="/platforms/packed/">Packed</a></td><td>Terms require Value Band odds to be shown, but nothing is published on the web</td><td>Not calculable</td><td>100%, withdrawable &mdash; within a one-day window</td></tr>
-    <tr><td class="num">9</td><td class="name"><a href="/platforms/fast-rips/">Fast Rips</a></td><td>No prices or odds published at all</td><td>Not calculable</td><td>100% advertised; terms say credit, non-withdrawable</td></tr>
+    <tr><td class="num">8</td><td class="name"><a href="/platforms/pickem/">Pickem</a></td><td>Per-card pull rates in-app only; nothing published on the web</td><td>Not calculable</td><td>90%, withdrawable &mdash; within a three-hour window</td></tr>
+    <tr><td class="num">9</td><td class="name"><a href="/platforms/packed/">Packed</a></td><td>Terms require Value Band odds to be shown, but nothing is published on the web</td><td>Not calculable</td><td>100%, withdrawable &mdash; within a one-day window</td></tr>
+    <tr><td class="num">10</td><td class="name"><a href="/platforms/fast-rips/">Fast Rips</a></td><td>No prices or odds published at all</td><td>Not calculable</td><td>100% advertised; terms say credit, non-withdrawable</td></tr>
   </tbody>
   </table>
   </div>
@@ -417,6 +418,19 @@ def build_platforms_index():
       </dl>
       <p>The largest catalogue and the least odds disclosure. Its sell-back is the best cash route we have verified, but the platform sets the valuation and says the price cannot be disputed.</p>
       <p class="more"><a href="/platforms/tilt-rips/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/pickem/">Pickem</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>$1 &ndash; $250</dd>
+        <dt>Odds shown</dt><dd>In-app, per card</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>90%, withdrawable</dd>
+      </dl>
+      <p>A rip product inside a social casino. Pays 90% to a bank card, and gives you three hours from opening a pack before it sells the card for you.</p>
+      <p class="more"><a href="/platforms/pickem/">Full breakdown &rarr;</a></p>
     </article>
 
     <article class="card">
@@ -791,7 +805,7 @@ def build_arena_club():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all nine platforms</a>.</li>
+    <li><a href="/platforms/">Compare all ten platforms</a>.</li>
     <li><a href="/methodology/">How we rate platforms</a>, including how we handle a platform that publishes no values.</li>
   </ul>
 </div>
@@ -927,7 +941,7 @@ def build_tilt():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a>, the useful contrast on valuation sourcing</li>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the only platform publishing observed results</li>
-    <li><a href="/platforms/">Compare all nine platforms</a></li>
+    <li><a href="/platforms/">Compare all ten platforms</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows=rows, faq=faq_html)
@@ -944,7 +958,7 @@ def build_tilt():
 def build_fanatics():
     faq_html, faq_ld = faq_block([
         ("Does Fanatics Instant Rips publish pack odds?",
-         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the nine platforms we track.</p>"),
+         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the ten platforms we track.</p>"),
         ("What is the real Fanatics instant offer percentage?",
          "<p>Effectively 84.6% of a card's appraised value, not the 90% headline. Fanatics' own worked example takes a $200 card, applies the 90% rate to get $180, then deducts a 6% marketplace fee of $10.80, leaving an offer of $169.20. That is 84.6% of the card's value. The formula is 0.90 multiplied by 0.94. The 90% figure is accurate as far as it goes, but it is not what arrives.</p>"),
         ("Can you withdraw Fanatics Instant Rips credits as cash?",
@@ -1004,7 +1018,7 @@ def build_fanatics():
 
   <h2>Where Fanatics is genuinely best in class</h2>
   <p>Card valuations come from Card Ladder, a third-party sales-data service, rather than from Fanatics itself.</p>
-  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the nine platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
+  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the ten platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
 
   <h2>Pack prices</h2>
   <div class="table-wrap">
@@ -1053,7 +1067,7 @@ def build_fanatics():
   <h2>Next</h2>
   <ul>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the opposite approach: 158,556 published pull outcomes</li>
-    <li><a href="/platforms/">Compare all nine platforms</a></li>
+    <li><a href="/platforms/">Compare all ten platforms</a></li>
     <li><a href="/calculator/">Pack EV calculator</a></li>
   </ul>
 </div>
@@ -1208,7 +1222,7 @@ def build_clutch():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all nine platforms</a></li>
+    <li><a href="/platforms/">Compare all ten platforms</a></li>
     <li><a href="/platforms/courtyard/">Courtyard</a>, the only other platform that publishes a return figure</li>
     <li><a href="/methodology/">How we rate platforms</a></li>
   </ul>
@@ -1353,7 +1367,7 @@ def build_crown_rips():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all nine platforms</a></li>
+    <li><a href="/platforms/">Compare all ten platforms</a></li>
     <li><a href="/is-card-ripping-gambling/">Why the sweepstakes framing matters</a></li>
   </ul>
 </div>
@@ -1836,7 +1850,7 @@ def build_bonuses():
   <h2>Every offer, ranked</h2>
   <div class="table-wrap">
   <table>
-  <caption>Sign-up and first-pack offers across the nine platforms we track, {collected}.</caption>
+  <caption>Sign-up and first-pack offers across the ten platforms we track, {collected}.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col">Offer</th><th scope="col">Type</th><th scope="col" class="num">What it's worth</th><th scope="col">Catch</th></tr></thead>
   <tbody>{offer_rows}</tbody>
   </table>
@@ -1932,6 +1946,127 @@ def build_bonuses():
         "Every pack ripping sign-up offer, with the maths. Clutch Packs' 20% first-pack discount works out to about +26% on outlay; Courtyard has no welcome offer at all.",
         body, crumbs=[("/", "Home"), (None, "Bonus offers")],
         updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
+
+
+def build_pickem():
+    faq_html, faq_ld = faq_block([
+        ("How long do you have to decide on a Pickem pull?",
+         "<p>Three hours, and the timer starts when you open the pack rather than when you buy it. If it expires, Pickem sells the card automatically at its displayed fair market value. Reporting indicates the window is shorter still in some states. It is by a wide margin the tightest decision window of the ten platforms we track: Packed gives one day, Crown Rips reportedly seven, and Courtyard, Arena Club, Fanatics and Tilt Rips vault cards indefinitely.</p>"),
+        ("What is the Pickem buyback rate?",
+         "<p>90% of the card's displayed fair market value, rising to 100% on your first pack purchase. Proceeds go to a USD balance which can be withdrawn to a bank card, with a $6 minimum and a $2,500 cap per withdrawal. Only money from selling cards is withdrawable, so deposits and any promotional balance are not.</p>"),
+        ("Does Pickem publish pack odds?",
+         "<p>Inside the app, yes. Each pack reportedly shows the cards it can produce with a pull percentage against each one, in the same per-card style Arena Club uses. Nothing appears on the public website, so a buyer cannot see a single figure before downloading. Pickem also offers Normal, High and Max probability settings at the same pack price, which means each pack is really three different probability distributions, and we have seen no published figures for any of them.</p>"),
+        ("Which states can't use Pickem Ripping Packs?",
+         "<p>Michigan, Minnesota, Montana, Nevada and Washington are reported as excluded. The minimum age is 18, or 19 in Nebraska. Pickem Ripping Packs sits inside Pickem, a social gaming platform that also runs slots and table games, which is the likely reason for that particular list of exclusions &mdash; those states are the ones most active against sweepstakes-model operators.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Pickem Ripping Packs: three hours to decide</h1>
+    <p class="lede">Pickem pays 90% of fair market value into a balance you can withdraw to a bank card. You get three hours from opening the pack to choose between shipping the card and selling it back, after which it is sold automatically.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Three hours, and the clock starts when you open the pack rather than when you buy it. If it runs out, Pickem sells the card for you at its own fair market value. That is eight times tighter than Packed's one-day limit and the shortest window of any platform we track.</p>
+    <p class="small muted">Confirmed across two independent reviews, read {collected}. We have not verified the window first-hand and reporting indicates it is shorter in some states.</p>
+  </div>
+
+  <h2>Why three hours matters</h2>
+  <p>On most of this category, deciding what to do with a pull is a decision. Here it is a deadline, and a short one. If you rip a pack in the evening and go to bed, the platform has made the choice for you by morning.</p>
+
+  <p>The detail that sharpens it is where the timer starts. It begins when the pack is opened, not when it is bought, so a pack bought and opened at once gives you three hours from that moment. Shipping also requires an address and, on most platforms in this category, identity verification &mdash; which is time spent inside the window rather than before it.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>How long you can hold a card before the platform acts, across the ten platforms we track.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col">Window</th><th scope="col">What happens at the end</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Pickem</td><td><strong class="neg">3 hours</strong></td><td>Card sold automatically at Pickem's FMV</td></tr>
+    <tr><td class="name">Packed</td><td><strong class="neg">1 day</strong></td><td>&ldquo;Automatically returned to Packed&rdquo; (&sect;6.1)</td></tr>
+    <tr><td class="name">Crown Rips</td><td>7 days, reportedly</td><td>Auto-sold at market value</td></tr>
+    <tr><td class="name">Courtyard</td><td>Indefinite</td><td>Vaulted and insured, free</td></tr>
+    <tr><td class="name">Arena Club</td><td>Indefinite</td><td>Vaulted</td></tr>
+    <tr><td class="name">Fanatics Instant Rips</td><td>Indefinite</td><td>Free vault storage, no time limit</td></tr>
+    <tr><td class="name">Tilt Rips</td><td>Indefinite</td><td>Free vaulting, no storage fees</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Note what the short-window platforms have in common: they are also the ones paying the highest buyback rates. Pickem at 90% withdrawable and Packed at 100% withdrawable are near the top of the category on rate, and at the very bottom on time. That is not a coincidence. A platform that will reliably buy the card back does not want to be holding inventory, and the clock is how it avoids that.</p>
+
+  <h2>What Pickem pays, and how you get it</h2>
+  <ul>
+    <li><strong>90% of displayed fair market value</strong> on a sell-back, rising to <strong>100% on your first pack purchase</strong>.</li>
+    <li><strong>Proceeds land in a USD balance</strong> and can be withdrawn to a bank card, with a $6 minimum and a $2,500 cap per withdrawal.</li>
+    <li><strong>Only sale proceeds are withdrawable.</strong> Deposits and promotional balances are not, which is the same structure <a href="/platforms/packed/">Packed</a> uses.</li>
+  </ul>
+  <p>That places Pickem alongside <a href="/platforms/arena-club/">Arena Club</a> and <a href="/platforms/tilt-rips/">Tilt Rips</a> in the group whose buyback reaches real money, and above <a href="/platforms/packz/">Packz</a> and <a href="/platforms/fanatics-instant-rips/">Fanatics</a>, where it does not. <a href="/guides/buyback-rates/">The full comparison is here.</a></p>
+
+  <h2>Odds are shown, but only once you are inside</h2>
+  <p>Each pack reportedly lists the cards it can produce with a pull percentage against each, the same per-card format <a href="/platforms/arena-club/">Arena Club</a> uses. That is real disclosure and better than the several platforms here that publish nothing at all.</p>
+
+  <p>Two things limit it. Nothing appears on the public website, so the figures are invisible until you have downloaded the app and are standing at the checkout. And Pickem offers <strong>Normal, High and Max probability settings at the same pack price</strong>, which means every pack is three distributions rather than one. <a href="/platforms/crown-rips/">Crown Rips</a> has the same feature, and the same gap: no published figures for any setting, so a buyer choosing Max over Normal cannot see what they are trading.</p>
+
+  <p>Pack prices run from $1 starter packs to around $250, with a Pok&eacute;mon Pro Pack and a Football Pro Pack at $100 and a Multi-Sport Elite Pack at $250. Prices do not change when you change the probability setting.</p>
+
+  <h2>A social casino with a card product attached</h2>
+  <p>Pickem Ripping Packs is a feature inside Pickem, a social gaming platform that also runs slots, table games and arcade games. <a href="/platforms/crown-rips/">Crown Rips</a> is the same shape: a rip product bolted onto a sweepstakes casino.</p>
+
+  <p>The exclusion list is the tell. Michigan, Minnesota, Montana, Nevada and Washington are reported as blocked, and those are the states most active against sweepstakes-model operators rather than against collectibles sellers. Whatever the packs are, the platform around them is being treated as a gaming product. Our <a href="/is-card-ripping-gambling/">page on the legal position</a> covers why that distinction is unsettled and being tested.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Pickem, a social gaming platform with slots, table games and arcade games</td></tr>
+    <tr><th scope="row">Categories</th><td>Pok&eacute;mon, baseball, football, basketball, multi-sport</td></tr>
+    <tr><th scope="row">Pack prices</th><td>$1 starter packs up to about $250</td></tr>
+    <tr><th scope="row">Guarantee</th><td>At least one PSA-graded card per pack</td></tr>
+    <tr><th scope="row">Probability settings</th><td>Normal, High, Max &mdash; same price, no published figures</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>Per-card pull percentages in-app; nothing on the website</td></tr>
+    <tr><th scope="row">Expected value</th><td>Not published and not calculable from public information</td></tr>
+    <tr><th scope="row">Buyback</th><td>90% of displayed FMV; 100% on the first pack purchase</td></tr>
+    <tr><th scope="row">Decision window</th><td>3 hours from opening the pack, then auto-sold; shorter in some states</td></tr>
+    <tr><th scope="row">Withdrawals</th><td>To a bank card; $6 minimum, $2,500 maximum per withdrawal; sale proceeds only</td></tr>
+    <tr><th scope="row">Storage</th><td>PSA slabs held in secure vaults until shipped or sold back</td></tr>
+    <tr><th scope="row">New user offer</th><td>One free pack on joining</td></tr>
+    <tr><th scope="row">Restricted states</th><td>Michigan, Minnesota, Montana, Nevada, Washington</td></tr>
+    <tr><th scope="row">Age</th><td>18+, or 19 in Nebraska</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <h3>Why this page has no rating, and what we still need</h3>
+    <p>Everything here comes from Pickem's public marketing and two independent reviews. We have not collected the in-app odds ourselves, so no expected value can be calculated and no score published. We also want to confirm the exact length of the window in each state, whether it differs by pack, and whether the free first pack counts as the &ldquo;first purchase&rdquo; that triggers the 100% buyback. If you have screenshots of a Pickem pack page showing per-card percentages, we would like to see them.</p>
+  </div>
+
+  <div class="callout danger">
+    <h3>If you buy, decide before you rip</h3>
+    <p>On a three-hour clock, the time to decide what you would keep is before you open the pack, not after. Know in advance what a pull has to be worth for you to ship it, and remember that the alternative is not holding the card &mdash; it is Pickem selling it at a value Pickem sets.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+    <li><a href="/platforms/packed/">Packed, the other short-clock platform</a></li>
+    <li><a href="/platforms/">All ten platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html)
+
+    return pages_written("/platforms/pickem/", page(
+        "/platforms/pickem/",
+        "Pickem Ripping Packs review — three hours to decide on a pull",
+        "Pickem pays 90% of FMV withdrawable to a bank card, but gives you three hours from opening a pack before it sells the card automatically.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Pickem")],
+        updated=UPDATED, structured=faq_ld))
 
 
 def build_packed():
@@ -2043,7 +2178,7 @@ def build_packed():
   <ul>
     <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
     <li><a href="/platforms/fast-rips/">Fast Rips, where the terms contradict the marketing</a></li>
-    <li><a href="/platforms/">All nine platforms compared</a></li>
+    <li><a href="/platforms/">All ten platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=UPDATED, faq=faq_html, cta=affiliate_cta("packed"))
@@ -2173,7 +2308,7 @@ def build_fast_rips():
   <h2>Next</h2>
   <ul>
     <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays, across every platform</a></li>
-    <li><a href="/platforms/">All nine platforms compared</a></li>
+    <li><a href="/platforms/">All ten platforms compared</a></li>
     <li><a href="/is-card-ripping-gambling/">Where the law currently stands</a></li>
   </ul>
 </div>
@@ -2262,7 +2397,7 @@ def build_buyback():
 <div class="wrap narrow">
   <div class="page-head">
     <h1>Every site advertises a 90% buyback. Here is what you actually get back.</h1>
-    <p class="lede">Five of the nine platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
+    <p class="lede">Five of the ten platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
   </div>
 
   <div class="finding">
@@ -2273,7 +2408,7 @@ def build_buyback():
   <h2>The headline against the reality</h2>
   <div class="table-wrap">
   <table>
-  <caption>Advertised and effective buyback rates across the nine platforms we track, {collected}.</caption>
+  <caption>Advertised and effective buyback rates across the ten platforms we track, {collected}.</caption>
   <thead><tr>
     <th scope="col">Platform</th><th scope="col" class="num">Advertised</th>
     <th scope="col" class="num">Effective</th><th scope="col" class="num">Withdrawable</th>
@@ -2355,7 +2490,7 @@ def build_buyback():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">How the Fanatics 90% becomes 84.6%</a></li>
     <li><a href="/platforms/packz/">Why the Packz buyback pays credit, not cash</a></li>
-    <li><a href="/platforms/">All nine platforms compared</a></li>
+    <li><a href="/platforms/">All ten platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows="".join(rows), conv="".join(conv),
@@ -2704,6 +2839,7 @@ def main():
         build_compare(),
         build_chase(),
         build_bonuses(),
+        build_pickem(),
         build_packed(),
         build_fast_rips(),
         build_buyback(),
