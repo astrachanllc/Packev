@@ -30,6 +30,7 @@ NAV = [
     ("/compare/courtyard-vs-packz/", "Courtyard vs Packz"),
     ("/calculator/", "Pack EV calculator"),
     ("/guides/buyback-rates/", "Buyback rates"),
+    ("/legal/", "By state"),
     ("/methodology/", "How we rate"),
 ]
 
@@ -40,8 +41,11 @@ FOOTER_NAV = [
     ("/guides/chase-card-odds/", "Chase card odds"),
     ("/guides/bonus-offers/", "Bonus offers"),
     ("/guides/buyback-rates/", "Buyback rates"),
+    ("/guides/withdrawals/", "Withdrawals"),
+    ("/legal/", "By state"),
     ("/methodology/", "How we rate"),
     ("/is-card-ripping-gambling/", "Is it gambling?"),
+    ("/changelog/", "Changelog"),
     ("/data/", "Open data"),
 ]
 

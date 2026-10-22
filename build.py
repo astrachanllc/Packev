@@ -6,6 +6,7 @@ import shutil
 from collections import Counter
 
 from data import (load_courtyard, load_packz, ARENA_CLUB_PACKS, BUYBACK_TERMS,
+                  FLAGS, PLATFORM_FLAGS, STATE_RESTRICTIONS, CHANGELOG,
                   CROWN_RIPS_PACKS, CLUTCH_PACKS, CLUTCH_BAND_LABELS,
                   CLUTCH_COLLECTED, clutch_stats,
                   money, pct, COLLECTED, UPDATED)
@@ -214,6 +215,7 @@ def build_home():
     <tr><td class="num">8</td><td class="name"><a href="/platforms/pickem/">Pickem</a></td><td>Per-card pull rates in-app only; nothing published on the web</td><td>Not calculable</td><td>90%, withdrawable &mdash; within a three-hour window</td></tr>
     <tr><td class="num">9</td><td class="name"><a href="/platforms/packed/">Packed</a></td><td>Terms require Value Band odds to be shown, but nothing is published on the web</td><td>Not calculable</td><td>100%, withdrawable &mdash; within a one-day window</td></tr>
     <tr><td class="num">10</td><td class="name"><a href="/platforms/fast-rips/">Fast Rips</a></td><td>No prices or odds published at all</td><td>Not calculable</td><td>100% advertised; terms say credit, non-withdrawable</td></tr>
+    <tr><td class="num">11</td><td class="name"><a href="/platforms/mintpull/">MintPull</a></td><td>No prices or odds published; terms warn distribution is likely unequal</td><td>Not calculable</td><td>100% advertised; credited as pack credit, $250/week withdrawal cap</td></tr>
   </tbody>
   </table>
   </div>
@@ -331,6 +333,7 @@ def build_platforms_index():
   <div class="card-grid">
     <article class="card">
       <h3><a href="/platforms/clutch-packs/">Clutch Packs</a></h3>
+      {flag_clutch_packs}
       <dl>
         <dt>Packs</dt><dd>{clutchpacks}</dd>
         <dt>Prices</dt><dd>$25&ndash;$2,500</dd>
@@ -344,6 +347,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/courtyard/">Courtyard</a></h3>
+      {flag_courtyard}
       <dl>
         <dt>Packs</dt><dd>{cyn}</dd>
         <dt>Prices</dt><dd>{cymin}&ndash;{cymax}</dd>
@@ -357,6 +361,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/packz/">Packz</a></h3>
+      {flag_packz}
       <dl>
         <dt>Packs</dt><dd>{pzn}</dd>
         <dt>Prices</dt><dd>$5&ndash;$1,000</dd>
@@ -370,6 +375,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/arena-club/">Arena Club</a></h3>
+      {flag_arena_club}
       <dl>
         <dt>Packs</dt><dd>9 tiers &times; 9 categories</dd>
         <dt>Prices</dt><dd>$25&ndash;$5,000</dd>
@@ -383,6 +389,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/crown-rips/">Crown Rips</a></h3>
+      {flag_crown_rips}
       <dl>
         <dt>Packs</dt><dd>10 reported</dd>
         <dt>Prices</dt><dd>$1&ndash;$2,500</dd>
@@ -396,6 +403,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></h3>
+      {flag_fanatics_instant_rips}
       <dl>
         <dt>Packs</dt><dd>5 categories</dd>
         <dt>Prices</dt><dd>$10&ndash;$2,500</dd>
@@ -409,6 +417,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/tilt-rips/">Tilt Rips</a></h3>
+      {flag_tilt_rips}
       <dl>
         <dt>Packs</dt><dd>~60</dd>
         <dt>Prices</dt><dd>$0.10&ndash;$3,000</dd>
@@ -422,6 +431,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/pickem/">Pickem</a></h3>
+      {flag_pickem}
       <dl>
         <dt>Packs</dt><dd>$1 &ndash; $250</dd>
         <dt>Odds shown</dt><dd>In-app, per card</dd>
@@ -435,6 +445,7 @@ def build_platforms_index():
 
     <article class="card">
       <h3><a href="/platforms/packed/">Packed</a></h3>
+      {flag_packed}
       <dl>
         <dt>Packs</dt><dd>21, no prices shown</dd>
         <dt>Prices</dt><dd>Not published</dd>
@@ -447,7 +458,22 @@ def build_platforms_index():
     </article>
 
     <article class="card">
+      <h3><a href="/platforms/mintpull/">MintPull</a></h3>
+      {flag_mintpull}
+      <dl>
+        <dt>Packs</dt><dd>No prices shown</dd>
+        <dt>Odds shown</dt><dd>None published</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>100% as pack credit</dd>
+      </dl>
+      <p>Advertises a 100% FMV guarantee. Its terms credit returns as pack purchase credit, cap withdrawals at $250 per seven days, and are governed by Hong Kong law.</p>
+      <p class="more"><a href="/platforms/mintpull/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
       <h3><a href="/platforms/fast-rips/">Fast Rips</a></h3>
+      {flag_fast_rips}
       <dl>
         <dt>Packs</dt><dd>7, no prices shown</dd>
         <dt>Prices</dt><dd>Not published</dd>
@@ -477,7 +503,9 @@ def build_platforms_index():
 """.format(cyn=CY_N, pzn=PZ_N, cymin=money(CY_MIN_PRICE),
            cymax=money(CY_MAX_PRICE), pzstd=pct(PZ_STD_MID * 100, 0),
            clutch=CL["w_avg"], clutchpacks=CL["n_packs"],
-           clutchpulls="{:,}".format(CL["pulls"]))
+           clutchpulls="{:,}".format(CL["pulls"]),
+           **{"flag_" + s.replace("-", "_"): flag_row(s)
+              for s in PLATFORM_FLAGS})
 
     return pages_written("/platforms/", page(
         "/platforms/",
@@ -507,6 +535,7 @@ def build_courtyard():
   <div class="page-head">
     <h1>Courtyard pack odds and expected value</h1>
     <p class="lede">All {cyn} Courtyard packs, from the {cymin} Basic packs to the {cymax} Sports Cosmic Pack, with the expected value Courtyard publishes on each one.</p>
+    {flags_courtyard}
   </div>
 
   <div class="finding">
@@ -552,7 +581,7 @@ def build_courtyard():
 """.format(cyn=CY_N, cy95=CY_AT_95, cymin=money(CY_MIN_PRICE),
            cymax=money(CY_MAX_PRICE), collected=COLLECTED,
            hitlo=pct(CY_HIT_LO, 0), hithi=pct(CY_HIT_HI, 0),
-           nspicy=len(spicy), table=courtyard_table(), faq=faq_html)
+           nspicy=len(spicy), table=courtyard_table(), faq=faq_html, **{"flags_courtyard": flag_row("courtyard")})
 
     ds = jsonld({
         "@context": "https://schema.org", "@type": "Dataset",
@@ -592,6 +621,7 @@ def build_packz():
   <div class="page-head">
     <h1>Packz pack odds and expected value</h1>
     <p class="lede">All {pzn} Packz packs, from the $5 Pok&eacute;mon Common Pack to the $1,000 Champion and Hall of Fame packs, calculated from the odds Packz publishes on each pack page.</p>
+    {flags_packz}
   </div>
 
   <div class="finding">
@@ -673,7 +703,7 @@ def build_packz():
            com=pct(PZ_COMMON["ratio_mid"] * 100, 0),
            unc=pct(PZ_UNCOMMON["ratio_mid"] * 100, 0),
            pzhit=pct(PZ_HIT, 1), loss=pct(100 - PZ_HIT, 1),
-           table=packz_table(), faq=faq_html, cta=affiliate_cta("packz"))
+           table=packz_table(), faq=faq_html, cta=affiliate_cta("packz"), **{"flags_packz": flag_row("packz")})
 
     ds = jsonld({
         "@context": "https://schema.org", "@type": "Dataset",
@@ -731,6 +761,7 @@ def build_arena_club():
   <div class="page-head">
     <h1>Arena Club pack odds and buyback terms</h1>
     <p class="lede">Arena Club sells graded slabs in nine price tiers from $25 to $5,000 across as many as nine categories. It publishes detailed per-card odds and no card values at all, which makes it the hardest of the three platforms to evaluate before you buy.</p>
+    {flags_arena_club}
   </div>
 
   <div class="finding">
@@ -805,11 +836,11 @@ def build_arena_club():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all ten platforms</a>.</li>
+    <li><a href="/platforms/">Compare all eleven platforms</a>.</li>
     <li><a href="/methodology/">How we rate platforms</a>, including how we handle a platform that publishes no values.</li>
   </ul>
 </div>
-""".format(collected=COLLECTED, updated=UPDATED, rows="".join(rows), faq=faq_html)
+""".format(collected=COLLECTED, updated=UPDATED, rows="".join(rows), faq=faq_html, **{"flags_arena_club": flag_row("arena-club")})
 
     return pages_written("/platforms/arena-club/", page(
         "/platforms/arena-club/",
@@ -860,6 +891,7 @@ def build_tilt():
   <div class="page-head">
     <h1>Tilt Rips: 60 packs, no published odds</h1>
     <p class="lede">Tilt Rips has the largest pack catalogue of any platform we track, prices starting at ten cents, and the best cash-out terms we have verified. It publishes no pull rates for any of it.</p>
+    {flags_tilt_rips}
   </div>
 
   <div class="finding">
@@ -941,10 +973,10 @@ def build_tilt():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a>, the useful contrast on valuation sourcing</li>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the only platform publishing observed results</li>
-    <li><a href="/platforms/">Compare all ten platforms</a></li>
+    <li><a href="/platforms/">Compare all eleven platforms</a></li>
   </ul>
 </div>
-""".format(collected=CLUTCH_COLLECTED, rows=rows, faq=faq_html)
+""".format(collected=CLUTCH_COLLECTED, rows=rows, faq=faq_html, **{"flags_tilt_rips": flag_row("tilt-rips")})
 
     return pages_written("/platforms/tilt-rips/", page(
         "/platforms/tilt-rips/",
@@ -958,7 +990,7 @@ def build_tilt():
 def build_fanatics():
     faq_html, faq_ld = faq_block([
         ("Does Fanatics Instant Rips publish pack odds?",
-         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the ten platforms we track.</p>"),
+         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the eleven platforms we track.</p>"),
         ("What is the real Fanatics instant offer percentage?",
          "<p>Effectively 84.6% of a card's appraised value, not the 90% headline. Fanatics' own worked example takes a $200 card, applies the 90% rate to get $180, then deducts a 6% marketplace fee of $10.80, leaving an offer of $169.20. That is 84.6% of the card's value. The formula is 0.90 multiplied by 0.94. The 90% figure is accurate as far as it goes, but it is not what arrives.</p>"),
         ("Can you withdraw Fanatics Instant Rips credits as cash?",
@@ -974,6 +1006,7 @@ def build_fanatics():
   <div class="page-head">
     <h1>Fanatics Instant Rips: the 90% offer is really 84.6%</h1>
     <p class="lede">Fanatics is the largest brand in digital pack ripping and discloses the least about odds. It also has the category's best practice on card valuation. Both of those are worth knowing before you buy.</p>
+    {flags_fanatics_instant_rips}
   </div>
 
   <div class="finding">
@@ -1018,7 +1051,7 @@ def build_fanatics():
 
   <h2>Where Fanatics is genuinely best in class</h2>
   <p>Card valuations come from Card Ladder, a third-party sales-data service, rather than from Fanatics itself.</p>
-  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the ten platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
+  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the eleven platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
 
   <h2>Pack prices</h2>
   <div class="table-wrap">
@@ -1067,11 +1100,11 @@ def build_fanatics():
   <h2>Next</h2>
   <ul>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the opposite approach: 158,556 published pull outcomes</li>
-    <li><a href="/platforms/">Compare all ten platforms</a></li>
+    <li><a href="/platforms/">Compare all eleven platforms</a></li>
     <li><a href="/calculator/">Pack EV calculator</a></li>
   </ul>
 </div>
-""".format(collected=CLUTCH_COLLECTED, faq=faq_html)
+""".format(collected=CLUTCH_COLLECTED, faq=faq_html, **{"flags_fanatics_instant_rips": flag_row("fanatics-instant-rips")})
 
     return pages_written("/platforms/fanatics-instant-rips/", page(
         "/platforms/fanatics-instant-rips/",
@@ -1124,6 +1157,7 @@ def build_clutch():
   <div class="page-head">
     <h1>Clutch Packs: {pulls} verified pulls, and what they actually show</h1>
     <p class="lede">Clutch Packs records every pack opening on the Polygon blockchain and publishes the results. It is the only platform we track that reports what buyers actually pulled rather than what the platform says its cards are worth.</p>
+    {flags_clutch_packs}
   </div>
 
   <div class="finding">
@@ -1222,7 +1256,7 @@ def build_clutch():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all ten platforms</a></li>
+    <li><a href="/platforms/">Compare all eleven platforms</a></li>
     <li><a href="/platforms/courtyard/">Courtyard</a>, the only other platform that publishes a return figure</li>
     <li><a href="/methodology/">How we rate platforms</a></li>
   </ul>
@@ -1233,7 +1267,7 @@ def build_clutch():
            rows="".join(rows), bandrows="".join(band_rows),
            bandhead="".join('<th scope="col" class="num">%s</th>' % b
                             for b in CLUTCH_BAND_LABELS),
-           faq=faq_html)
+           faq=faq_html, **{"flags_clutch_packs": flag_row("clutch-packs")})
 
     ds = jsonld({
         "@context": "https://schema.org", "@type": "Dataset",
@@ -1284,6 +1318,7 @@ def build_crown_rips():
   <div class="page-head">
     <h1>Crown Rips: pack prices, floors and what is not disclosed</h1>
     <p class="lede">Crown Rips is the card ripping feature inside Crown Coins Casino, launched as a 500-person beta in July 2026. It is the only platform we track that sells rips inside a sweepstakes casino, and the only one with a $1 pack.</p>
+    {flags_crown_rips}
   </div>
 
   <div class="finding">
@@ -1367,13 +1402,13 @@ def build_crown_rips():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all ten platforms</a></li>
+    <li><a href="/platforms/">Compare all eleven platforms</a></li>
     <li><a href="/is-card-ripping-gambling/">Why the sweepstakes framing matters</a></li>
   </ul>
 </div>
 """.format(rows="".join(rows), reported="27 July 2026",
            modal="30%", starter=pct(floors[0] * 100, 0),
-           basic=pct(floors[1] * 100, 0), faq=faq_html)
+           basic=pct(floors[1] * 100, 0), faq=faq_html, **{"flags_crown_rips": flag_row("crown-rips")})
 
     return pages_written("/platforms/crown-rips/", page(
         "/platforms/crown-rips/",
@@ -1850,7 +1885,7 @@ def build_bonuses():
   <h2>Every offer, ranked</h2>
   <div class="table-wrap">
   <table>
-  <caption>Sign-up and first-pack offers across the ten platforms we track, {collected}.</caption>
+  <caption>Sign-up and first-pack offers across the eleven platforms we track, {collected}.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col">Offer</th><th scope="col">Type</th><th scope="col" class="num">What it's worth</th><th scope="col">Catch</th></tr></thead>
   <tbody>{offer_rows}</tbody>
   </table>
@@ -1948,10 +1983,143 @@ def build_bonuses():
         updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
 
 
+def build_mintpull():
+    cap = 250
+    rows = "".join(
+        '<tr><td class="num">%s</td><td class="num"><strong>%d weeks</strong></td>'
+        '<td class="num">%.1f months</td></tr>'
+        % (money(b), -(-b // cap), (-(-b // cap)) / 4.345)
+        for b in (500, 1000, 2500, 5000, 10000))
+
+    faq_html, faq_ld = faq_block([
+        ("Can you withdraw money from MintPull?",
+         "<p>Only money that came from selling inventory, and only $250 per seven days. Section 5.5 of the terms states &ldquo;The only funds available for withdrawal are those you have received from sales of your Inventory,&rdquo; so deposits cannot be taken back out. The Company &ldquo;may cap eligible funds at $250 per seven days.&rdquo; The minimum withdrawal is $5, processing takes up to a week, and KYC verification is required. At that cap a $2,500 balance takes ten weeks to withdraw and a $10,000 balance takes about nine months.</p>"),
+        ("Is the MintPull 100% FMV guarantee paid in cash?",
+         "<p>Not according to the terms. The homepage advertises a &ldquo;100% Fair Market Value (FMV) guarantee,&rdquo; but section 5.5 says returns are credited as &ldquo;additional pack purchase credits.&rdquo; Pack credit is not money, and since deposits are separately non-withdrawable, the only balance that can ever leave the platform is proceeds from inventory sales &mdash; subject to the $250 weekly cap.</p>"),
+        ("Who operates MintPull?",
+         "<p>Arcane Answers Studio Limited, a Hong Kong company based in Kwun Tong, trading as MintPull. Two further entities act as payment administration agents: Starpnet Studio Inc in the United States and YISEN BREEZE LTD in the United Kingdom. Hong Kong law governs the agreement. That is why the website lists three separate support addresses at three unrelated domains.</p>"),
+        ("How long can you keep a card on MintPull?",
+         "<p>Seven days. Section 5.3 states, in capitals, &ldquo;YOU MAY ONLY STORE A COLLECTIBLE FOR A MAXIMUM OF SEVEN DAYS.&rdquo; After that it becomes a Return at the Company's discretion and you are credited its fair market value as of when you received it. The Company may give 24 hours' notice by push notification and may extend the deadline. That matches Crown Rips and is longer than Packed's one day or Pickem's three hours.</p>"),
+        ("Does MintPull publish pack odds?",
+         "<p>Not on its website. Section 5.2 says packs may show the producer, series, cost and item count, and that odds details such as value chance, rarity or grade may also be shown. The same section states, in capitals, &ldquo;THE DISTRIBUTION BETWEEN RANGES MAY NOT (AND LIKELY IS NOT) BE EQUAL,&rdquo; and that statistics change in real time with inventory. No figures appear anywhere publicly.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>MintPull: a 100% guarantee you can withdraw at $250 a week</h1>
+    <p class="lede">MintPull advertises a 100% fair market value guarantee. Its terms credit returns as pack purchase credit, cap withdrawals at $250 per seven days, and are governed by Hong Kong law.</p>
+    {flags_mintpull}
+  </div>
+
+  <div class="finding">
+    <p class="big">Section 5.5: &ldquo;The only funds available for withdrawal are those you have received from sales of your Inventory,&rdquo; and the Company &ldquo;may cap eligible funds at $250 per seven days.&rdquo; At that rate a $2,500 balance takes ten weeks to withdraw and a $10,000 balance takes about nine months. The same section credits returns as &ldquo;additional pack purchase credits&rdquo; rather than money.</p>
+    <p class="small muted">Read from mintpull.net, its Terms of Service and its Responsible Purchasing Policy on {collected}.</p>
+  </div>
+
+  <h2>The withdrawal cap</h2>
+  <p>Every other platform we track either states no withdrawal cap or sets one high enough not to matter. Pickem allows $2,500 per withdrawal. Arena Club, Tilt Rips, Packed and Fanatics publish no cap at all. MintPull's is $250 per seven days, which is the lowest by an order of magnitude and the term most likely to affect anyone who does well.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>How long it takes to withdraw a balance at $250 per seven days.</caption>
+  <thead><tr><th scope="col" class="num">Balance</th><th scope="col" class="num">Weeks to withdraw</th><th scope="col" class="num">Roughly</th></tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <p>Note where this bites. It is irrelevant to someone who loses, and severe for someone who pulls well &mdash; which is the opposite of how a cap is usually framed. A single good pull on a mid-priced pack can take months to convert into money, and during that time the balance sits on a platform whose terms let it change fees &ldquo;at any time in the Company's sole discretion.&rdquo;</p>
+
+  <h2>The self-exclusion problem</h2>
+  <p>MintPull publishes a Responsible Purchasing Policy, which is more than most of this category does, and it offers temporary suspension or permanent account closure. Section 3.2 then says that on exclusion &ldquo;any remaining funds in your account will be permanently forfeited unless withdrawn prior to the exclusion taking effect.&rdquo;</p>
+
+  <p>Put that beside the $250 weekly cap. <strong>A user with $2,500 in their balance who decides to stop has to keep the account open for ten weeks to get their money out first.</strong> A user with $1,000 needs four weeks. The tool intended to help someone step away requires them to stay for a month or more, or forfeit the balance.</p>
+
+  <p>We do not think that is deliberate. It reads like two policies written separately by people who never put them side by side. But it is the practical effect, and it is the kind of thing a responsible-purchasing policy exists to prevent.</p>
+
+  <div class="callout danger">
+    <h3>If you use MintPull, withdraw as you go</h3>
+    <p>Do not let a balance accumulate. At $250 per seven days, money you leave on the platform is money you have committed to a months-long exit, and the self-exclusion clause forfeits anything still sitting there. Withdraw to the cap each week rather than waiting until you want to stop.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <h2>Who you are actually dealing with</h2>
+  <p>The site lists three support addresses at three unrelated domains, which is unusual enough to be worth following. The terms explain it:</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Arcane Answers Studio Limited, trading as MintPull &mdash; Kwun Tong, Hong Kong (&sect;17)</td></tr>
+    <tr><th scope="row">Payment agents</th><td>Starpnet Studio Inc (United States) and YISEN BREEZE LTD (United Kingdom)</td></tr>
+    <tr><th scope="row">Governing law</th><td>Hong Kong (&sect;14.1)</td></tr>
+    <tr><th scope="row">Funding</th><td>Only after the Company verifies you are in the United States (&sect;6.2)</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>So the product is sold to US buyers, funded only from the US, administered through US and UK payment agents, and governed by the law of Hong Kong. Every other platform we track is a US company operating under US law. If a dispute arises over a valuation, a withdrawal or a forfeited balance, the contract points to a jurisdiction on the other side of the world.</p>
+
+  <p>That is not an accusation of bad faith &mdash; plenty of legitimate businesses are structured across borders. It is simply a material fact that nothing on the marketing site tells you, and it belongs in any assessment of counterparty risk on a platform that holds your money.</p>
+
+  <h2>Odds, and an unusually frank sentence</h2>
+  <p>No odds, prices or pull rates appear anywhere on the public site. Packs are described only as running from &ldquo;Basic Packs to Epic Packs.&rdquo; Section 5.2 says packs may display the producer, series, cost and item count, and that odds details such as value chance, rarity or grade may also be shown.</p>
+
+  <p>The same section then says, in capitals: <strong>&ldquo;THE DISTRIBUTION BETWEEN RANGES MAY NOT (AND LIKELY IS NOT) BE EQUAL.&rdquo;</strong></p>
+
+  <p>That is a more candid statement than most of this category manages, and it is worth reading carefully. It warns that where a pack shows value ranges, you should not assume the outcomes within a range are evenly spread &mdash; which is exactly the assumption our own midpoint estimates make when a platform publishes ranges without rates. It is a fair warning, and it is also an argument for publishing the actual distribution instead.</p>
+
+  <h2>Other terms worth knowing</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Buyback</th><td>Advertised at 100% of FMV; &sect;5.5 credits returns as &ldquo;additional pack purchase credits&rdquo;</td></tr>
+    <tr><th scope="row">Storage limit</th><td>&ldquo;YOU MAY ONLY STORE A COLLECTIBLE FOR A MAXIMUM OF SEVEN DAYS&rdquo; (&sect;5.3), then auto-returned at FMV</td></tr>
+    <tr><th scope="row">Withdrawals</th><td>Sale proceeds only; $250 per seven days; $5 minimum; up to a week to process; KYC required</td></tr>
+    <tr><th scope="row">Deposits</th><td>Not withdrawable</td></tr>
+    <tr><th scope="row">FMV</th><td>Proprietary; &ldquo;may not match published market values&rdquo;; &ldquo;subject to change at any time&rdquo; (&sect;&sect;5.4&ndash;5.5)</td></tr>
+    <tr><th scope="row">Refunds</th><td>&ldquo;All Purchases are final and binding&rdquo;; requests within 30 days; Company error or legal requirement only</td></tr>
+    <tr><th scope="row">Fees</th><td>Shipping, tracking, insurance above $1,000, sales tax, $25 returned-ACH fee; changeable at any time</td></tr>
+    <tr><th scope="row">Restricted</th><td>Nevada, and anywhere outside the United States &mdash; though the terms apply this inconsistently</td></tr>
+    <tr><th scope="row">Age</th><td>18+, or the local age of majority if higher</td></tr>
+    <tr><th scope="row">Responsible purchasing</th><td>Self-exclusion available; <strong>no deposit limits, spending caps or mandatory cooling-off periods</strong> (&sect;4.1)</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Credit where it is due</h2>
+  <p>Two things here are better than the category norm. MintPull publishes a Responsible Purchasing Policy at all, naming the National Council on Problem Gambling and Gamblers Anonymous and offering self-exclusion &mdash; most platforms we have read offer nothing. And the all-caps warning about unequal distribution within value ranges is a more honest statement about pack mathematics than several better-funded competitors make.</p>
+  <p>Neither offsets the withdrawal cap. But a site that only reported the bad terms would be a worse guide than one that reports both.</p>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>No prices and no odds are published, so no expected value can be calculated. We have also not tested a withdrawal, which is the claim most worth verifying here. If you have used MintPull and have screenshots of in-app odds, or experience of how the $250 cap works in practice, we would like to hear from you.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+    <li><a href="/platforms/pickem/">Pickem, where the clock runs for three hours</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, rows=rows, faq=faq_html, **{"flags_mintpull": flag_row("mintpull")})
+
+    return pages_written("/platforms/mintpull/", page(
+        "/platforms/mintpull/",
+        "MintPull review — 100% FMV, capped at $250 a week",
+        "MintPull advertises a 100% FMV guarantee. Its terms credit returns as pack purchase credit, cap withdrawals at $250 per seven days, and are governed by Hong Kong law.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "MintPull")],
+        updated=UPDATED, structured=faq_ld))
+
+
 def build_pickem():
     faq_html, faq_ld = faq_block([
         ("How long do you have to decide on a Pickem pull?",
-         "<p>Three hours, and the timer starts when you open the pack rather than when you buy it. If it expires, Pickem sells the card automatically at its displayed fair market value. Reporting indicates the window is shorter still in some states. It is by a wide margin the tightest decision window of the ten platforms we track: Packed gives one day, Crown Rips reportedly seven, and Courtyard, Arena Club, Fanatics and Tilt Rips vault cards indefinitely.</p>"),
+         "<p>Three hours, and the timer starts when you open the pack rather than when you buy it. If it expires, Pickem sells the card automatically at its displayed fair market value. Reporting indicates the window is shorter still in some states. It is by a wide margin the tightest decision window of the eleven platforms we track: Packed gives one day, Crown Rips reportedly seven, and Courtyard, Arena Club, Fanatics and Tilt Rips vault cards indefinitely.</p>"),
         ("What is the Pickem buyback rate?",
          "<p>90% of the card's displayed fair market value, rising to 100% on your first pack purchase. Proceeds go to a USD balance which can be withdrawn to a bank card, with a $6 minimum and a $2,500 cap per withdrawal. Only money from selling cards is withdrawable, so deposits and any promotional balance are not.</p>"),
         ("Does Pickem publish pack odds?",
@@ -1965,6 +2133,7 @@ def build_pickem():
   <div class="page-head">
     <h1>Pickem Ripping Packs: three hours to decide</h1>
     <p class="lede">Pickem pays 90% of fair market value into a balance you can withdraw to a bank card. You get three hours from opening the pack to choose between shipping the card and selling it back, after which it is sold automatically.</p>
+    {flags_pickem}
   </div>
 
   <div class="finding">
@@ -1979,7 +2148,7 @@ def build_pickem():
 
   <div class="table-wrap">
   <table>
-  <caption>How long you can hold a card before the platform acts, across the ten platforms we track.</caption>
+  <caption>How long you can hold a card before the platform acts, across the eleven platforms we track.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col">Window</th><th scope="col">What happens at the end</th></tr></thead>
   <tbody>
     <tr><td class="name">Pickem</td><td><strong class="neg">3 hours</strong></td><td>Card sold automatically at Pickem's FMV</td></tr>
@@ -2055,10 +2224,10 @@ def build_pickem():
   <ul>
     <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
     <li><a href="/platforms/packed/">Packed, the other short-clock platform</a></li>
-    <li><a href="/platforms/">All ten platforms compared</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
   </ul>
 </div>
-""".format(collected=UPDATED, faq=faq_html)
+""".format(collected=UPDATED, faq=faq_html, **{"flags_pickem": flag_row("pickem")})
 
     return pages_written("/platforms/pickem/", page(
         "/platforms/pickem/",
@@ -2088,6 +2257,7 @@ def build_packed():
   <div class="page-head">
     <h1>Packed: a real 100% buyback with a one-day clock on it</h1>
     <p class="lede">Packed pays 100% of fair market value and the money genuinely reaches your bank &mdash; the best cash terms we have verified. Its Terms of Use also give you one day to decide before the card is taken back automatically.</p>
+    {flags_packed}
   </div>
 
   <div class="finding">
@@ -2178,10 +2348,10 @@ def build_packed():
   <ul>
     <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
     <li><a href="/platforms/fast-rips/">Fast Rips, where the terms contradict the marketing</a></li>
-    <li><a href="/platforms/">All ten platforms compared</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
   </ul>
 </div>
-""".format(collected=UPDATED, faq=faq_html, cta=affiliate_cta("packed"))
+""".format(collected=UPDATED, faq=faq_html, cta=affiliate_cta("packed"), **{"flags_packed": flag_row("packed")})
 
     return pages_written("/platforms/packed/", page(
         "/platforms/packed/",
@@ -2209,6 +2379,7 @@ def build_fast_rips():
   <div class="page-head">
     <h1>Fast Rips: the homepage and the terms do not agree</h1>
     <p class="lede">Fast Rips advertises a 100% buyback paid out to your bank account, which would be the best terms of any platform we track. Its own Terms of Use say Platform Credit has no cash value outside the platform and is not withdrawable.</p>
+    {flags_fast_rips}
   </div>
 
   <div class="finding">
@@ -2308,11 +2479,11 @@ def build_fast_rips():
   <h2>Next</h2>
   <ul>
     <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays, across every platform</a></li>
-    <li><a href="/platforms/">All ten platforms compared</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
     <li><a href="/is-card-ripping-gambling/">Where the law currently stands</a></li>
   </ul>
 </div>
-""".format(collected=UPDATED, faq=faq_html)
+""".format(collected=UPDATED, faq=faq_html, **{"flags_fast_rips": flag_row("fast-rips")})
 
     return pages_written("/platforms/fast-rips/", page(
         "/platforms/fast-rips/",
@@ -2397,7 +2568,7 @@ def build_buyback():
 <div class="wrap narrow">
   <div class="page-head">
     <h1>Every site advertises a 90% buyback. Here is what you actually get back.</h1>
-    <p class="lede">Five of the ten platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
+    <p class="lede">Five of the eleven platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
   </div>
 
   <div class="finding">
@@ -2408,7 +2579,7 @@ def build_buyback():
   <h2>The headline against the reality</h2>
   <div class="table-wrap">
   <table>
-  <caption>Advertised and effective buyback rates across the ten platforms we track, {collected}.</caption>
+  <caption>Advertised and effective buyback rates across the eleven platforms we track, {collected}.</caption>
   <thead><tr>
     <th scope="col">Platform</th><th scope="col" class="num">Advertised</th>
     <th scope="col" class="num">Effective</th><th scope="col" class="num">Withdrawable</th>
@@ -2490,7 +2661,7 @@ def build_buyback():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">How the Fanatics 90% becomes 84.6%</a></li>
     <li><a href="/platforms/packz/">Why the Packz buyback pays credit, not cash</a></li>
-    <li><a href="/platforms/">All ten platforms compared</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows="".join(rows), conv="".join(conv),
@@ -2512,6 +2683,390 @@ def build_buyback():
         "Five pack ripping sites advertise a 90% buyback. One pays 84.6% after fees, three pay non-withdrawable credit, and a $100 Courtyard pack sold straight back returns about $80.75.",
         body, crumbs=[("/", "Home"), (None, "Buyback rates")],
         updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
+
+
+def flag_row(slug):
+    """Scannable trust flags for one platform."""
+    keys = PLATFORM_FLAGS.get(slug, [])
+    if not keys:
+        return ""
+    chips = "".join(
+        '<li class="flag %s" title="%s">%s</li>'
+        % (FLAGS[k][1], E(FLAGS[k][2]), E(FLAGS[k][0])) for k in keys)
+    return '<ul class="flags">%s</ul>' % chips
+
+
+def build_legal():
+    STATES = [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+        "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
+        "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana",
+        "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+        "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada",
+        "New Hampshire", "New Jersey", "New Mexico", "New York",
+        "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon",
+        "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota",
+        "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington",
+        "West Virginia", "Wisconsin", "Wyoming",
+    ]
+    rows = []
+    for s in STATES:
+        blocked = STATE_RESTRICTIONS.get(s, [])
+        if blocked:
+            cell = ('<td><strong class="neg">%s</strong></td>'
+                    % E(", ".join(blocked)))
+            note = "Blocked by %d of the 11 platforms we track" % len(blocked)
+        else:
+            cell = '<td class="muted">None we could source</td>'
+            note = "No platform we track publishes a restriction here"
+        age = "19" if s == "Nebraska" else "18"
+        rows.append('<tr><th scope="row">%s</th>%s<td class="num">%s+</td>'
+                    '<td class="muted small">%s</td></tr>'
+                    % (E(s), cell, age, E(note)))
+
+    faq_html, faq_ld = faq_block([
+        ("Which states block card ripping sites?",
+         "<p>Based on the platforms' own published terms, five states are restricted by at least one platform we track: Michigan, Minnesota, Montana, Nevada and Washington are all excluded by Pickem, and Nevada is additionally excluded by MintPull. No platform we track publishes a restriction on any other state. That is not the same as saying ripping is legal everywhere else &mdash; it means no operator has told us otherwise.</p>"),
+        ("Why do those five states appear and not others?",
+         "<p>Because the platform restricting them, Pickem, operates its rip product inside a social casino. Michigan, Minnesota, Montana, Nevada and Washington are the states most active against sweepstakes-model operators. The exclusions look like a response to sweepstakes enforcement rather than to anything about trading cards, which tells you how at least one operator understands its own product.</p>"),
+        ("Is card ripping legal in my state?",
+         "<p>We cannot tell you that, and neither can anyone else with confidence. No state has ruled specifically on digital pack ripping, the question of whether it constitutes gambling or an unlawful lottery is being litigated now, and operators are making their own risk judgements state by state. What we can tell you is which platforms will accept you and what their own terms say. For the underlying legal arguments, see <a href=\"/is-card-ripping-gambling/\">our page on the legal position</a>. For an actual answer about your own circumstances, ask a lawyer.</p>"),
+        ("What is the minimum age for card ripping sites?",
+         "<p>18 on every platform we track, except that Pickem requires 19 in Nebraska, which reflects Nebraska's age of majority. Several platforms also carry a 21+ framing in promotional material. Age verification varies widely: Packed and Pickem require a government ID and a liveness check before you can withdraw or ship, while others verify only at the point of shipping.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Where card ripping sites are restricted, state by state</h1>
+    <p class="lede">Which platforms will accept you, which states they exclude, and why the exclusions look the way they do. Sourced from each platform's own published terms rather than from our reading of the law.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Five states are excluded by at least one platform we track: Michigan, Minnesota, Montana, Nevada and Washington. Every one of those exclusions comes from Pickem, whose rip product sits inside a social casino, and Nevada is additionally excluded by MintPull. No platform we track publishes a restriction on any other state.</p>
+    <p class="small muted">Compiled from published terms, {collected}. This is availability, not legality &mdash; see the caveat below.</p>
+  </div>
+
+  <div class="callout">
+    <h3>What this page is and is not</h3>
+    <p>This is a record of <strong>where platforms say they will and will not operate</strong>. It is not legal advice and it is not a map of where ripping is lawful. No state has ruled specifically on digital pack ripping; the question is unsettled and being litigated. A state's absence from the restricted list means no operator has published a restriction there, not that anyone has blessed it.</p>
+    <p>We would rather publish five states we can source than fifty we cannot. Where we have nothing, the table says so.</p>
+  </div>
+
+  <h2>The pattern in the exclusions</h2>
+  <p>Michigan, Minnesota, Montana, Nevada and Washington are the states most active against sweepstakes-model operators. They are not states with unusual views on trading cards.</p>
+
+  <p>That tells you something useful about how operators read their own product. Pickem runs its packs inside a social casino alongside slots and table games, and it has drawn its exclusion map the way a sweepstakes operator would. <a href="/platforms/crown-rips/">Crown Rips</a> has the same shape, sitting inside Crown Coins. Whatever the marketing says about collectibles, the compliance teams are treating these as gaming products in the states that scrutinise gaming products.</p>
+
+  <p>The platforms that sell packs as straightforward retail &mdash; <a href="/platforms/courtyard/">Courtyard</a>, <a href="/platforms/arena-club/">Arena Club</a>, <a href="/platforms/fanatics-instant-rips/">Fanatics</a> &mdash; publish no state exclusions at all. Both groups are selling a randomised card for a fixed price. Only one group is behaving as though that might be regulated.</p>
+
+  <h2>Availability by state</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Platform-published restrictions by state, {collected}. &ldquo;None we could source&rdquo; means no platform we track publishes a restriction, not that the activity is approved.</caption>
+  <thead><tr><th scope="col">State</th><th scope="col">Platforms that exclude it</th><th scope="col" class="num">Min age</th><th scope="col">Note</th></tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <h2>Platform availability at a glance</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">US only, no state detail published</th><td>Packz, Packed, Fast Rips, MintPull, Crown Rips</td></tr>
+    <tr><th scope="row">US only, with state exclusions</th><td>Pickem (MI, MN, MT, NV, WA)</td></tr>
+    <tr><th scope="row">Excludes Nevada specifically</th><td>MintPull</td></tr>
+    <tr><th scope="row">Not restricted to the US</th><td>Courtyard &mdash; redeems worldwide</td></tr>
+    <tr><th scope="row">No availability detail published</th><td>Arena Club, Clutch Packs, Tilt Rips, Fanatics Instant Rips</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Age requirements</h2>
+  <p>Every platform we track requires 18, with Pickem requiring 19 in Nebraska in line with that state's age of majority. Some carry 21+ framing in promotional material without making it a condition of use.</p>
+  <p>Verification differs more than the headline age does. <a href="/platforms/packed/">Packed</a> and <a href="/platforms/pickem/">Pickem</a> require a government ID and a liveness check before you can withdraw or ship anything. <a href="/platforms/arena-club/">Arena Club</a> verifies through Stripe at withdrawal. Several verify only when you ask for a card to be shipped, which means you can buy packs before anyone has confirmed who you are. Given how much of this category's audience overlaps with Pok&eacute;mon collecting, that gap is worth noting.</p>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/is-card-ripping-gambling/">Is card ripping gambling? The legal arguments and the live cases</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, rows="".join(rows), faq=faq_html)
+
+    return pages_written("/legal/", page(
+        "/legal/",
+        "Card ripping by state — where each platform is restricted",
+        "Five states are excluded by at least one card ripping platform: Michigan, Minnesota, Montana, Nevada and Washington. Availability and age rules from each platform's own terms.",
+        body, crumbs=[("/", "Home"), (None, "By state")],
+        updated=UPDATED, structured=faq_ld))
+
+
+ALTERNATIVES = {
+    "courtyard": {
+        "name": "Courtyard",
+        "why": "it publishes an exact expected value on every pack, settles in "
+               "USDC, and vaults cards indefinitely",
+        "picks": [
+            ("clutch-packs", "Clutch Packs",
+             "If you came to Courtyard for the published EV, this is the only "
+             "platform that goes further: 158,556 recorded pulls published "
+             "on-chain, averaging 1.01&times; the pack price. It discloses no "
+             "buyback terms, which is the trade."),
+            ("packz", "Packz",
+             "Publishes dollar-range odds on every pack and implies roughly "
+             "100% of face in card value on its $25-and-up packs. The buyback "
+             "pays credit that cannot be withdrawn."),
+            ("arena-club", "Arena Club",
+             "If the vaulting mattered more than the EV: indefinite storage "
+             "and a 90% buyback that withdraws to a bank account. No card "
+             "values are published, so no EV can be calculated."),
+        ],
+    },
+    "fanatics-instant-rips": {
+        "name": "Fanatics Instant Rips",
+        "why": "it is the largest brand in the category, uses third-party "
+               "Card Ladder valuations, and vaults cards free with no time limit",
+        "picks": [
+            ("arena-club", "Arena Club",
+             "The closest like-for-like: graded slabs, indefinite vaulting, "
+             "and a 90% buyback that reaches a bank account rather than the "
+             "84.6% in non-withdrawable credit Fanatics pays."),
+            ("courtyard", "Courtyard",
+             "Publishes an exact expected value on every pack, which Fanatics "
+             "does not do for any pack. Vaults indefinitely and insures."),
+            ("tilt-rips", "Tilt Rips",
+             "90% withdrawable in dollars or crypto with free vaulting. But it "
+             "publishes no odds at all and will not name its valuation source, "
+             "which is the one thing Fanatics does better than anyone."),
+        ],
+    },
+    "packz": {
+        "name": "Packz",
+        "why": "its buyback pays site credit that can only buy more packs",
+        "picks": [
+            ("arena-club", "Arena Club",
+             "Same 90% headline rate, but paid into a wallet that withdraws to "
+             "a bank account or debit card through Stripe."),
+            ("tilt-rips", "Tilt Rips",
+             "90% withdrawable in dollars or crypto, free vaulting, no time "
+             "limit. The catch is that it publishes no odds and will not name "
+             "its valuation source."),
+            ("courtyard", "Courtyard",
+             "Lower stated return at 95% of the pack price, but it publishes "
+             "that figure on every pack rather than leaving it to be estimated "
+             "from value ranges."),
+        ],
+    },
+}
+
+
+def build_alternatives(slug):
+    a = ALTERNATIVES[slug]
+    cards = "".join(
+        '<article class="card"><h3><a href="/platforms/%s/">%s</a></h3>%s'
+        '<p>%s</p><p class="more"><a href="/platforms/%s/">Full breakdown '
+        '&rarr;</a></p></article>' % (s, E(n), flag_row(s), why, s)
+        for s, n, why in a["picks"])
+
+    faq_html, faq_ld = faq_block([
+        ("What is the best alternative to %s?" % a["name"],
+         "<p>It depends which part of %s you are replacing. %s</p>" % (
+             a["name"],
+             " ".join("<strong>%s</strong> if %s" % (E(n), why[0].lower() + why[1:])
+                      for _s, n, why in a["picks"][:2]))),
+        ("Are there card ripping sites with better buyback terms than %s?" % a["name"],
+         "<p>Our <a href=\"/guides/buyback-rates/\">buyback comparison</a> ranks all eleven platforms by what the headline rate actually converts to. The short version: Arena Club and Tilt Rips pay 90% into wallets you can withdraw from, Packed pays 100% withdrawable but gives you one day to decide, and Packz and Fanatics pay credit that cannot be withdrawn at all.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Alternatives to {name}</h1>
+    <p class="lede">People look past {name} because {why}, or because they want something it does not do. Here is what each of the credible alternatives trades away.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">There is no platform in this category that is better than {name} on every axis. Each of these is better on something and worse on something else, and which matters depends on whether you care most about published odds, withdrawable money, or being allowed to keep what you pull.</p>
+    <p class="small muted">Based on published terms and odds collected {collected}.</p>
+  </div>
+
+  <div class="card-grid">{cards}</div>
+
+  <h2>How to choose between them</h2>
+  <ul>
+    <li><strong>If you want to know the odds before you buy:</strong> Clutch Packs publishes observed results from 158,556 recorded pulls, and Courtyard publishes an exact expected value on every pack. Everyone else is a step down.</li>
+    <li><strong>If you want to convert cards into money:</strong> Arena Club, Tilt Rips, Pickem and Packed all pay into accounts you can withdraw from. Packz, Fanatics, Fast Rips and MintPull do not.</li>
+    <li><strong>If you want to keep what you pull:</strong> Courtyard, Arena Club, Fanatics and Tilt Rips vault indefinitely. Pickem gives you three hours, Packed one day, Crown Rips and MintPull seven.</li>
+  </ul>
+
+  <p>The <a href="/guides/buyback-rates/">full buyback comparison</a> and the <a href="/platforms/">platform directory</a> cover all eleven.</p>
+
+  <h2>Frequently asked</h2>
+  {faq}
+</div>
+""".format(name=E(a["name"]), why=a["why"], cards=cards,
+           collected=COLLECTED, faq=faq_html)
+
+    return pages_written("/alternatives/%s/" % slug, page(
+        "/alternatives/%s/" % slug,
+        "%s alternatives — what each one trades away" % a["name"],
+        "The credible alternatives to %s, compared on published odds, "
+        "whether the buyback reaches real money, and how long you can keep a "
+        "card." % a["name"],
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"),
+                (None, "%s alternatives" % a["name"])],
+        updated=COLLECTED, structured=faq_ld))
+
+
+def build_withdrawals():
+    rows = []
+    for name, head, eff, cash, form, _who in BUYBACK_TERMS:
+        if cash is True:
+            verdict, cls = "Yes", "pos"
+        elif cash is False:
+            verdict, cls = "No", "neg"
+        else:
+            verdict, cls = "Unconfirmed", ""
+        rows.append('<tr><td class="name">%s</td>'
+                    '<td class="num"><strong class="%s">%s</strong></td>'
+                    '<td>%s</td></tr>' % (E(name), cls, verdict, form))
+
+    faq_html, faq_ld = faq_block([
+        ("Which card ripping sites let you withdraw real money?",
+         "<p>Four of the eleven we track pay into something you can withdraw from. Arena Club pays 90% to a bank account or debit card through Stripe. Tilt Rips pays 90% in US dollars or several cryptocurrencies. Packed pays 100% to a debit card, bank, PayPal or Venmo. Pickem pays 90% to a bank card, capped at $2,500 per withdrawal. Packz, Fanatics, Fast Rips and MintPull all pay credit that cannot be withdrawn, and Courtyard settles in USDC with a withdrawal path we have not verified.</p>"),
+        ("Which card ripping site pays to PayPal?",
+         "<p>Packed is the only platform we track that lists PayPal and Venmo as withdrawal options, alongside debit card and bank transfer, with a minimum around $5 to $10. Tilt Rips pays in US dollars or cryptocurrency. Arena Club and Pickem pay to a bank account or card. No other platform we track publishes PayPal as an option.</p>"),
+        ("Are there withdrawal limits on card ripping sites?",
+         "<p>MintPull caps withdrawals at $250 per seven days, which is the lowest by a wide margin &mdash; a $2,500 balance takes ten weeks to withdraw. Pickem caps at $2,500 per withdrawal with a $6 minimum. Packed, Arena Club and Tilt Rips publish no cap. Several platforms, including MintPull and Packed, also restrict withdrawals to proceeds from selling cards, meaning deposits cannot be taken back out.</p>"),
+        ("How long do card ripping withdrawals take?",
+         "<p>Packed's FAQ says instant withdrawals average about ten minutes, while its terms allow up to two weeks. MintPull states up to one week. Arena Club pays through Stripe on standard processing times. Fanatics offers free ACH or a $50 wire. Most platforms require identity verification before a first withdrawal, which is usually the longest part of the process.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Which card ripping sites actually pay out money</h1>
+    <p class="lede">Four of the eleven platforms we track let you withdraw. The rest pay credit you can only spend on more packs, or do not say. Here is who pays what, by which method, and with which limits.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Four platforms of eleven pay into an account you can withdraw from: Arena Club, Tilt Rips, Packed and Pickem. Four pay credit that cannot be withdrawn at all. Two are unconfirmed, and one &mdash; MintPull &mdash; pays withdrawable proceeds but caps them at $250 per seven days.</p>
+    <p class="small muted">From published terms and FAQs, {collected}.</p>
+  </div>
+
+  <h2>Can you get money out?</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Whether buyback proceeds reach money you control, across all eleven platforms.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Withdrawable</th><th scope="col">How it is paid</th></tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <h2>By payment method</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Bank account</th><td>Arena Club (via Stripe), Tilt Rips, Packed, Fanatics (ACH, free)</td></tr>
+    <tr><th scope="row">Debit card</th><td>Arena Club, Packed, Pickem</td></tr>
+    <tr><th scope="row">PayPal or Venmo</th><td>Packed only</td></tr>
+    <tr><th scope="row">Cryptocurrency</th><td>Tilt Rips; Courtyard settles in USDC</td></tr>
+    <tr><th scope="row">Wire transfer</th><td>Fanatics, $50 fee</td></tr>
+    <tr><th scope="row">Nothing &mdash; credit only</th><td>Packz, Fanatics instant offers, Fast Rips, MintPull returns</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Limits and minimums</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">MintPull</th><td><strong class="neg">$250 per seven days</strong>; $5 minimum; sale proceeds only; up to a week to process</td></tr>
+    <tr><th scope="row">Pickem</th><td>$2,500 maximum per withdrawal; $6 minimum; sale proceeds only</td></tr>
+    <tr><th scope="row">Packed</th><td>No stated cap; roughly $5&ndash;$10 minimum; sale proceeds only; instant averages ~10 minutes per the FAQ, &ldquo;within two weeks&rdquo; per the terms</td></tr>
+    <tr><th scope="row">Arena Club</th><td>No stated cap; Stripe's $1 minimum</td></tr>
+    <tr><th scope="row">Tilt Rips</th><td>No stated cap; no fees beyond those shown in the app</td></tr>
+    <tr><th scope="row">Fanatics</th><td>Free ACH or $50 wire; applies to marketplace sales, not instant offers</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Three things that catch people out</h2>
+  <p><strong>Deposits are often not withdrawable.</strong> MintPull, Packed and Pickem all restrict withdrawals to proceeds from selling inventory. Money you put in can only be spent on packs; only money you get back from cards can come out.</p>
+
+  <p><strong>The convenient option is usually the expensive one.</strong> On Fanatics, the instant offer pays 84.6% in non-withdrawable credit, while declining it and selling the card on the Fanatics Collect marketplace pays real money. The same logic applies anywhere with a credit-only buyback: the cash route exists, it just runs through shipping and selling the card yourself.</p>
+
+  <p><strong>Verification is the real delay.</strong> Most platforms require a government ID, and some a liveness check, before a first withdrawal. Doing that in advance rather than at the moment you want your money is worth the ten minutes &mdash; particularly on <a href="/platforms/packed/">Packed</a> and <a href="/platforms/pickem/">Pickem</a>, where a clock is running on the card itself.</p>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays</a></li>
+    <li><a href="/platforms/">All eleven platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, rows="".join(rows), faq=faq_html)
+
+    return pages_written("/guides/withdrawals/", page(
+        "/guides/withdrawals/",
+        "Card ripping withdrawals — which sites actually pay out",
+        "Four of eleven card ripping platforms let you withdraw real money. Which pay to bank, PayPal or crypto, which pay credit only, and what the limits are.",
+        body, crumbs=[("/", "Home"), (None, "Withdrawals")],
+        updated=UPDATED, structured=faq_ld))
+
+
+def build_changelog():
+    items = []
+    for date, title, detail, url in CHANGELOG:
+        items.append(
+            '<li class="log-item"><div class="log-date"><time datetime="%s">%s'
+            '</time></div><div class="log-body"><h3><a href="%s">%s</a></h3>'
+            '<p>%s</p></div></li>' % (date, date, E(url), E(title), detail))
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>What we have found, and when</h1>
+    <p class="lede">A dated record of every platform we have collected, every figure we have published, and every change we have caught. Platforms revise their odds and terms without announcing it, so the date on a number matters as much as the number.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">We date every dataset because this category changes underneath you. In one month, Arena Club's entire $25 Pok&eacute;mon checklist rotated &mdash; not one card from September appeared in October, the common tier shrank from 50 cards to 24, and the displayed rates stopped adding up to 100%.</p>
+  </div>
+
+  <ol class="changelog">{items}</ol>
+
+  <h2>Open questions</h2>
+  <p>Things we have published as unresolved rather than guessed at:</p>
+  <ul>
+    <li><strong>Arena Club's October odds summing to 49.07%.</strong> Either the displayed per-card rates go stale as inventory sells out, or part of the checklist did not load. We are rechecking.</li>
+    <li><strong>Whether Clutch Packs has a buyback at all.</strong> No terms appear anywhere, which is the one gap in otherwise category-leading disclosure.</li>
+    <li><strong>Whether Fast Rips' advertised cash-out exists.</strong> Its homepage promises a bank payout; its terms say platform credit is not withdrawable.</li>
+    <li><strong>Whether any platform's valuations match real sold prices.</strong> Every expected value on this site still rests on the platform's own numbers.</li>
+  </ul>
+
+  <h2>Corrections</h2>
+  <p>We publish these rather than quietly editing.</p>
+  <ul>
+    <li><strong>Courtyard referral offer.</strong> Earlier research described a Courtyard referral guaranteeing a $25 buyback on a $25 starter pack. We could not substantiate it. Courtyard has no welcome offer; its referral pays the referrer in points of undisclosed value. Corrected on the <a href="/guides/bonus-offers/">bonus offers page</a>.</li>
+  </ul>
+
+  <p class="small muted">Found something we have wrong? The <a href="/methodology/">methodology page</a> explains how we handle corrections.</p>
+</div>
+""".format(items="".join(items))
+
+    return pages_written("/changelog/", page(
+        "/changelog/",
+        "Changelog — what we have found, and when",
+        "A dated record of every platform collected, figure published and change caught across eleven card ripping platforms.",
+        body, crumbs=[("/", "Home"), (None, "Changelog")], updated=UPDATED))
 
 
 def build_methodology():
@@ -2839,6 +3394,13 @@ def main():
         build_compare(),
         build_chase(),
         build_bonuses(),
+        build_mintpull(),
+        build_legal(),
+        build_withdrawals(),
+        build_changelog(),
+        build_alternatives("courtyard"),
+        build_alternatives("fanatics-instant-rips"),
+        build_alternatives("packz"),
         build_pickem(),
         build_packed(),
         build_fast_rips(),

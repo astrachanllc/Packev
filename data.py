@@ -3,7 +3,7 @@ import csv
 from collections import OrderedDict
 
 COLLECTED = "2026-09-21"
-UPDATED = "2026-10-21"
+UPDATED = "2026-10-22"
 
 CATEGORY_LABELS = {
     "pokemon": "Pokémon", "sneakers": "Sneakers", "onepiece": "One Piece",
@@ -229,6 +229,12 @@ BUYBACK_TERMS = [
     ("Clutch Packs", None, None, None,
      "No buyback or sell-back terms disclosed anywhere",
      "Market value at the time of the pull, source not named"),
+    ("MintPull", 1.00, None, False,
+     "Returns are credited as &ldquo;additional pack purchase credits&rdquo; "
+     "(&sect;5.5); withdrawals capped at $250 per seven days and limited to "
+     "proceeds from sales",
+     "&ldquo;Proprietary system&rdquo; which &ldquo;may not match published "
+     "market values&rdquo; and is &ldquo;subject to change at any time&rdquo;"),
     ("Pickem", 0.90, 0.90, True,
      "USD balance, withdrawable to a bank card ($6 minimum, $2,500 per "
      "withdrawal); only sale proceeds can be withdrawn",
@@ -243,6 +249,99 @@ BUYBACK_TERMS = [
      "non-withdrawable, with withdrawals at the company's sole discretion",
      "&ldquo;Proprietary, Platform-administered valuation used exclusively "
      "for internal Platform purposes&rdquo;"),
+]
+
+
+# ---------------------------------------------------------------- trust flags
+# Short, scannable risk labels. Every flag must trace to a quoted term or a
+# figure we published; nothing here is a vibe.
+FLAGS = {
+    "cash": ("Cash-out verified", "pos",
+             "Buyback proceeds reach a bank account, card or wallet you control"),
+    "credit": ("Credit only", "neg",
+               "Buyback pays platform credit that cannot be withdrawn"),
+    "clock": ("Short clock", "neg",
+              "You have under a week to decide before the platform sells the card"),
+    "conflict": ("Marketing conflicts with terms", "neg",
+                 "A published claim is contradicted by the platform's own terms"),
+    "noodds": ("No odds published", "neg",
+               "No pull rates or probabilities are published anywhere public"),
+    "odds": ("Odds published", "pos",
+             "Pull rates or value-band probabilities are published"),
+    "ev": ("Expected value published", "pos",
+           "The platform states an expected value, or publishes observed results"),
+    "cap": ("Withdrawal cap", "neg",
+            "Withdrawals are capped low enough to delay getting money out"),
+    "offshore": ("Non-US operator", "neg",
+                 "Operated outside the US under non-US law"),
+}
+
+PLATFORM_FLAGS = {
+    "clutch-packs": ["ev", "odds"],
+    "courtyard": ["ev", "odds"],
+    "packz": ["odds", "credit"],
+    "arena-club": ["odds", "cash"],
+    "fanatics-instant-rips": ["noodds", "credit"],
+    "tilt-rips": ["noodds", "cash"],
+    "pickem": ["odds", "cash", "clock"],
+    "packed": ["cash", "clock"],
+    "crown-rips": ["noodds", "clock"],
+    "fast-rips": ["noodds", "conflict", "credit"],
+    "mintpull": ["noodds", "credit", "cap", "offshore", "clock"],
+}
+
+# --------------------------------------------------------------- availability
+# Per-state restrictions we can source to a platform's own published terms.
+STATE_RESTRICTIONS = {
+    "Michigan": ["Pickem"],
+    "Minnesota": ["Pickem"],
+    "Montana": ["Pickem"],
+    "Nevada": ["Pickem", "MintPull"],
+    "Washington": ["Pickem"],
+}
+
+US_ONLY = ["Packz", "Packed", "Fast Rips", "MintPull", "Pickem", "Crown Rips"]
+UNKNOWN_AVAILABILITY = ["Arena Club", "Clutch Packs", "Tilt Rips",
+                        "Fanatics Instant Rips"]
+
+# ------------------------------------------------------------------ changelog
+# Dated record of what we collected and what changed. Newest first.
+CHANGELOG = [
+    ("2026-10-22", "MintPull added",
+     "Terms cap withdrawals at $250 per seven days and credit returns as pack "
+     "purchase credit, against a &ldquo;100% FMV guarantee&rdquo; on the "
+     "homepage. Operated from Hong Kong under Hong Kong law.",
+     "/platforms/mintpull/"),
+    ("2026-10-22", "Pickem added",
+     "Three-hour window from opening a pack before the card is sold "
+     "automatically &mdash; the shortest in the category.",
+     "/platforms/pickem/"),
+    ("2026-10-22", "Packed added",
+     "&sect;6.3 limits storage to one day. Terms require Value Band odds to be "
+     "displayed, which no other platform contractually commits to.",
+     "/platforms/packed/"),
+    ("2026-10-22", "Fast Rips added",
+     "Homepage advertises a 100% buyback paid to a bank account; &sect;6.3 of "
+     "its terms says Platform Credit has no cash value outside the platform.",
+     "/platforms/fast-rips/"),
+    ("2026-10-22", "Buyback comparison published",
+     "Five platforms advertise 90%. One pays 84.6% after fees and three pay "
+     "credit that cannot be withdrawn.",
+     "/guides/buyback-rates/"),
+    ("2026-10-21", "Arena Club checklist rotated entirely in one month",
+     "Not one card from the September $25 Pok&eacute;mon Bronze checklist "
+     "appeared in the October one. The Lineup tier shrank from 50 cards to 24, "
+     "and the displayed per-card rates then summed to 49.07% rather than 100%. "
+     "Unresolved.",
+     "/platforms/arena-club/"),
+    ("2026-10-21", "Clutch Packs observed results collected",
+     "158,556 verified on-chain pulls across 25 packs, averaging 1.01&times; "
+     "the pack price &mdash; the only observed return data in the category.",
+     "/platforms/clutch-packs/"),
+    ("2026-09-21", "Courtyard and Packz odds collected",
+     "All 92 Courtyard packs and all 14 Packz packs, collected first-hand and "
+     "published as open data.",
+     "/data/"),
 ]
 
 

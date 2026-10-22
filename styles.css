@@ -176,6 +176,32 @@ select:focus,input:focus{border-color:var(--cert);outline:none}
 .affiliate p:last-child{margin-bottom:0;margin-top:14px}
 .affiliate .btn.primary{text-decoration:none}
 
+/* ---------- Trust flags ---------- */
+.flags{list-style:none;margin:0 0 4px;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.flag{
+  font-size:.74rem;font-weight:700;letter-spacing:.01em;
+  padding:3px 9px;border-radius:999px;white-space:nowrap;
+  border:1.5px solid var(--line);color:var(--muted);background:var(--panel);
+  cursor:help;
+}
+.flag.pos{border-color:var(--gain);color:var(--gain)}
+.flag.neg{border-color:var(--loss);color:var(--loss)}
+
+/* ---------- Changelog ---------- */
+.changelog{list-style:none;margin:28px 0;padding:0}
+.log-item{
+  display:grid;grid-template-columns:120px 1fr;gap:20px;
+  padding:18px 0;border-bottom:1px solid var(--line-soft);
+}
+.log-item:last-child{border-bottom:none}
+.log-date{font-size:.84rem;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:3px}
+.log-body h3{margin:0 0 .35em;font-size:1.05rem}
+.log-body p{margin:0;font-size:.95rem}
+@media (max-width:640px){
+  .log-item{grid-template-columns:1fr;gap:6px}
+  .log-date{padding-top:0}
+}
+
 /* ---------- Callouts ---------- */
 .callout{background:var(--panel);border-left:4px solid var(--warn);padding:16px 20px;border-radius:0 8px 8px 0;margin:24px 0}
 .callout.danger{border-left-color:var(--loss)}
