@@ -1,0 +1,1863 @@
+#!/usr/bin/env python3
+"""Build the static PackEV site. Every table is rendered into the HTML here,
+so crawlers that do not run JavaScript still see the numbers."""
+import os
+import shutil
+from collections import Counter
+
+from data import (load_courtyard, load_packz, ARENA_CLUB_PACKS,
+                  CROWN_RIPS_PACKS, CLUTCH_PACKS, CLUTCH_BAND_LABELS,
+                  CLUTCH_COLLECTED, clutch_stats,
+                  money, pct, COLLECTED, UPDATED)
+from layout import page, faq_block, jsonld, BASE_URL, SITE_NAME, E
+
+OUT = "site"
+CY = load_courtyard()
+PZ = load_packz()
+
+# ---------------------------------------------------------------- stats
+cy_ratios = Counter(round(p["ev_ratio"], 4) for p in CY if p["ev_ratio"])
+CY_N = len(CY)
+CY_AT_95 = cy_ratios[0.95]
+CY_MIN_PRICE = min(p["price"] for p in CY)
+CY_MAX_PRICE = max(p["price"] for p in CY)
+CY_HIT_LO = min(p["at_or_above"] for p in CY)
+CY_HIT_HI = max(p["at_or_above"] for p in CY)
+
+PZ_N = len(PZ)
+pz_std = [p for p in PZ if p["price"] >= 25]
+PZ_STD_MID = sum(p["ratio_mid"] for p in pz_std) / len(pz_std)
+PZ_COMMON = next(p for p in PZ if p["price"] == 5)
+PZ_UNCOMMON = next(p for p in PZ if p["price"] == 10)
+PZ_HIT = pz_std[0]["at_or_above"]
+
+CL = clutch_stats()
+
+
+def pages_written(path, content):
+    full = os.path.join(OUT, path.strip("/"), "index.html") if path != "/" \
+        else os.path.join(OUT, "index.html")
+    os.makedirs(os.path.dirname(full), exist_ok=True)
+    with open(full, "w", encoding="utf-8") as fh:
+        fh.write(content)
+    return path
+
+
+# ================================================================== tables
+def courtyard_table():
+    rows = []
+    for p in CY:
+        rows.append(
+            '<tr data-cat="{cat}">'
+            '<td class="name">{name}</td>'
+            '<td>{cat}</td>'
+            '<td class="num">{price}</td>'
+            '<td class="num">{ev}</td>'
+            '<td class="num"><strong>{ratio}</strong></td>'
+            '<td class="num">{credit}</td>'
+            '<td class="num">{hit}</td>'
+            '<td class="num">{top}</td>'
+            "</tr>".format(
+                cat=E(p["category_label"]), name=E(p["name"]),
+                price=money(p["price"]), ev=money(p["ev"]),
+                ratio=pct(p["ev_ratio"] * 100, 0),
+                credit=pct(p["credit_ratio"] * 100, 1),
+                hit=pct(p["at_or_above"], 1), top=money(p["top"]),
+            ))
+    cats = sorted({p["category_label"] for p in CY})
+    options = "".join('<option>%s</option>' % E(c) for c in cats)
+    return """
+<div class="filter-bar">
+  <label for="cyFilter">Filter by category</label>
+  <select id="cyFilter"><option value="">All categories ({n} packs)</option>{options}</select>
+</div>
+<div class="table-wrap">
+<table id="cyTable">
+<caption>Expected value as published by Courtyard, collected {collected}. "At 90% buyback" applies Courtyard's advertised instant-offer rate to the posted EV.</caption>
+<thead><tr>
+<th scope="col">Pack</th><th scope="col">Category</th><th scope="col" class="num">Price</th>
+<th scope="col" class="num">Posted EV</th><th scope="col" class="num">Return</th>
+<th scope="col" class="num">At 90% buyback</th>
+<th scope="col" class="num">Chance of &ge; price</th><th scope="col" class="num">Top prize</th>
+</tr></thead>
+<tbody>{rows}</tbody>
+</table>
+</div>
+<script>
+document.getElementById('cyFilter').addEventListener('change',function(e){{
+  var v=e.target.value;
+  document.querySelectorAll('#cyTable tbody tr').forEach(function(tr){{
+    tr.hidden = !!v && tr.dataset.cat !== v;
+  }});
+}});
+</script>
+""".format(rows="".join(rows), options=options, n=CY_N, collected=COLLECTED)
+
+
+def packz_table():
+    rows = []
+    for p in PZ:
+        rows.append(
+            '<tr><td class="name">{name}</td><td>{cat}</td>'
+            '<td class="num">{price}</td><td class="num">{mid}</td>'
+            '<td class="num"><strong>{ratio}</strong></td>'
+            '<td class="num">{band}</td><td class="num">{credit}</td>'
+            '<td class="num">{hit}</td></tr>'.format(
+                name=E(p["name"]), cat=E(p["category_label"]),
+                price=money(p["price"]), mid=money(p["ev_mid"]),
+                ratio=pct(p["ratio_mid"] * 100, 0),
+                band="%s&ndash;%s" % (pct(p["ratio_low"] * 100, 0).rstrip("%"),
+                                      pct(p["ratio_high"] * 100, 0)),
+                credit=pct(p["credit_ratio"] * 100, 0),
+                hit=pct(p["at_or_above"], 1),
+            ))
+    return """
+<div class="table-wrap">
+<table>
+<caption>Calculated from the odds Packz publishes on each pack page, collected {collected}. Packz shows value ranges rather than exact card values, so the headline figure assumes cards sit at the middle of their range and the band shows the full span.</caption>
+<thead><tr>
+<th scope="col">Pack</th><th scope="col">Category</th><th scope="col" class="num">Price</th>
+<th scope="col" class="num">Avg. card value</th><th scope="col" class="num">Return</th>
+<th scope="col" class="num">Possible range</th><th scope="col" class="num">As 90% credit</th>
+<th scope="col" class="num">Chance of &ge; price</th>
+</tr></thead>
+<tbody>{rows}</tbody>
+</table>
+</div>
+""".format(rows="".join(rows), collected=COLLECTED)
+
+
+# ================================================================== pages
+def build_home():
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Every card ripping site, one honest number.</h1>
+    <p class="lede">Online pack ripping sites publish odds. They rarely publish the number that decides whether a pack is worth buying: how much of your money comes back, on average, per pack. We calculate it from each platform's own disclosures.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Clutch Packs publishes {clutchpulls} real pack openings verified on-chain, and they average {clutch:.2f} times the pack price &mdash; yet {clutchbelow} of those pulls came back worth less than the pack cost. Courtyard posts an expected value of 95% of the price on {cy95} of its {cyn} packs. Packz's published odds work out to about {pzstd}. Arena Club and Crown Rips publish no values at all.</p>
+    <p class="small muted">Odds collected {collected}. These are the platforms' own figures and valuations, not independently verified sale prices.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>{clutchpulls}</b><span>Real pulls analysed</span></div>
+    <div class="stat"><b>{totpacks}</b><span>Packs measured across 5 platforms</span></div>
+    <div class="stat"><b>95%</b><span>Courtyard's most common posted return</span></div>
+    <div class="stat"><b class="neg">{clutchbelow}</b><span>Of real pulls worth less than the pack</span></div>
+  </div>
+
+  <h2>Transparency ranking</h2>
+  <p>We rank on transparency first, because it is the one thing a buyer can verify before spending anything. A platform that publishes observed results is making the strongest claim available. One that publishes an expected value is making a checkable commitment. One that publishes only ranges, or per-card hit rates with no values, is not.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Transparency ranking as of {collected2}. Full scored ratings follow once buyback terms and card valuations are verified.</caption>
+  <thead><tr><th scope="col">#</th><th scope="col">Platform</th><th scope="col">What it discloses</th><th scope="col">Return</th><th scope="col">Buyback</th></tr></thead>
+  <tbody>
+    <tr><td class="num">1</td><td class="name"><a href="/platforms/clutch-packs/">Clutch Packs</a></td><td>Observed pull results, verified on-chain, plus a full 100-card pool per pack</td><td><strong>{clutch:.2f}&times;</strong> observed over {clutchpulls} pulls</td><td>Not disclosed</td></tr>
+    <tr><td class="num">2</td><td class="name"><a href="/platforms/courtyard/">Courtyard</a></td><td>Exact expected value and dollar-range odds on every pack</td><td>95&ndash;96% claimed</td><td>90% advertised</td></tr>
+    <tr><td class="num">3</td><td class="name"><a href="/platforms/packz/">Packz</a></td><td>Dollar-range odds, no expected value</td><td>~{pzstd} on $25+ packs, our estimate</td><td>90%, site credit only</td></tr>
+    <tr><td class="num">4</td><td class="name"><a href="/platforms/arena-club/">Arena Club</a></td><td>Per-card hit rates, no card values, no expected value</td><td>Not calculable</td><td>90% of card value, withdrawable</td></tr>
+    <tr><td class="num">5</td><td class="name"><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></td><td>Checklist of contents, no pull rates; third-party card valuations</td><td>Not calculable</td><td>84.6% effective, credit only</td></tr>
+    <tr><td class="num">6</td><td class="name"><a href="/platforms/crown-rips/">Crown Rips</a></td><td>Minimum and maximum pull value only, no rates</td><td>Not calculable</td><td>100% claimed, unverified</td></tr>
+    <tr><td class="num">7</td><td class="name"><a href="/platforms/tilt-rips/">Tilt Rips</a></td><td>Top prizes only, no rates and no floor</td><td>Not calculable</td><td>90%, withdrawable in cash or crypto</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p class="small muted">Clutch Packs leads because observed results cannot be quietly adjusted by revaluing inventory. It is not yet scored, because it discloses no buyback terms and buyback is a quarter of the score.</p>
+
+  <div class="card-grid">
+    <article class="card">
+      <span class="verdict">Most transparent</span>
+      <h3>Clutch Packs</h3>
+      <dl>
+        <dt>Packs measured</dt><dd>{clutchpacks}</dd>
+        <dt>Real pulls</dt><dd>{clutchpulls}</dd>
+        <dt>Observed return</dt><dd>{clutch:.2f}&times;</dd>
+        <dt>Pulls under 1&times;</dt><dd>{clutchbelow}</dd>
+      </dl>
+      <p>Records every opening on-chain and publishes the results. The average is near break-even; three quarters of individual pulls are not.</p>
+      <p class="more"><a href="/platforms/clutch-packs/">The full pull data &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <span class="verdict">Best published EV</span>
+      <h3>Courtyard</h3>
+      <dl>
+        <dt>Packs measured</dt><dd>{cyn}</dd>
+        <dt>Price range</dt><dd>{cymin}&ndash;{cymax}</dd>
+        <dt>Posted return</dt><dd>95&ndash;96%</dd>
+        <dt>Chance of &ge; price</dt><dd>{cyhitlo}&ndash;{cyhithi}</dd>
+      </dl>
+      <p>Publishes an exact expected value on every pack. Packs differ in shape, not in average return.</p>
+      <p class="more"><a href="/platforms/courtyard/">All {cyn} Courtyard packs &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <span class="verdict">Best stated return</span>
+      <h3>Packz</h3>
+      <dl>
+        <dt>Packs measured</dt><dd>{pzn}</dd>
+        <dt>Price range</dt><dd>$5&ndash;$1,000</dd>
+        <dt>Estimated return</dt><dd>~{pzstd} ($25+)</dd>
+        <dt>Chance of &ge; price</dt><dd>{pzhit}</dd>
+      </dl>
+      <p>Every pack uses one odds template. The headline return looks strong, but it rests on Packz's own valuations and the buyback pays in credit you cannot withdraw.</p>
+      <p class="more"><a href="/platforms/packz/">All {pzn} Packz packs &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <span class="verdict">Best buyback terms</span>
+      <h3>Arena Club</h3>
+      <dl>
+        <dt>Price range</dt><dd>$25&ndash;$5,000</dd>
+        <dt>Odds format</dt><dd>Per card</dd>
+        <dt>Posted EV</dt><dd>None</dd>
+        <dt>Buyback payout</dt><dd>Withdrawable</dd>
+      </dl>
+      <p>The only platform here whose buyback reaches a real bank account without further conditions, and the only one whose expected value you cannot work out from its own page.</p>
+      <p class="more"><a href="/platforms/arena-club/">Arena Club breakdown &rarr;</a></p>
+    </article>
+  </div>
+
+  <h2>Work out any pack yourself</h2>
+  <p>The <a href="/calculator/">pack EV calculator</a> takes the odds any site publishes and returns the average card value, the expected loss per pack, and the chance of beating the pack price. It is free, needs no account, and runs entirely in your browser.</p>
+
+  <h2>Start here</h2>
+  <ul>
+    <li><a href="/platforms/clutch-packs/">What 158,556 real pulls show</a> &mdash; the only observed return data in the category.</li>
+    <li><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a> &mdash; the two platforms that publish enough to compare directly.</li>
+    <li><a href="/methodology/">How we rate platforms</a> &mdash; what goes into a score and what does not.</li>
+    <li><a href="/is-card-ripping-gambling/">Is card ripping gambling?</a> &mdash; where the law currently stands.</li>
+    <li><a href="/data/">Open data</a> &mdash; every odds table we have collected, as CSV.</li>
+  </ul>
+</div>
+""".format(cyn=CY_N, cy95=CY_AT_95, pzn=PZ_N, collected=COLLECTED,
+           collected2=CLUTCH_COLLECTED,
+           pzstd=pct(PZ_STD_MID * 100, 0), pzhit=pct(PZ_HIT, 1),
+           cymin=money(CY_MIN_PRICE), cymax=money(CY_MAX_PRICE),
+           cyhitlo=pct(CY_HIT_LO, 0), cyhithi=pct(CY_HIT_HI, 0),
+           clutch=CL["w_avg"], clutchpulls="{:,}".format(CL["pulls"]),
+           clutchbelow=pct(CL["below_1x"], 0), clutchpacks=CL["n_packs"],
+           totpacks=CY_N + PZ_N + CL["n_packs"] + len(CROWN_RIPS_PACKS))
+
+    ld = [
+        jsonld({
+            "@context": "https://schema.org", "@type": "WebSite",
+            "name": SITE_NAME, "url": BASE_URL,
+            "description": "Independent expected-value analysis of online card ripping and digital pack opening platforms.",
+        }),
+        jsonld({
+            "@context": "https://schema.org", "@type": "Organization",
+            "name": SITE_NAME, "url": BASE_URL,
+            "description": "Independent research on online card ripping platforms, based on each platform's published odds.",
+        }),
+    ]
+    return pages_written("/", page(
+        "/",
+        "%s — %s" % (SITE_NAME, TAGLINE_FULL),
+        "Independent expected-value analysis of online card ripping sites. Courtyard posts 95%% returns on most packs; Packz's published odds work out to about %s. Free pack EV calculator." % pct(PZ_STD_MID * 100, 0),
+        body, updated=COLLECTED, structured=ld))
+
+
+TAGLINE_FULL = "Card ripping sites rated by expected value"
+
+
+def build_platforms_index():
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Card ripping platforms</h1>
+    <p class="lede">Every platform we cover, with what it discloses and what that works out to. Clutch Packs, Courtyard, Packz and Arena Club we collected first-hand; Crown Rips is in closed beta, so its figures are reported rather than collected. Platforms we have not measured at all are listed at the bottom.</p>
+  </div>
+
+  <div class="card-grid">
+    <article class="card">
+      <h3><a href="/platforms/clutch-packs/">Clutch Packs</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>{clutchpacks}</dd>
+        <dt>Prices</dt><dd>$25&ndash;$2,500</dd>
+        <dt>Posted EV</dt><dd>Observed, on-chain</dd>
+        <dt>Return</dt><dd>{clutch:.2f}&times; over {clutchpulls} pulls</dd>
+        <dt>Buyback</dt><dd>Not disclosed</dd>
+      </dl>
+      <p>Multisport, Pok&eacute;mon, One Piece and soccer. The only platform publishing what buyers actually pulled rather than what it says its cards are worth.</p>
+      <p class="more"><a href="/platforms/clutch-packs/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/courtyard/">Courtyard</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>{cyn}</dd>
+        <dt>Prices</dt><dd>{cymin}&ndash;{cymax}</dd>
+        <dt>Posted EV</dt><dd>Yes, exact</dd>
+        <dt>Return</dt><dd>95&ndash;96%</dd>
+        <dt>Buyback</dt><dd>90% advertised</dd>
+      </dl>
+      <p>Cards, comics, coins, watches and sneakers. Publishes an expected value on every pack, which is the strongest disclosure we have found anywhere.</p>
+      <p class="more"><a href="/platforms/courtyard/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/packz/">Packz</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>{pzn}</dd>
+        <dt>Prices</dt><dd>$5&ndash;$1,000</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>~{pzstd} ($25+)</dd>
+        <dt>Buyback</dt><dd>90%, credit only</dd>
+      </dl>
+      <p>Sports and Pok&eacute;mon, US only. Publishes dollar-range odds on every pack, all built from a single odds template.</p>
+      <p class="more"><a href="/platforms/packz/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/arena-club/">Arena Club</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>9 tiers &times; 9 categories</dd>
+        <dt>Prices</dt><dd>$25&ndash;$5,000</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>90% of value, withdrawable</dd>
+      </dl>
+      <p>Every pull is a graded slab. Odds are listed card by card with no values attached, so the expected value cannot be worked out from the page.</p>
+      <p class="more"><a href="/platforms/arena-club/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/crown-rips/">Crown Rips</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>10 reported</dd>
+        <dt>Prices</dt><dd>$1&ndash;$2,500</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>100% claimed</dd>
+      </dl>
+      <p>A card ripping feature inside a sweepstakes casino, in closed beta. Publishes a minimum and maximum pull value per pack but no pull rates, and its disclosed floor is the lowest we have seen.</p>
+      <p class="more"><a href="/platforms/crown-rips/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>5 categories</dd>
+        <dt>Prices</dt><dd>$10&ndash;$2,500</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>84.6% effective, credit</dd>
+      </dl>
+      <p>The largest brand in the category. Publishes a checklist but no pull rates, and the advertised 90% offer nets 84.6% after fees. Uses third-party card valuations, which no competitor does.</p>
+      <p class="more"><a href="/platforms/fanatics-instant-rips/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/tilt-rips/">Tilt Rips</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>~60</dd>
+        <dt>Prices</dt><dd>$0.10&ndash;$3,000</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>90%, withdrawable</dd>
+      </dl>
+      <p>The largest catalogue and the least odds disclosure. Its sell-back is the best cash route we have verified, but the platform sets the valuation and says the price cannot be disputed.</p>
+      <p class="more"><a href="/platforms/tilt-rips/">Full breakdown &rarr;</a></p>
+    </article>
+  </div>
+
+  <h2>Not yet measured</h2>
+  <p>These platforms are on our list. We publish nothing about a platform's returns until we have collected its odds ourselves.</p>
+  <div class="table-wrap">
+  <table class="plain">
+  <thead><tr><th scope="col">Platform</th><th scope="col">Why it matters</th><th scope="col">Status</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Phygitals</td><td>Powers Underdog's pack product; runs a referral and revenue-share programme</td><td>Odds not yet collected</td></tr>
+    <tr><td class="name">Collector Crypt</td><td>One of the largest platforms by reported sales volume</td><td>Odds not yet collected</td></tr>
+    <tr><td class="name">RipRip</td><td>Venture-backed Pok&eacute;mon-only entrant, launched April 2026</td><td>Odds not yet collected</td></tr>
+    <tr><td class="name">GameStop Power Packs</td><td>A major retailer's version of digital packs</td><td>Odds not yet collected</td></tr>
+  </tbody>
+  </table>
+  </div>
+</div>
+""".format(cyn=CY_N, pzn=PZ_N, cymin=money(CY_MIN_PRICE),
+           cymax=money(CY_MAX_PRICE), pzstd=pct(PZ_STD_MID * 100, 0),
+           clutch=CL["w_avg"], clutchpacks=CL["n_packs"],
+           clutchpulls="{:,}".format(CL["pulls"]))
+
+    return pages_written("/platforms/", page(
+        "/platforms/",
+        "Card ripping platforms compared — odds, returns and buyback terms",
+        "Every online pack ripping platform we have collected odds from: Courtyard, Packz and Arena Club, with published returns, odds formats and buyback terms side by side.",
+        body, crumbs=[("/", "Home"), (None, "Platforms")], updated=COLLECTED))
+
+
+def build_courtyard():
+    spicy = [p for p in CY if p["spicy"]]
+    best = max((p for p in CY if p["ev_ratio"]), key=lambda p: p["ev_ratio"])
+    worst = min((p for p in CY if p["ev_ratio"]), key=lambda p: p["ev_ratio"])
+
+    faq_html, faq_ld = faq_block([
+        ("What is the expected value of a Courtyard pack?",
+         "<p>Courtyard publishes an expected value on every pack, and on %d of its %d packs that figure is exactly 95%% of the pack price. The $2,500 and $5,000 packs post 96%%, and the $1,500 U.S. Coins Pack posts the lowest figure at 93.3%%. In plain terms, the average card in a Courtyard pack is worth about 95 cents for every dollar spent, using Courtyard's own valuations.</p>" % (CY_AT_95, CY_N)),
+        ("Does Courtyard pay out in cash?",
+         "<p>Courtyard advertises an instant buyback at 90%% of a card's value, and the platform settles in USDC, a dollar-pegged stablecoin. Applying that 90%% rate to a 95%% pack gives about 85.5%% of the pack price back if you sell every card straight back. Independent tracking of recorded pulls has measured Courtyard's actual instant offers nearer 85%% of value, which would put the real figure closer to 80%%. We have not yet verified the withdrawal path ourselves.</p>"),
+        ("Which Courtyard pack has the best odds?",
+         "<p>Every Courtyard pack returns almost the same average, so the meaningful difference is shape rather than value. The chance of pulling a card worth at least roughly the pack price ranges from %s to %s across the %d packs. The highest posted return is the %s at %s, and the lowest is the %s at %s.</p>" % (pct(CY_HIT_LO, 0), pct(CY_HIT_HI, 0), CY_N, E(best["name"]), pct(best["ev_ratio"] * 100, 1), E(worst["name"]), pct(worst["ev_ratio"] * 100, 1))),
+        ("What are Courtyard's Spicy packs?",
+         "<p>Spicy packs lower the floor in exchange for a much larger ceiling. They post the same kind of expected value as the standard packs but start their bottom tier at around half the pack price, and their top prize reaches far higher. The Pok&eacute;mon Legend (Spicy) tops out at $79,900 against $40,000 for the standard Legend pack. Same average, more variance.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Courtyard pack odds and expected value</h1>
+    <p class="lede">All {cyn} Courtyard packs, from the {cymin} Basic packs to the {cymax} Sports Cosmic Pack, with the expected value Courtyard publishes on each one.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Courtyard publishes an exact expected value on every pack, and on {cy95} of {cyn} packs that figure is exactly 95% of the pack price. The $2,500 and $5,000 packs post 96%. The $1,500 U.S. Coins Pack is the lowest at 93.3%.</p>
+    <p class="small muted">Collected {collected} from Courtyard's own pack pages.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>{cyn}</b><span>Packs measured</span></div>
+    <div class="stat"><b>95%</b><span>Posted return on {cy95} packs</span></div>
+    <div class="stat"><b>85.5%</b><span>Return after 90% buyback</span></div>
+    <div class="stat"><b>{hitlo}&ndash;{hithi}</b><span>Chance of beating the price</span></div>
+  </div>
+
+  <h2>What the numbers mean</h2>
+  <p><strong>The average is fixed; the shape is what changes.</strong> Nearly every pack returns the same 95%, whether you spend $15 or $10,000. What differs between packs is how that value is distributed. The chance of pulling a card worth at least roughly the pack price runs from {hitlo} to {hithi} depending on the pack, so two packs with identical expected value can feel completely different to open.</p>
+
+  <p><strong>Spicy packs trade the floor for the ceiling.</strong> The {nspicy} Spicy packs start their lowest tier at around half the pack price instead of about 70%, and push their top prize far higher in return. If you want the lottery shape, that is where it is; the average return is the same either way.</p>
+
+  <p><strong>Selling back costs you more than the posted EV suggests.</strong> Courtyard advertises a 90% instant buyback. Applied to a 95% pack that is about 85.5% of your money returned if you sell everything straight back. Independent tracking of recorded Courtyard pulls has measured actual instant offers nearer 85% of card value, which would put the real cash return closer to 80%. The posted expected value is the value of the card, not the cash you can get for it.</p>
+
+  <div class="callout">
+    <h3>What we have not verified</h3>
+    <p>The expected values on this page are Courtyard's own, calculated from Courtyard's own card valuations. We have not yet checked a sample of those valuations against real sold prices. If the valuations run high, the true return is lower than the posted figure. That check is the next thing we are doing, and we will publish it either way.</p>
+  </div>
+
+  <h2>All {cyn} Courtyard packs</h2>
+  {table}
+
+  <h2>Odds disclosure</h2>
+  <p>Courtyard shows each pack's odds as dollar ranges with a percentage against each, plus a single expected value figure. Most packs' odds sum to between 99.6% and 100.5% rather than exactly 100%, which is consistent with rounding the small tiers for display rather than an error in the underlying numbers. One pack in our collection, the Sealed Pok&eacute;mon Booster ($50), appears to be missing a tier between $100 and $200 and needs rechecking.</p>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a> &mdash; how the two disclosures compare.</li>
+    <li><a href="/calculator/">Run a Courtyard pack through the calculator</a>.</li>
+    <li><a href="/data/">Download the full Courtyard odds dataset</a>.</li>
+  </ul>
+</div>
+""".format(cyn=CY_N, cy95=CY_AT_95, cymin=money(CY_MIN_PRICE),
+           cymax=money(CY_MAX_PRICE), collected=COLLECTED,
+           hitlo=pct(CY_HIT_LO, 0), hithi=pct(CY_HIT_HI, 0),
+           nspicy=len(spicy), table=courtyard_table(), faq=faq_html)
+
+    ds = jsonld({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Courtyard pack odds and expected values",
+        "description": "Published odds tiers and expected values for all %d Courtyard mystery packs, collected %s." % (CY_N, COLLECTED),
+        "url": BASE_URL + "/platforms/courtyard/",
+        "dateModified": COLLECTED,
+        "creator": {"@type": "Organization", "name": SITE_NAME},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv",
+                          "contentUrl": BASE_URL + "/data/courtyard_odds_2026-09-21.csv"}],
+    })
+
+    return pages_written("/platforms/courtyard/", page(
+        "/platforms/courtyard/",
+        "Courtyard pack odds and expected value — all %d packs" % CY_N,
+        "Courtyard posts an expected value of 95%% of the price on %d of its %d packs. Full odds tables, buyback maths and what the posted EV leaves out." % (CY_AT_95, CY_N),
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Courtyard")],
+        updated=COLLECTED, structured=[faq_ld, ds]))
+
+
+def build_packz():
+    faq_html, faq_ld = faq_block([
+        ("What is the expected value of a Packz pack?",
+         "<p>Packz does not publish an expected value, but it does publish dollar-range odds on every pack. Working those out at the middle of each range gives about %s of the pack price on every pack of $25 and up. The two cheapest packs are worse: the $10 Pok&eacute;mon Uncommon Pack returns about %s and the $5 Pok&eacute;mon Common Pack about %s. Because Packz shows ranges rather than exact values, every figure is an estimate with a band around it rather than a precise number.</p>" % (pct(PZ_STD_MID * 100, 0), pct(PZ_UNCOMMON["ratio_mid"] * 100, 0), pct(PZ_COMMON["ratio_mid"] * 100, 0))),
+        ("Can you cash out a Packz buyback?",
+         "<p>No. Packz pays sell-backs as site credit that cannot be withdrawn, so the only way to take value out of the platform is to have the card shipped and sell it yourself. The standard rate is 90% of fair market value, and a new user's first pack qualifies for a 100% buyback capped at $100. Several ranking sites score Packz highly on the strength of that buyback without noting that it pays in credit rather than cash.</p>"),
+        ("Do all Packz packs have the same odds?",
+         "<p>Yes. All %d packs we collected use the same seven probabilities, 44%%, 25.6%%, 19%%, 9.5%%, 1.5%%, 0.3%% and 0.1%%, with the dollar ranges scaled to the pack price. For every pack of $25 and up the tiers are exactly 0.5 to 0.7, 0.7 to 1, 1 to 1.5, 1.5 to 2.5, 2.5 to 5, 5 to 10 and 10 to 20 times the price. A $25 Starter Pack and a $1,000 Champion Pack therefore have the same expected return.</p>" % PZ_N),
+        ("What are the chances of beating the pack price on Packz?",
+         "<p>%s, on every pack. That is the sum of the top five tiers, which all start at or above the pack price. Put the other way, %s of pulls are worth less than you paid.</p>" % (pct(PZ_HIT, 1), pct(100 - PZ_HIT, 1))),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Packz pack odds and expected value</h1>
+    <p class="lede">All {pzn} Packz packs, from the $5 Pok&eacute;mon Common Pack to the $1,000 Champion and Hall of Fame packs, calculated from the odds Packz publishes on each pack page.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Every Packz pack uses the same odds template. On the $25-and-up packs the published odds work out to about {pzstd} of the pack price at midpoint values. The two cheapest packs are worse: the $10 Uncommon Pack returns about {unc} and the $5 Common Pack about {com}.</p>
+    <p class="small muted">Calculated from Packz's published odds, collected {collected}. Packz shows value ranges, not exact card values.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>{pzn}</b><span>Packs measured</span></div>
+    <div class="stat"><b>{pzstd}</b><span>Return on $25+ packs</span></div>
+    <div class="stat"><b>{pzhit}</b><span>Chance of beating the price</span></div>
+    <div class="stat"><b>0%</b><span>Of buyback you can withdraw</span></div>
+  </div>
+
+  <h2>One odds template, fourteen packs</h2>
+  <p>All {pzn} packs use the same seven probabilities with the dollar ranges scaled to the price. For every pack of $25 and up the tiers are exactly these multiples of the pack price:</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>The Packz odds template, identical across all $25-and-up packs.</caption>
+  <thead><tr><th scope="col">Tier</th><th scope="col" class="num">Value, as a multiple of the price</th><th scope="col" class="num">Odds</th><th scope="col">Outcome</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td class="num">0.5&ndash;0.7&times;</td><td class="num">44%</td><td>Loss</td></tr>
+    <tr><td>2</td><td class="num">0.7&ndash;1&times;</td><td class="num">25.6%</td><td>Loss</td></tr>
+    <tr><td>3</td><td class="num">1&ndash;1.5&times;</td><td class="num">19%</td><td>Break even or better</td></tr>
+    <tr><td>4</td><td class="num">1.5&ndash;2.5&times;</td><td class="num">9.5%</td><td>Win</td></tr>
+    <tr><td>5</td><td class="num">2.5&ndash;5&times;</td><td class="num">1.5%</td><td>Win</td></tr>
+    <tr><td>6</td><td class="num">5&ndash;10&times;</td><td class="num">0.3%</td><td>Win</td></tr>
+    <tr><td>7</td><td class="num">10&ndash;20&times;</td><td class="num">0.1%</td><td>Win</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p><strong>{loss} of pulls are worth less than you paid.</strong> That is the first two tiers combined. The top tier hits once in a thousand packs. Most of the expected value sits in the common tiers rather than the chase, which is actually a point in the template's favour: the return does not depend on a jackpot you will almost certainly never hit.</p>
+
+  <h2>The cheap packs are the worst deal</h2>
+  <p>The $5 Common Pack and $10 Uncommon Pack break the pattern. Their lowest tier starts at 30% and 40% of the pack price respectively, instead of the 50% floor used on every larger pack, which drags their return below the rest. The packs most likely to be bought by a beginner testing the platform are the packs that give back the least.</p>
+
+  <h2>Buyback pays in credit, not cash</h2>
+  <p>Packz advertises a 90% buyback, and a new user's first pack qualifies for 100% capped at $100. What the headline does not say is that sell-backs are paid as site credit that cannot be withdrawn. The credit can only buy more packs. Your only routes to actual money are shipping the card and selling it yourself, or keeping it.</p>
+  <p>That distinction matters most on cheap pulls. Shipping a $2 card home to resell it will usually cost more than the card is worth, so in practice a low pull on a small pack leaves you choosing between re-ripping and keeping something you did not want.</p>
+
+  <div class="callout">
+    <h3>Why this estimate has a band around it</h3>
+    <p>Packz publishes value ranges rather than exact card values, so an exact expected value cannot be calculated from its pages. The headline figures here assume cards sit at the middle of their range. Real card values tend to cluster toward the bottom of a range, because cheap cards are more numerous than expensive ones, so the true return is likely at or below our midpoint estimate. The table below shows the full possible span for each pack.</p>
+  </div>
+
+  <h2>All {pzn} Packz packs</h2>
+  {table}
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Launched</th><td>September 2025</td></tr>
+    <tr><th scope="row">Availability</th><td>United States only, 18+</td></tr>
+    <tr><th scope="row">Categories</th><td>Sports and Pok&eacute;mon</td></tr>
+    <tr><th scope="row">Payment methods</th><td>Visa, Mastercard, American Express, Discover</td></tr>
+    <tr><th scope="row">Buyback rate</th><td>90% of fair market value, as non-withdrawable site credit</td></tr>
+    <tr><th scope="row">New user offer</th><td>100% buyback on the first pack, capped at $100</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>Dollar-range odds on every pack page; no expected value published</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a> &mdash; estimated return against committed return.</li>
+    <li><a href="/calculator/">Run a Packz pack through the calculator</a>.</li>
+    <li><a href="/data/">Download the full Packz odds dataset</a>.</li>
+  </ul>
+</div>
+""".format(pzn=PZ_N, pzstd=pct(PZ_STD_MID * 100, 0), collected=COLLECTED,
+           com=pct(PZ_COMMON["ratio_mid"] * 100, 0),
+           unc=pct(PZ_UNCOMMON["ratio_mid"] * 100, 0),
+           pzhit=pct(PZ_HIT, 1), loss=pct(100 - PZ_HIT, 1),
+           table=packz_table(), faq=faq_html)
+
+    ds = jsonld({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Packz pack odds and calculated expected values",
+        "description": "Published odds tiers for all %d Packz mystery packs with calculated expected value bands, collected %s." % (PZ_N, COLLECTED),
+        "url": BASE_URL + "/platforms/packz/",
+        "dateModified": COLLECTED,
+        "creator": {"@type": "Organization", "name": SITE_NAME},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "distribution": [{"@type": "DataDownload", "encodingFormat": "text/csv",
+                          "contentUrl": BASE_URL + "/data/packz_odds_2026-09-21.csv"}],
+    })
+
+    return pages_written("/platforms/packz/", page(
+        "/platforms/packz/",
+        "Packz pack odds and expected value — all %d packs" % PZ_N,
+        "Packz's published odds work out to about %s of the pack price on $25+ packs, and less on the $5 and $10 packs. Full odds template, EV bands and why the 90%% buyback pays credit, not cash." % pct(PZ_STD_MID * 100, 0),
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Packz")],
+        updated=COLLECTED, structured=[faq_ld, ds]))
+
+
+def build_arena_club():
+    rows = []
+    for p in ARENA_CLUB_PACKS:
+        for i, (tier, count, rate) in enumerate(p["tiers"]):
+            rows.append(
+                '<tr><td class="name">%s</td><td>%s</td><td>%s</td><td>%s</td>'
+                '<td class="num">%d</td><td class="num">%s</td>'
+                '<td class="num"><strong>%s</strong></td></tr>' % (
+                    E(p["name"]), p["collected"], money(p["price"]), tier,
+                    count, pct(rate, 2),
+                    pct(count * rate, 2 if count * rate < 1 else 1)))
+        rows.append(
+            '<tr><td class="name"></td><td></td><td></td>'
+            '<td class="rowspan-label">All tiers</td><td class="num">%d</td>'
+            '<td class="num"></td><td class="num"><strong>%s</strong></td></tr>'
+            % (sum(c for _, c, _ in p["tiers"]), pct(p["odds_sum"], 2)))
+
+    faq_html, faq_ld = faq_block([
+        ("What is the expected value of an Arena Club pack?",
+         "<p>It cannot be calculated from Arena Club's own pages. Arena Club lists a hit rate for each individual card but attaches no value to any of them, and publishes no expected value figure anywhere on its pack pages or in its help centre. Of the three platforms we have measured, Arena Club is the hardest for a buyer to evaluate before spending.</p>"),
+        ("How do Arena Club pack odds work?",
+         "<p>Each pack page lists every card available in that pack with its own hit rate, grouped into three named tiers: Grail, Chase and Lineup. Grail cards are listed at 0.01% to 0.02% each, Chase cards at 0.25% each and Lineup cards at 1.96% each. In the two packs we collected in September there were 3 Grail, 8 Chase and 50 Lineup cards, meaning 98% of pulls came from the Lineup tier. Because the rates are per card rather than per tier, you have to add up dozens of individual numbers to work out your real chance at anything.</p>"),
+        ("Does Arena Club grade its own cards?",
+         "<p>Some of them, yes. Alongside PSA, BGS and CGC slabs, Arena Club's checklists include cards in its own holders, labelled with an Arena Club grade and a BAC certificate number. In the October checklist we collected for the $25 Pok&eacute;mon Bronze pack, 11 of the 24 Lineup cards were Arena Club-graded rather than third-party graded. That matters for valuation: a PSA 10 has a public sales history you can look up, while an Arena Club 10 of the same card has no established market, so there is no independent way to check what the platform says it is worth.</p>"),
+        ("What is Arena Club's Collect Safe option?",
+         "<p>Collect Safe is an optional add-on bought at checkout for an extra 10% of the pack price, which guarantees a buyback offer of at least 80% of the pack price. On the $25 Pok&eacute;mon Bronze pack it is offered as &ldquo;Guarantee a $20 Arena Club Offer, for just $2.50 more.&rdquo; You pay $27.50 and cannot get back less than $20, so your worst case is losing $7.50, or 27.3% of what you spent. Without it the floor is only 90% of the revealed card's estimated value, so a low pull returns much less. The add-on pays for itself whenever the card is worth less than about $22.22, which is 89% of the pack price.</p>"),
+        ("Can you withdraw money from Arena Club?",
+         "<p>Yes. Accepted buyback offers are credited to an in-house Arena Club Wallet rather than refunded directly, and wallet funds can then be withdrawn to a bank account or debit card through a connected Stripe account. That makes it the only platform of the three we have measured whose buyback reaches real money without further conditions, as against Packz's credit-only buyback.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Arena Club pack odds and buyback terms</h1>
+    <p class="lede">Arena Club sells graded slabs in nine price tiers from $25 to $5,000 across as many as nine categories. It publishes detailed per-card odds and no card values at all, which makes it the hardest of the three platforms to evaluate before you buy.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Arena Club's expected value cannot be calculated from its own disclosures. It lists a hit rate for every individual card in a pack but attaches no value to any of them, and publishes no expected value figure anywhere. Its buyback terms, by contrast, are the best of the three platforms we have measured.</p>
+    <p class="small muted">Collected {collected} and re-collected {updated} from Arena Club's pack pages and help centre.</p>
+  </div>
+
+  <h2>How the odds are structured</h2>
+  <p>Every pack page carries an "Available Slabs" checklist that lists each card with its own hit rate, grouped into three tiers. We collected two complete checklists, and both use the same structure:</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Complete checklists collected for two Arena Club packs on {collected}, plus a second collection of the Pok&eacute;mon Bronze pack on {updated}.</caption>
+  <thead><tr><th scope="col">Pack</th><th scope="col">Collected</th><th scope="col">Price</th><th scope="col">Tier</th><th scope="col" class="num">Cards</th><th scope="col" class="num">Odds per card</th><th scope="col" class="num">Tier total</th></tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <p><strong>98% of pulls come from the Lineup tier.</strong> On the September checklists that means a pack's expected value is almost exactly the average value of its 50 Lineup cards; the Chase and Grail cards barely move it. Your combined chance at any Chase or Grail card is about 2%, roughly one pack in fifty, and a specific Grail card is about one in five thousand.</p>
+
+  <p><strong>The marquee names are mostly in the Lineup.</strong> A basketball checklist reads like a hall of fame roster, with Jordan, LeBron and Curry cards throughout. But Lineup cards have to be sized to fit the pack price, so at $100 those are common base cards rather than the ones a collector pictures when they see the name. The checklist is accurate and still misleading if you only skim the names.</p>
+
+  <h2>Buyback and Collect Safe</h2>
+  <p>Arena Club's standard buyback is 90% of the revealed card's estimated value, credited to an in-house wallet that can be withdrawn to a bank account or debit card through a connected Stripe account. Of the three platforms here, it is the only buyback that reaches real money without further conditions.</p>
+
+  <p>At checkout each pack also offers <strong>Collect Safe</strong>, an opt-in add-on costing an extra 10% of the pack price. With it you are guaranteed an offer of at least 80% of the pack price, or 90% of the card's estimated value, whichever is greater. On the $25 Pok&eacute;mon Bronze pack the toggle reads &ldquo;Guarantee a $20 Arena Club Offer, for just $2.50 more,&rdquo; which confirms the premium is 10% of the pack price and the floor is 80% of the pack price before the premium is added.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Collect Safe on the $25 Pok&eacute;mon Bronze pack, using the figures Arena Club displays.</caption>
+  <thead><tr><th scope="col"></th><th scope="col">Without Collect Safe</th><th scope="col">With Collect Safe</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">You pay</th><td>$25</td><td>$27.50</td></tr>
+    <tr><th scope="row">Guaranteed floor</th><td>None &mdash; 90% of whatever the card is worth</td><td>$20</td></tr>
+    <tr><th scope="row">Worst case</th><td>Whatever a near-worthless pull is worth</td><td>Lose $7.50, or 27.3% of outlay</td></tr>
+    <tr><th scope="row">Pays for itself when</th><td>&mdash;</td><td>The card is worth less than $22.22, which is 89% of the pack price</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>So the add-on is worth buying if a pack produces a card worth under about 89% of its price more often than one time in ten, which is the break-even point for a 10% premium. Given that this is a product where the average card is worth less than the pack, that condition is very likely met. But Arena Club publishes no card values, so neither we nor a buyer at the checkout toggle can calculate it properly.</p>
+
+  <h2>Arena Club grades some of its own cards</h2>
+  <p>The checklists mix third-party slabs from PSA, BGS and CGC with cards in Arena Club's own holders, labelled with an Arena Club grade and a BAC certificate number. In the October checklist we collected for the $25 Pok&eacute;mon Bronze pack, 11 of the 24 Lineup cards were Arena Club-graded rather than third-party graded.</p>
+
+  <p>This compounds the valuation problem. A PSA 10 of a given card has a public sales history that anyone can look up, so a platform's stated value for it can be checked. An Arena Club 10 of the same card has no established secondary market, so there is no independent way to verify what the platform says it is worth, or what it will offer you for it at buyback. A platform grading the inventory it sells and then setting the buyback price against its own grade is a structure worth understanding before you spend.</p>
+
+  <div class="callout">
+    <h3>The checklist changed completely in a month, and the odds no longer add up</h3>
+    <p>We collected the $25 Pok&eacute;mon Bronze checklist twice, on 21 September and 21 October. Not one card appeared in both. The Lineup had also shrunk from 50 cards to 24, and cards disappeared from the list while we were reading it.</p>
+    <p>Taken at face value the October figures do not work: 3 Grail cards at 0.01%, 8 Chase at 0.25% and 24 Lineup at 1.96% sum to 49.07%, not 100%. Either the per-card rates are not updated as inventory sells out, or part of the list was not displayed. We are rechecking before drawing a conclusion, because the difference matters: if displayed rates go stale as cards sell, the odds on the page are not the odds you are playing.</p>
+  </div>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Pack name</th><td>Slab Packs, one graded card per pack</td></tr>
+    <tr><th scope="row">Price tiers</th><td>Bronze $25, Silver $50, Gold $100, Ruby $250, Emerald $500, Diamond $1,000, Legendary $2,500, Crown Jewel $5,000, plus limited Special Series packs</td></tr>
+    <tr><th scope="row">Categories</th><td>Baseball, basketball, football, Pok&eacute;mon, soccer, Magic, One Piece, hockey and Super, though not every category is sold at every tier</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>Per-card hit rates in Grail, Chase and Lineup tiers; no card values</td></tr>
+    <tr><th scope="row">Expected value</th><td>Not published</td></tr>
+    <tr><th scope="row">Buyback rate</th><td>90% of the card's estimated value</td></tr>
+    <tr><th scope="row">Buyback payout</th><td>Arena Club Wallet, withdrawable to a bank account or debit card via Stripe</td></tr>
+    <tr><th scope="row">Collect Safe</th><td>Optional, 10% of the pack price, guarantees 80% of the pack price or 90% of card value, whichever is greater</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/">Compare all seven platforms</a>.</li>
+    <li><a href="/methodology/">How we rate platforms</a>, including how we handle a platform that publishes no values.</li>
+  </ul>
+</div>
+""".format(collected=COLLECTED, updated=UPDATED, rows="".join(rows), faq=faq_html)
+
+    return pages_written("/platforms/arena-club/", page(
+        "/platforms/arena-club/",
+        "Arena Club pack odds, Collect Safe and buyback terms explained",
+        "Arena Club lists per-card hit rates with no values, so its expected value cannot be calculated. What the Grail, Chase and Lineup tiers really mean, and whether Collect Safe is worth 10%.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Arena Club")],
+        updated=COLLECTED, structured=faq_ld))
+
+
+def build_tilt():
+    tiers = [
+        ("Pokémon", "Dime Pack", "$0.10"), ("Pokémon", "Dollar Pack", "$1"),
+        ("Pokémon", "Rookie Pack", "$2.50"),
+        ("Pokémon", "EX Pack", "$250"), ("Pokémon", "Full Art", "$500"),
+        ("Pokémon", "Master Pack", "$1,000"),
+        ("Pokémon", "Grandmaster Pack", "$3,000"),
+        ("Sports", "Starter / Kickoff / Tip-Off", "$25"),
+        ("Sports", "Premium / Blitz / Fast Break", "$50"),
+        ("Sports", "Pro / Red Zone / Crossover / Sleeper", "$100"),
+        ("Sports", "Ace / Touchdown / Slam Dunk / Steal / Flash / Ink", "$250"),
+        ("Sports", "Ultimate / Hail Mary / Dagger / Heist / Supernova", "$500"),
+        ("Sports", "Master / Primetime / Showtime / Grand Heist / Case Hit", "$1,000"),
+        ("Sports", "Grandmaster", "$3,000"),
+        ("One Piece", "Loot Pack", "$25"),
+        ("One Piece", "Pro Pack", "$100"),
+        ("One Piece", "Heritage Pack", "$500"),
+    ]
+    rows = "".join(
+        '<tr><td>%s</td><td class="name">%s</td><td class="num">%s</td></tr>'
+        % (E(c), E(n), p) for c, n, p in tiers)
+
+    faq_html, faq_ld = faq_block([
+        ("Does Tilt Rips publish pack odds?",
+         "<p>No. Across roughly 60 packs we found no pull rates, drop rates, probabilities, value tiers or expected value figures anywhere on the site. Pack pages show a list of top prizes with their market values, which tells you what the ceiling looks like but nothing about your chance of reaching it. Tilt Rips has the largest pack catalogue of any platform we track and the least odds disclosure.</p>"),
+        ("Can you withdraw money from Tilt Rips?",
+         "<p>Yes, and this is the platform's strongest feature. Selling a card back pays 90% of market value into a Tilt Rips wallet, and withdrawals are available in US dollars and several cryptocurrencies, with no fees or commissions beyond those shown in the app. That is a better cash route than Fanatics, which pays 84.6% effective in non-withdrawable credit, and Packz, which pays 90% in credit that can only buy more packs.</p>"),
+        ("How does Tilt Rips decide what a card is worth?",
+         "<p>The site says the price is set by live market data but does not name the data source, and it states that the sell-back price cannot be disputed. Those two facts together are the counterweight to the 90% headline: the party paying you sets the number it is paying 90% of, from a source it does not identify, with no appeal. Compare Fanatics, which names Card Ladder as its valuation source, so the figure can in principle be checked against data a buyer can also see.</p>"),
+        ("What is the cheapest Tilt Rips pack?",
+         "<p>A $0.10 Dime Pack, followed by a $1 Dollar Pack and a $2.50 Rookie Pack. Those are by a wide margin the cheapest entry points of any platform we track, where the next cheapest anywhere is Crown Rips at $1 and Packz at $5. The catalogue runs up to $3,000 Grandmaster packs.</p>"),
+        ("How long does Tilt Rips shipping take?",
+         "<p>Up to six weeks, per the site, with shipping fees shown before you confirm and international delivery available for additional fees. That is the slowest fulfilment we have recorded: Fanatics quotes 3 to 15 business days. Vault storage is free with no storage fees, so there is no pressure to ship, but closing an account requires shipping or selling all inventory first.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Tilt Rips: 60 packs, no published odds</h1>
+    <p class="lede">Tilt Rips has the largest pack catalogue of any platform we track, prices starting at ten cents, and the best cash-out terms we have verified. It publishes no pull rates for any of it.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Across roughly 60 packs priced from $0.10 to $3,000, Tilt Rips publishes no pull rates, no value tiers and no expected value. Its sell-back is the strongest we have verified &mdash; 90% of market value, withdrawable in dollars or crypto &mdash; but the platform sets that market value itself, does not name its data source, and states the price cannot be disputed.</p>
+    <p class="small muted">Read from the Tilt Rips site on {collected}. Pack pages load their contents dynamically, so a first-hand collection is still needed to confirm no odds appear once a pack page is fully loaded.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>~60</b><span>Packs in the catalogue</span></div>
+    <div class="stat"><b>0</b><span>With published pull rates</span></div>
+    <div class="stat"><b class="pos">90%</b><span>Sell-back, withdrawable</span></div>
+    <div class="stat"><b>$0.10</b><span>Cheapest pack anywhere</span></div>
+  </div>
+
+  <h2>The best cash route in the category</h2>
+  <p>On every other platform we have examined, the headline buyback rate erodes somewhere: Fanatics deducts a 6% marketplace fee and pays in credit you cannot withdraw, Packz pays credit that can only buy more packs, Courtyard's advertised 90% has been independently measured nearer 85%. Tilt Rips pays 90% of market value into a wallet you can withdraw from in US dollars or several cryptocurrencies, with no fees or commissions beyond those shown in the app.</p>
+
+  <p>Taken at face value that is the strongest sell-back of the seven platforms here. Crown Rips claims 100% but is unverified and in closed beta; Arena Club's 90% to a Stripe-connected bank account is the closest comparison and is equally good. Tilt Rips also vaults cards free with no storage fees and no time limit, so holding a card costs nothing.</p>
+
+  <div class="callout">
+    <h3>The catch is who decides what 90% is 90% of</h3>
+    <p>Tilt Rips says the price is set by live market data, but it does not name the data source, and it states plainly that the sell-back price cannot be disputed. A rate is only as good as the valuation it is applied to, and here the party paying you also sets that valuation, from a source you cannot inspect, with no appeal.</p>
+    <p>Fanatics is the useful contrast: it pays a worse effective rate, 84.6% against 90%, but names Card Ladder as its valuation source, so the number can be checked against data the buyer can also reach. A verifiable 84.6% and an unverifiable 90% are not obviously ranked in the order the percentages suggest.</p>
+  </div>
+
+  <h2>The odds gap</h2>
+  <p>Pack pages show a list of top prizes with market values attached &mdash; on one $100 pack those run as high as $90,000, which is 900 times the pack price. A ceiling is the easiest thing in this business to advertise and the least useful thing to know. What it does not come with is any probability, so there is no way to turn it into an expected value.</p>
+
+  <p>The site also makes two claims that read as transparency but are not odds disclosure: that every pack contains real physical cards held with security partners, and that pricing comes from live market data. Both speak to inventory and valuation. Neither tells you your chance of pulling anything. We found no provably-fair mechanism, no third-party audit of pull rates, and no published odds of any kind.</p>
+
+  <p>With roughly 60 packs, Tilt Rips has more products with no disclosed odds than any other platform we track has products at all.</p>
+
+  <h2>Pack catalogue and prices</h2>
+  <p>Prices are not shown in the page text for most packs, but the pack URLs encode them, and the few prices that do appear confirm the pattern. The table below is our reconstruction and should be treated as provisional until confirmed on the live pack pages.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Tilt Rips pack tiers, reconstructed from pack URLs and the prices shown on the site, {collected}. Several sports packs share a price point under different names by sport.</caption>
+  <thead><tr><th scope="col">Category</th><th scope="col">Packs</th><th scope="col" class="num">Price</th></tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <p><strong>The ten-cent pack deserves a mention.</strong> A $0.10 Dime Pack and a $1 Dollar Pack are the cheapest entry points we have found anywhere, well below Packz at $5 and Crown Rips at $1. Cheap packs lower the barrier to trying a platform, and on both Packz and Crown Rips the cheapest packs also carried the worst floors. Whether that holds here cannot be determined, because the floors are not published either. Given that these are Pok&eacute;mon packs, the combination of a ten-cent price point and undisclosed odds is worth noting on its own terms.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Categories</th><td>Pok&eacute;mon, One Piece, football, basketball and general sports</td></tr>
+    <tr><th scope="row">Pack prices</th><td>$0.10 to $3,000, roughly 60 packs</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>None. Top prizes listed with values; no pull rates</td></tr>
+    <tr><th scope="row">Expected value</th><td>Not published and not calculable</td></tr>
+    <tr><th scope="row">Sell-back</th><td>90% of market value, instantly to a wallet</td></tr>
+    <tr><th scope="row">Withdrawals</th><td>US dollars and several cryptocurrencies</td></tr>
+    <tr><th scope="row">Fees</th><td>None beyond those shown in the app, per the site</td></tr>
+    <tr><th scope="row">Valuation source</th><td>&ldquo;Live market data,&rdquo; source not named; price cannot be disputed</td></tr>
+    <tr><th scope="row">Vaulting</th><td>Free, no storage fees</td></tr>
+    <tr><th scope="row">Shipping</th><td>Up to six weeks; fees shown before confirming; international available</td></tr>
+    <tr><th scope="row">Marketplace</th><td>Cards can be listed from inventory or the vault; fees shown before confirming</td></tr>
+    <tr><th scope="row">Account closure</th><td>Requires shipping or selling all inventory first</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>What we still need</h2>
+  <ul>
+    <li><strong>Any pull rates at all</strong>, from a fully loaded pack page. Our reading was done without JavaScript, so we cannot yet rule out that odds appear once a pack loads. This is the first thing to check.</li>
+    <li><strong>Confirmed prices</strong> for each pack, to replace the reconstruction above.</li>
+    <li><strong>The valuation data source</strong>, which decides what the 90% is calculated from.</li>
+    <li><strong>Whether a floor exists</strong> on any pack, published or otherwise.</li>
+    <li><strong>Withdrawal minimums and processing times</strong>, which are not stated.</li>
+  </ul>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a>, the useful contrast on valuation sourcing</li>
+    <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the only platform publishing observed results</li>
+    <li><a href="/platforms/">Compare all seven platforms</a></li>
+  </ul>
+</div>
+""".format(collected=CLUTCH_COLLECTED, rows=rows, faq=faq_html)
+
+    return pages_written("/platforms/tilt-rips/", page(
+        "/platforms/tilt-rips/",
+        "Tilt Rips review — 60 packs, no published odds, 90% withdrawable sell-back",
+        "Tilt Rips publishes no pull rates for any of its ~60 packs, priced from $0.10 to $3,000. Its 90% sell-back is withdrawable in cash or crypto, but the platform sets the valuation and the price cannot be disputed.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Tilt Rips")],
+        updated=CLUTCH_COLLECTED, structured=faq_ld))
+
+
+def build_fanatics():
+    faq_html, faq_ld = faq_block([
+        ("Does Fanatics Instant Rips publish pack odds?",
+         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the seven platforms we track.</p>"),
+        ("What is the real Fanatics instant offer percentage?",
+         "<p>Effectively 84.6% of a card's appraised value, not the 90% headline. Fanatics' own worked example takes a $200 card, applies the 90% rate to get $180, then deducts a 6% marketplace fee of $10.80, leaving an offer of $169.20. That is 84.6% of the card's value. The formula is 0.90 multiplied by 0.94. The 90% figure is accurate as far as it goes, but it is not what arrives.</p>"),
+        ("Can you withdraw Fanatics Instant Rips credits as cash?",
+         "<p>No. Accepting an instant offer pays in Fanatics Live credits, which cannot be withdrawn as cash and can only be spent on Fanatics Live purchases, including more Instant Rips. There is a separate route to real money: decline the offer, take the card, and list it on the Fanatics Collect marketplace, where sales do pay out, with free ACH withdrawal or a $50 fee for a wire. That path costs 1% to 3% of asset value in fulfillment fees and takes time, but it is the only one that ends in cash.</p>"),
+        ("How much do Fanatics Instant Rips packs cost?",
+         "<p>The category pages list Collector Packs from $10 to $100, Football and Basketball from $100 to $1,000, Baseball from $50 to $1,000, and Pok&eacute;mon from $25 to $2,500. The debut Odyssey series was 1,000 baseball repacks at $250 each, one graded card per pack, with a reported value floor of about $90 and a ceiling of about $3,800.</p>"),
+        ("Where do Fanatics card valuations come from?",
+         "<p>Card Ladder, a third-party sales-data service. This is the one place where Fanatics has the best practice in the category: Courtyard, Packz and Arena Club all appraise cards using their own valuations, which means the figure a buyback is calculated against is set by the party paying it. Using an outside dataset removes that conflict, and it makes the valuation checkable by anyone with access to the same data.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Fanatics Instant Rips: the 90% offer is really 84.6%</h1>
+    <p class="lede">Fanatics is the largest brand in digital pack ripping and discloses the least about odds. It also has the category's best practice on card valuation. Both of those are worth knowing before you buy.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Fanatics advertises an instant offer of 90% of a card's appraised value. Its own worked example takes a $200 card, applies the 90%, then deducts a 6% marketplace fee, leaving $169.20 &mdash; which is 84.6% of the card's value. The offer is also paid in Fanatics Live credits that cannot be withdrawn as cash.</p>
+    <p class="small muted">Figures from Fanatics' own published example and help documentation, read {collected}. No pull rates are published for any pack, so no expected value can be calculated.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b class="neg">84.6%</b><span>Effective instant offer, after fees</span></div>
+    <div class="stat"><b>0</b><span>Packs with published pull rates</span></div>
+    <div class="stat"><b>36%</b><span>Odyssey series floor, as % of price</span></div>
+    <div class="stat"><b>48h</b><span>Window to accept an offer</span></div>
+  </div>
+
+  <h2>The buyback maths</h2>
+  <p>The 90% figure is accurate as a rate and misleading as an outcome, because the marketplace fee comes off afterwards. Fanatics publishes the arithmetic itself, which is to its credit; it just does not publish the resulting percentage.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Fanatics' own worked example of an instant offer.</caption>
+  <tbody>
+    <tr><th scope="row">Card's appraised value</th><td>$200.00</td></tr>
+    <tr><th scope="row">Offer at 90%</th><td>$180.00</td></tr>
+    <tr><th scope="row">Marketplace fee, 6%</th><td>&minus;$10.80</td></tr>
+    <tr><th scope="row">Offer received</th><td><strong>$169.20</strong></td></tr>
+    <tr><th scope="row">Effective rate</th><td><strong>84.6% of card value</strong></td></tr>
+    <tr><th scope="row">Paid as</th><td>Fanatics Live credits, not withdrawable as cash</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p><strong>Credit is not cash, but the ecosystem is larger.</strong> Like Packz, Fanatics pays sell-backs in credit that cannot be withdrawn. Unlike Packz, where credit can only buy more packs, Fanatics Live credits work across any Fanatics Live purchase. That is a wider door, still inside the same building.</p>
+
+  <p><strong>There is a real cash route, and it is not the instant offer.</strong> Decline the offer, take the card, and list it on the Fanatics Collect marketplace, where sales pay out in money, with free ACH withdrawal or a $50 wire fee. Fulfillment runs 1% to 3% of asset value and shipping takes 3 to 15 business days. On a card worth more than the instant offer minus that friction, selling it yourself is the better move &mdash; which is to say, the convenient option is the expensive one.</p>
+
+  <h2>The odds problem</h2>
+  <p>Fanatics publishes a checklist of what is in a series and has said it will move from a static list to a dynamic one that shows what remains unpulled. That is useful and more than Crown Rips offers. It is still not odds.</p>
+
+  <p>A checklist tells you which cards exist in the pool. Without a probability against each one, you cannot calculate an average, and neither can anyone else. Compare the two ends of this category: Clutch Packs enumerates a 100-card pool at 1% each and publishes 158,556 verified pull outcomes; Courtyard posts an exact expected value on every pack. Against that, the biggest brand in the business asks you to take the pack on trust.</p>
+
+  <p>The company has framed the product as bringing consistency and professionalism to repacks, which is a reasonable ambition. Publishing pull rates is the cheapest available way to demonstrate it.</p>
+
+  <h2>Where Fanatics is genuinely best in class</h2>
+  <p>Card valuations come from Card Ladder, a third-party sales-data service, rather than from Fanatics itself.</p>
+  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the seven platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
+
+  <h2>Pack prices</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Category price ranges as listed on the Instant Rips page, {collected}. Individual packs are not named at the category level.</caption>
+  <thead><tr><th scope="col">Category</th><th scope="col" class="num">Price range</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Collector Packs</th><td class="num">$10 &ndash; $100</td></tr>
+    <tr><th scope="row">Football</th><td class="num">$100 &ndash; $1,000</td></tr>
+    <tr><th scope="row">Basketball</th><td class="num">$100 &ndash; $1,000</td></tr>
+    <tr><th scope="row">Baseball</th><td class="num">$50 &ndash; $1,000</td></tr>
+    <tr><th scope="row">Pok&eacute;mon</th><td class="num">$25 &ndash; $2,500</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>The debut Odyssey series was 1,000 baseball repacks at $250 each, one graded card per pack, with a reported value floor of about $90 and a ceiling of about $3,800. That floor is 36% of the pack price, which sits between Packz at 50% and Crown Rips at 30%. A worst-case pull taken as an instant offer returns about $76, or 30% of what the pack cost.</p>
+
+  <h2>Fees and logistics</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Instant offer rate</th><td>90% of Card Ladder value, less a 6% marketplace fee, so 84.6% effective</td></tr>
+    <tr><th scope="row">Offer window</th><td>48 hours after the pull</td></tr>
+    <tr><th scope="row">Offer payout</th><td>Fanatics Live credits, not withdrawable as cash</td></tr>
+    <tr><th scope="row">Cash route</th><td>List the card on the Fanatics Collect marketplace</td></tr>
+    <tr><th scope="row">Fulfillment or shipping</th><td>1% to 3% of asset value; 3 to 15 business days</td></tr>
+    <tr><th scope="row">Vault storage</th><td>Free, no time limit</td></tr>
+    <tr><th scope="row">Withdrawal</th><td>ACH free; wire $50</td></tr>
+    <tr><th scope="row">Card sourcing</th><td>Card shows, collectors' vaulted cards, and PSA</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>Checklist only; no pull rates published</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>The free, unlimited vault storage is worth noting against <a href="/platforms/crown-rips/">Crown Rips</a>, where a card left in the vault is reportedly auto-sold after seven days. Holding a card at Fanatics costs nothing and carries no deadline.</p>
+
+  <div class="callout">
+    <h3>What we still need</h3>
+    <p>Pull rates, for any pack. Until Fanatics publishes probabilities, nobody can state an expected value for an Instant Rips pack, including Fanatics. We would also like to confirm whether the 6% marketplace fee applies uniformly across price points, and whether the dynamic checklist has shipped. If you have screenshots of a live Instant Rips pack page showing anything resembling odds, we would like to see them.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the opposite approach: 158,556 published pull outcomes</li>
+    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/calculator/">Pack EV calculator</a></li>
+  </ul>
+</div>
+""".format(collected=CLUTCH_COLLECTED, faq=faq_html)
+
+    return pages_written("/platforms/fanatics-instant-rips/", page(
+        "/platforms/fanatics-instant-rips/",
+        "Fanatics Instant Rips review — the 90% offer is really 84.6%",
+        "Fanatics advertises a 90% instant offer, but its own example nets 84.6% after a 6% fee, paid in credits you cannot withdraw. No pull rates are published for any pack.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"),
+                (None, "Fanatics Instant Rips")],
+        updated=CLUTCH_COLLECTED, structured=faq_ld))
+
+
+def build_clutch():
+    s = clutch_stats()
+    rows = []
+    for cat, name, price, pulls, avg, bands in CLUTCH_PACKS:
+        mult = avg / price
+        cls = "pos" if mult >= 1 else "neg"
+        thin = ' title="Fewer than 500 pulls — the tail is not measurable at this sample size"' if pulls < 500 else ""
+        rows.append(
+            '<tr><td class="name">%s %s</td><td>%s</td><td class="num">%s</td>'
+            '<td class="num"%s>%s</td><td class="num">%s</td>'
+            '<td class="num"><strong class="%s">%.2f&times;</strong></td>'
+            '<td class="num">%s</td><td class="num">%s</td></tr>' % (
+                E(cat), E(name), E(cat), money(price), thin, "{:,}".format(pulls),
+                money(avg), cls, mult,
+                pct(bands[4] + bands[5], 1), pct(bands[0] + bands[1] + bands[2], 1)))
+
+    band_rows = []
+    for cat, name, price, pulls, avg, bands in CLUTCH_PACKS:
+        band_rows.append(
+            '<tr><td class="name">%s %s</td>' % (E(cat), E(name))
+            + "".join('<td class="num">%s</td>' % pct(b, 1) for b in bands)
+            + "</tr>")
+
+    faq_html, faq_ld = faq_block([
+        ("What is the expected value of a Clutch Packs pack?",
+         "<p>Across %s verified pulls on %d packs, the pull-weighted average return is %.2f times the pack price. That is the only observed, as opposed to claimed, average return we have for any platform, because Clutch Packs records every pack opening on the Polygon blockchain and reports real pull values rather than its own valuations. Individual packs range from %.2f to %.2f times, though the packs at the extremes have small samples.</p>" % ("{:,}".format(s["pulls"]), s["n_packs"], s["w_avg"], s["min_mult"], s["max_mult"])),
+        ("Do most Clutch Packs pulls make money?",
+         "<p>No. Weighted across all recorded pulls, %s return less than the pack price and only %s return double or more. A near-100%% average return and a %s chance of losing money are not contradictory: the average is carried by a thin tail of large pulls, while the typical result is a card worth well under half what the pack cost.</p>" % (pct(s["below_1x"], 0), pct(s["at_2x"], 1), pct(s["below_1x"], 0))),
+        ("How do Clutch Packs odds work?",
+         "<p>Each pack page lists a pool of 100 cards at 1% each, grouped into four tiers. On the $100 Multisport Ascent pack that is 2 Epics at 2% combined, 6 Chasers at 6%, 15 Hits at 15% and 77 Commons at 77%. It is the clearest odds structure of any platform we track, because every card is equally likely and the tier percentages are simply the card counts.</p>"),
+        ("Is the Clutch Packs average inflated by jackpots?",
+         "<p>On two packs, yes, and the arithmetic is checkable. A single $130,000 Series Hit appears as the maximum on both the Multisport Ascent and Multisport Moonshot packs. Spread across Ascent's 21,127 recorded pulls that one card adds $6.15 to the average, which is 6.2%% of the $100 pack price, so Ascent's stated 1.07 times becomes about 1.00 times without it. On Moonshot, with only 1,102 pulls, it adds $117.97, or 4.7%% of the price. Every other pack's average sits close to 1.00 times without needing a jackpot to get there.</p>"),
+        ("Does Clutch Packs buy cards back?",
+         "<p>Not that it discloses. We found no buyback or sell-back terms on the pack pages or the transparency page, which is the one significant gap in otherwise category-leading disclosure. Since buyback quality is a quarter of our score, and the difference between withdrawable cash and site credit has mattered on every other platform, this needs answering before Clutch Packs can be rated.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Clutch Packs: {pulls} verified pulls, and what they actually show</h1>
+    <p class="lede">Clutch Packs records every pack opening on the Polygon blockchain and publishes the results. It is the only platform we track that reports what buyers actually pulled rather than what the platform says its cards are worth.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Across {pulls} verified pulls on {npacks} packs, the pull-weighted average return is {wavg:.2f} times the pack price &mdash; effectively break-even, against Courtyard's claimed 95%. But {below} of those pulls returned less than the pack price, and only {at2x} returned double or more. The average is real; it is carried by a thin tail.</p>
+    <p class="small muted">Figures read from the Clutch Packs transparency page on {collected}. Unlike every other number on this site, these are observed results rather than published odds.</p>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>{pulls}</b><span>Pulls verified on-chain</span></div>
+    <div class="stat"><b class="pos">{wavg:.2f}&times;</b><span>Pull-weighted average return</span></div>
+    <div class="stat"><b class="neg">{below}</b><span>Of pulls worth less than the pack</span></div>
+    <div class="stat"><b>{at2x}</b><span>Of pulls worth double or more</span></div>
+  </div>
+
+  <h2>Why this is different from every other platform</h2>
+  <p>Courtyard publishes an expected value it calculates from its own card valuations. Packz publishes value ranges that have to be turned into an estimate. Arena Club and Crown Rips publish no values at all. All of those are claims about what a pack should return.</p>
+
+  <p>Clutch Packs publishes an average drawn from recorded pulls, valued at the market price of the card when it was pulled, with a count of openings verified on Polygon against each figure. That is a materially stronger form of disclosure, because it cannot be quietly adjusted by revaluing inventory, and because anyone can in principle audit the chain. It is the single best disclosure practice we have found in this category, and it is worth saying so plainly.</p>
+
+  <p>It is not immune to scrutiny, though, and three things are worth understanding before taking the headline at face value.</p>
+
+  <h3>1. Most pulls still lose money</h3>
+  <p>A {wavg:.2f} times average and a {below} chance of losing money are not in conflict. Weighted across all recorded pulls, {below} came back worth less than the pack price and roughly half of all pulls landed in the bottom band at under half the price. Only {at2x} doubled. If you buy one pack, the most likely single outcome by a wide margin is a card worth a fraction of what you paid; the average describes a buyer who opens thousands.</p>
+
+  <h3>2. Two packs are carried by one $130,000 card</h3>
+  <p>A single $130,000 Series Hit, a 2000 Bowman Chrome Tom Brady Refractor, appears as the maximum recorded pull on both the Multisport Ascent and Multisport Moonshot packs. On Ascent, spread across 21,127 recorded pulls, that one card contributes $6.15 to the average, which is 6.2% of the $100 pack price. Strip it out and Ascent's stated 1.07 times becomes about 1.00 times. On Moonshot it adds $117.97 across 1,102 pulls.</p>
+  <p>Those are the two highest-returning packs on the board, and they are the two that happened to produce the jackpot. Every other pack sits close to 1.00 times without one. This is not a criticism of the disclosure, which is what makes the check possible in the first place, but it does mean the top of the table is luck rather than a better pack.</p>
+
+  <h3>3. The thin samples tell you nothing about the tail</h3>
+  <p>Pull counts range from 69,558 on Multisport Liftoff down to 127 on Football Galaxy. With a roughly 0.4% chance of a 10x-or-better pull, a 127-pull sample is expected to contain fewer than one. Basketball Ascent's 1.13 times on 260 pulls and Soccer Orbit's 0.92 times on 164 pulls are both noise, and treating either as a verdict on the pack would be a mistake. We have flagged every pack below 500 pulls in the table.</p>
+
+  <h2>Every pack, by observed return</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Observed results from the Clutch Packs transparency page, read {collected}. Packs under 500 pulls are too thinly sampled to judge.</caption>
+  <thead><tr>
+    <th scope="col">Pack</th><th scope="col">Category</th><th scope="col" class="num">Price</th>
+    <th scope="col" class="num">Verified pulls</th><th scope="col" class="num">Average pull</th>
+    <th scope="col" class="num">Return</th><th scope="col" class="num">Under 1&times;</th>
+    <th scope="col" class="num">2&times; or better</th>
+  </tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <h2>Full value distribution</h2>
+  <p>The shape matters more than the average. Note how much of every pack sits in the bottom two bands.</p>
+  <div class="table-wrap">
+  <table>
+  <caption>Share of recorded pulls by value band, as published. The bottom band's label varies between packs, from 0.1x to 0.2x at its lower edge.</caption>
+  <thead><tr><th scope="col">Pack</th>{bandhead}</tr></thead>
+  <tbody>{bandrows}</tbody>
+  </table>
+  </div>
+
+  <h2>Pack odds: a flat 100-card pool</h2>
+  <p>Alongside the observed results, each pack page lists its card pool with per-tier odds. On the $100 Multisport Ascent pack the pool is 100 cards, each at 1%:</p>
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Multisport Ascent ($100) card pool, as listed on the pack page.</caption>
+  <thead><tr><th scope="col">Tier</th><th scope="col" class="num">Cards</th><th scope="col" class="num">Combined odds</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Epics</th><td class="num">2</td><td class="num">2.00%</td></tr>
+    <tr><th scope="row">Chasers</th><td class="num">6</td><td class="num">6.00%</td></tr>
+    <tr><th scope="row">Hits</th><td class="num">15</td><td class="num">15.00%</td></tr>
+    <tr><th scope="row">Commons</th><td class="num">77</td><td class="num">77.00%</td></tr>
+  </tbody>
+  </table>
+  </div>
+  <p>This is the cleanest odds structure of any platform we track. Every card is equally likely, the tier percentages are just the card counts, and the pool is enumerated rather than summarised. Compare Arena Club, where you must add up dozens of individual per-card rates to learn your chance at a tier.</p>
+
+  <p>The pack page also states a $20 floor and a $1,000 chaser ceiling on Ascent, which puts its guaranteed minimum at 20% of the pack price. That is low by the standards of Courtyard, whose standard packs floor at around 70%, and Packz at 50%, though it is not as low as Crown Rips.</p>
+
+  <div class="callout">
+    <h3>Where the pack page and the transparency page disagree</h3>
+    <p>The Ascent pack page gives an average value of $100 and a chaser ceiling of $1,000. The transparency page gives an average of $106.61 and a maximum of $130,000 for the same pack. Both can be true: the Series Hits, which the pack page says can land in any Launch Series pack at any time, appear to sit outside the enumerated 100-card pool. A buyer reading only the pack page would not know the ceiling is 130 times higher than stated, or that the recorded average is above the stated one.</p>
+  </div>
+
+  <div class="callout danger">
+    <h3>No buyback terms are disclosed</h3>
+    <p>We could find no sell-back or buyback terms on the pack pages or the transparency page. On every other platform we track, this is where the headline return gets eroded: Courtyard's 90% advertised rate, Packz's 90% in non-withdrawable credit, Arena Club's 90% to a withdrawable wallet. A near-break-even average return means very different things depending on whether you can convert a card to money at 100%, at 90%, or only into more packs.</p>
+    <p>Until that is answered, Clutch Packs cannot be scored, however good its odds disclosure is.</p>
+  </div>
+
+  <h2>What we still need</h2>
+  <ul>
+    <li><strong>Buyback terms</strong>, the rate and whether proceeds are withdrawable.</li>
+    <li><strong>Whether Series Hits sit inside or outside the 100-card pool</strong>, and what their odds are. They are the difference between a $1,000 ceiling and a $130,000 one.</li>
+    <li><strong>How card values are set</strong> at the moment of a pull, and from which market data.</li>
+    <li><strong>Whether the on-chain record is independently auditable</strong> in practice, not just minted. A record anyone can verify is far stronger than one only the platform can read.</li>
+    <li><strong>Shipping terms and fees</strong>, which are undisclosed.</li>
+  </ul>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/platforms/courtyard/">Courtyard</a>, the only other platform that publishes a return figure</li>
+    <li><a href="/methodology/">How we rate platforms</a></li>
+  </ul>
+</div>
+""".format(pulls="{:,}".format(s["pulls"]), npacks=s["n_packs"],
+           wavg=s["w_avg"], below=pct(s["below_1x"], 0),
+           at2x=pct(s["at_2x"], 1), collected=CLUTCH_COLLECTED,
+           rows="".join(rows), bandrows="".join(band_rows),
+           bandhead="".join('<th scope="col" class="num">%s</th>' % b
+                            for b in CLUTCH_BAND_LABELS),
+           faq=faq_html)
+
+    ds = jsonld({
+        "@context": "https://schema.org", "@type": "Dataset",
+        "name": "Clutch Packs observed pull results",
+        "description": "Observed average return, pull counts and value distribution for %d Clutch Packs packs, covering %s pack openings verified on the Polygon blockchain." % (s["n_packs"], "{:,}".format(s["pulls"])),
+        "url": BASE_URL + "/platforms/clutch-packs/",
+        "dateModified": CLUTCH_COLLECTED,
+        "creator": {"@type": "Organization", "name": SITE_NAME},
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+    })
+
+    return pages_written("/platforms/clutch-packs/", page(
+        "/platforms/clutch-packs/",
+        "Clutch Packs odds and real returns — %s verified pulls analysed" % "{:,}".format(s["pulls"]),
+        "Clutch Packs publishes observed pull results on-chain. Across %s verified pulls the average return is %.2f times the pack price, but %s of pulls return less than the pack cost." % ("{:,}".format(s["pulls"]), s["w_avg"], pct(s["below_1x"], 0)),
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Clutch Packs")],
+        updated=CLUTCH_COLLECTED, structured=[faq_ld, ds]))
+
+
+def build_crown_rips():
+    rows = []
+    for name, price, lo, hi in CROWN_RIPS_PACKS:
+        rows.append(
+            '<tr><td class="name">%s Pack</td><td class="num">%s</td>'
+            '<td class="num">%s</td><td class="num"><strong>%s</strong></td>'
+            '<td class="num">%s</td><td class="num">%s</td></tr>' % (
+                E(name), money(price), money(lo), pct(lo / price * 100, 0),
+                money(hi), ("%.1f&times;" % (hi / price)).replace(".0&times;", "&times;")))
+
+    floors = [lo / p for _, p, lo, _ in CROWN_RIPS_PACKS]
+
+    faq_html, faq_ld = faq_block([
+        ("What is Crown Rips?",
+         "<p>Crown Rips is a digital card ripping feature inside Crown Coins Casino, a sweepstakes casino. It opened as a 500-person beta announced on 27 July 2026, with selected existing customers given early access. Users open mystery packs of sports and Pok&eacute;mon cards and can keep a card in a vault, have the physical card shipped, or sell it back.</p>"),
+        ("What is the expected value of a Crown Rips pack?",
+         "<p>It cannot be calculated. Crown Rips publishes a minimum and maximum pull value for each pack but no pull rates or probabilities, so there is no way to work out an average. The platform's marketing promises &ldquo;no dead pulls&rdquo; but publishes no numbers behind that. Of the four platforms we track, Crown Rips and Arena Club are the two whose expected value a buyer cannot determine before spending.</p>"),
+        ("What are the Crown Rips pack prices?",
+         "<p>Reporting from the beta lists ten Pok&eacute;mon packs: Starter at $1, Basic at $5, Signature at $10, Bronze at $25, Silver at $50, Gold at $100, Sapphire at $250, Amethyst at $500, Ultimate at $1,000 and Diamond at $2,500. The $1 Starter pack is the cheapest entry point of any platform we track, where the next cheapest is Packz at $5.</p>"),
+        ("Does Crown Rips really buy cards back at 100%?",
+         "<p>Crown Coins has said users can sell cards back for 100% of fair market value, which would be the best buyback in the category against the 90% offered by Courtyard, Packz and Arena Club. We have not verified it. Two things need checking first: what Crown Rips treats as fair market value, since the platform sets that figure itself, and what form the proceeds take, because the phrasing that proceeds can fund future pack purchases is the same language Packz uses for credit that cannot be withdrawn.</p>"),
+        ("What happens to cards left in the Crown Rips vault?",
+         "<p>Reporting from the beta says cards sit in the vault for seven days and are then automatically sold back at market value. If accurate, that is the most consequential term on the platform and the one least like its competitors: Courtyard and Arena Club vault cards indefinitely, so holding a card is a decision you make rather than a deadline you have to meet. Confirm it against the current terms before buying a pack you intend to hold.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Crown Rips: pack prices, floors and what is not disclosed</h1>
+    <p class="lede">Crown Rips is the card ripping feature inside Crown Coins Casino, launched as a 500-person beta in July 2026. It is the only platform we track that sells rips inside a sweepstakes casino, and the only one with a $1 pack.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Crown Rips publishes a minimum and maximum pull value for every pack but no pull rates at all, so its expected value cannot be calculated. On the figures reported from the beta its disclosed floor is the lowest of any platform we track: most packs guarantee only {modal} of the pack price, against 50% on Packz and roughly 70% on a standard Courtyard pack.</p>
+    <p class="small muted">Pack figures reported from the beta, {reported}. Unlike the Courtyard and Packz data on this site, we have not yet collected these from the platform ourselves.</p>
+  </div>
+
+  <div class="callout">
+    <h3>How this page differs from our others</h3>
+    <p>Everything on our <a href="/platforms/courtyard/">Courtyard</a> and <a href="/platforms/packz/">Packz</a> pages was collected directly from those platforms' own pack pages. Crown Rips is in a closed beta, so the pack figures below come from reporting rather than our own collection, and we publish no return figure for it. We will replace this with a first-hand collection when the platform opens up. <a href="/methodology/">Our methodology</a> explains why that distinction matters.</p>
+  </div>
+
+  <h2>Pack prices and disclosed range</h2>
+  <p>The Pok&eacute;mon store reportedly lists ten packs, each with a fixed price and a stated minimum and maximum pull value. There are no probabilities attached to either end, so the range tells you what is possible rather than what is likely.</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>Crown Rips Pok&eacute;mon packs as reported from the beta, {reported}. Floor and ceiling are our arithmetic on the reported minimum and maximum.</caption>
+  <thead><tr>
+  <th scope="col">Pack</th><th scope="col" class="num">Price</th>
+  <th scope="col" class="num">Minimum pull</th><th scope="col" class="num">Floor, as % of price</th>
+  <th scope="col" class="num">Maximum pull</th><th scope="col" class="num">Ceiling</th>
+  </tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <h2>The floor is the story</h2>
+  <p><strong>A {modal} floor is low for this category.</strong> It means a worst-case pull on a $100 Gold pack returns a card valued at $30. For comparison, the lowest tier on a standard Courtyard pack starts at about 70% of the price, and Packz guarantees 50% on every pack of $25 and up. Crown Rips is closer to Courtyard's high-variance Spicy packs, which start at around half the price, except that it applies at every price point rather than as an opt-in.</p>
+
+  <p><strong>The cheapest packs are the worst, again.</strong> The $1 Starter pack guarantees only {starter} of its price and the $5 Basic pack {basic}. This is the same pattern we found on Packz, where the $5 and $10 packs have materially worse floors than the rest of the range. On both platforms the pack a newcomer is most likely to try first is the one with the least protection.</p>
+
+  <p><strong>A low floor is not automatically a bad deal.</strong> Floor and average are different things, and a pack can combine a low floor with a reasonable expected value if the middle tiers are generous. That is exactly what the pull rates would tell you, and exactly what Crown Rips does not publish.</p>
+
+  <h2>Volatility settings</h2>
+  <p>Crown Rips reportedly offers three volatility settings on each pack, labelled something like Normal, High and Max, where a higher setting raises the chance of rare cards and also the chance of the lowest-value pulls. No platform we track offers anything comparable, and as a feature it is an honest acknowledgment that variance is a separate dial from value.</p>
+  <p>It also multiplies the disclosure problem. Ten packs with three settings each is thirty distinct probability distributions, none of which has published rates. A buyer choosing Max over Normal has no way to see what they are trading.</p>
+
+  <div class="callout danger">
+    <h3>Cards in the vault may be sold automatically after seven days</h3>
+    <p>Reporting from the beta says a card left in the vault is automatically sold back at market value after seven days. If that holds, it is the single most important term on the platform. Courtyard and Arena Club vault cards indefinitely, so keeping a card is a decision; here it would be a deadline, and a card you wanted to keep could be liquidated at a value the platform sets while you were not looking.</p>
+    <p>We have not confirmed this against Crown Rips' own terms. If you are in the beta, check it before buying a pack you intend to hold.</p>
+  </div>
+
+  <h2>Why a sweepstakes casino is doing this</h2>
+  <p>Crown Rips is the only platform we track that sits inside a sweepstakes casino rather than operating as a standalone retail business, and that is worth understanding rather than treating as a detail. Sweepstakes operators are built around a promotional-currency model with a no-purchase-necessary route, which is the structure they rely on to sit outside conventional gambling licensing.</p>
+
+  <p>Dropping a rip product into that framework is a plausible answer to the legal exposure described on our <a href="/is-card-ripping-gambling/">gambling page</a>, where plaintiffs have argued that paying money for a random prize of uncertain value amounts to an unlicensed lottery. Whether it works is untested, and it may cut the other way: a product already operating under a gambling-adjacent licence may find it harder to argue it is simply retail.</p>
+
+  <p>Reporting conflicts on a basic point here. Some coverage describes packs being opened with Sweeps Cash, the promotional virtual currency used for the casino games, while beta coverage describes players loading real cash in dollars specifically for Crown Rips. That distinction decides whether a pack has a dollar price at all, and therefore whether an expected value can ever be stated in dollars. We are not guessing at it.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Operator</th><td>Crown Coins Casino, a sweepstakes casino</td></tr>
+    <tr><th scope="row">Status</th><td>500-person closed beta, announced 27 July 2026; wider rollout expected but undated</td></tr>
+    <tr><th scope="row">Categories</th><td>Pok&eacute;mon and multi-sport cards</td></tr>
+    <tr><th scope="row">Pack prices</th><td>Ten Pok&eacute;mon packs reported from $1 to $2,500</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>Minimum and maximum pull value per pack; no pull rates or probabilities</td></tr>
+    <tr><th scope="row">Expected value</th><td>Not published and not calculable</td></tr>
+    <tr><th scope="row">Volatility settings</th><td>Three per pack, reportedly</td></tr>
+    <tr><th scope="row">Buyback</th><td>Claimed at 100% of fair market value; form of proceeds unconfirmed</td></tr>
+    <tr><th scope="row">Vault</th><td>Reportedly auto-sells after seven days</td></tr>
+    <tr><th scope="row">Shipping</th><td>Physical cards can be shipped; fees and timelines not published</td></tr>
+    <tr><th scope="row">Age</th><td>18+ per the site's promotional terms</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>What we still need</h2>
+  <ul>
+    <li><strong>Pull rates, if any exist in the beta.</strong> Without them there is no expected value, and Crown Rips sits with Arena Club as a platform a buyer cannot evaluate.</li>
+    <li><strong>What the buyback actually pays, and in what.</strong> A genuine 100% in withdrawable money would be the best terms in the category; 100% in packs-only credit would not.</li>
+    <li><strong>Whether the seven-day vault auto-sale is real</strong>, and whether it applies to cards you have paid to vault.</li>
+    <li><strong>Whether packs cost dollars or Sweeps Cash</strong>, which the current reporting disagrees on.</li>
+  </ul>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/is-card-ripping-gambling/">Why the sweepstakes framing matters</a></li>
+  </ul>
+</div>
+""".format(rows="".join(rows), reported="27 July 2026",
+           modal="30%", starter=pct(floors[0] * 100, 0),
+           basic=pct(floors[1] * 100, 0), faq=faq_html)
+
+    return pages_written("/platforms/crown-rips/", page(
+        "/platforms/crown-rips/",
+        "Crown Rips pack prices and odds — what Crown Coins does not disclose",
+        "Crown Rips publishes a minimum and maximum pull value per pack but no pull rates, so its expected value cannot be calculated. Pack prices from $1 to $2,500 and the lowest disclosed floor of any platform we track.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Crown Rips")],
+        updated=COLLECTED, structured=faq_ld))
+
+
+def build_compare():
+    faq_html, faq_ld = faq_block([
+        ("Is Courtyard or Packz better value?",
+         "<p>On the published numbers Packz looks better, at about %s of the pack price against Courtyard's 95%%, but the comparison is not like for like. Courtyard publishes an exact expected value and commits to it. The Packz figure is our own estimate, calculated from value ranges and resting on Packz's own card valuations, with a span of roughly %s to %s depending on where cards actually sit in each range. Courtyard also lets you withdraw a buyback while Packz pays only in site credit. A committed 95%% that converts to cash is arguably worth more than an estimated 100%% that does not.</p>" % (pct(PZ_STD_MID * 100, 0), pct(pz_std[0]["ratio_low"] * 100, 0), pct(pz_std[0]["ratio_high"] * 100, 0))),
+        ("Which platform has better odds of beating the pack price?",
+         "<p>Packz, consistently. Every Packz pack gives a %s chance of a card worth at least the pack price, because all its packs use the same odds template. Courtyard's packs range from %s to %s depending on which pack you choose, so the best Courtyard packs beat Packz on this measure and the worst are well behind it.</p>" % (pct(PZ_HIT, 1), pct(CY_HIT_LO, 0), pct(CY_HIT_HI, 0))),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Courtyard vs Packz</h1>
+    <p class="lede">The two platforms that publish enough for their packs to be compared directly, and the ways in which that comparison is not as simple as the headline numbers suggest.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Packz's published odds imply a better return than Courtyard's, about {pzstd} of the pack price against 95%. But Courtyard commits to an exact figure while the Packz number is an estimate from value ranges, and Courtyard's buyback can be withdrawn while Packz's pays only in site credit.</p>
+    <p class="small muted">Both datasets collected {collected}.</p>
+  </div>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <caption>Courtyard and Packz compared on what each actually publishes, {collected}.</caption>
+  <thead><tr><th scope="col"></th><th scope="col">Courtyard</th><th scope="col">Packz</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Packs measured</th><td>{cyn}</td><td>{pzn}</td></tr>
+    <tr><th scope="row">Price range</th><td>{cymin}&ndash;{cymax}</td><td>$5&ndash;$1,000</td></tr>
+    <tr><th scope="row">Stated return, $25+ packs</th><td><strong>95&ndash;96%</strong>, published by Courtyard</td><td><strong>~{pzstd}</strong>, our estimate</td></tr>
+    <tr><th scope="row">Cheapest packs</th><td>95% on the $15 packs</td><td>{com} on $5, {unc} on $10</td></tr>
+    <tr><th scope="row">How value is disclosed</th><td>Exact expected value on every pack</td><td>Dollar value ranges only</td></tr>
+    <tr><th scope="row">Odds structure</th><td>Varies by pack</td><td>One template across all packs</td></tr>
+    <tr><th scope="row">Chance of &ge; pack price</th><td>{cyhitlo}&ndash;{cyhithi}, depending on the pack</td><td>{pzhit} on every pack</td></tr>
+    <tr><th scope="row">Buyback rate</th><td>90% advertised; independently measured nearer 85%</td><td>90%, or 100% on a first pack up to $100</td></tr>
+    <tr><th scope="row">Buyback payout</th><td>Settles in USDC</td><td>Site credit that cannot be withdrawn</td></tr>
+    <tr><th scope="row">Categories</th><td>Cards, comics, coins, watches, sneakers</td><td>Sports and Pok&eacute;mon</td></tr>
+    <tr><th scope="row">Availability</th><td>Not restricted to the US</td><td>United States only, 18+</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Why the headline comparison is misleading</h2>
+  <p><strong>One number is a commitment, the other is an inference.</strong> Courtyard states an expected value on each pack page. If that figure is wrong, it is wrong in public and against a specific claim. Packz publishes only the bands a card might fall into, so its return has to be estimated, and depending on where cards actually sit within those ranges the true figure could be anywhere from {pzlo} to {pzhi} of the price.</p>
+
+  <p><strong>Both figures rest on the platforms' own valuations.</strong> Neither number has been checked against what the cards actually sell for. This is the single biggest open question on this site, and it is the next thing we are testing.</p>
+
+  <p><strong>Credit is not cash.</strong> A 90% buyback paid in withdrawable funds and a 90% buyback paid in packs-only credit are different products. On Packz the credit can only be spent on more packs, so a sell-back is really a re-roll rather than a refund.</p>
+
+  <h2>Which to pick, on the evidence so far</h2>
+  <p>If you want the most checkable information before you spend, Courtyard is the only one of the two that commits to a number. If you want the best chance of a pull that beats the pack price, Packz's {pzhit} is better than most Courtyard packs, though the best Courtyard packs beat it. If you expect to sell cards back for money rather than more packs, Packz's credit-only buyback is a significant disadvantage.</p>
+
+  <p>Avoid the $5 and $10 Packz packs specifically. They are the only packs on either platform with a materially worse return than their stablemates, and they are the ones a newcomer is most likely to try first.</p>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Go deeper</h2>
+  <ul>
+    <li><a href="/platforms/courtyard/">All {cyn} Courtyard packs</a></li>
+    <li><a href="/platforms/packz/">All {pzn} Packz packs</a></li>
+    <li><a href="/calculator/">Compare any two packs yourself</a></li>
+  </ul>
+</div>
+""".format(cyn=CY_N, pzn=PZ_N, pzstd=pct(PZ_STD_MID * 100, 0),
+           cymin=money(CY_MIN_PRICE), cymax=money(CY_MAX_PRICE),
+           com=pct(PZ_COMMON["ratio_mid"] * 100, 0),
+           unc=pct(PZ_UNCOMMON["ratio_mid"] * 100, 0),
+           cyhitlo=pct(CY_HIT_LO, 0), cyhithi=pct(CY_HIT_HI, 0),
+           pzhit=pct(PZ_HIT, 1), collected=COLLECTED,
+           pzlo=pct(pz_std[0]["ratio_low"] * 100, 0),
+           pzhi=pct(pz_std[0]["ratio_high"] * 100, 0), faq=faq_html)
+
+    return pages_written("/compare/courtyard-vs-packz/", page(
+        "/compare/courtyard-vs-packz/",
+        "Courtyard vs Packz — odds, expected value and buyback compared",
+        "Packz's odds imply about %s back against Courtyard's posted 95%%, but one figure is a published commitment and the other an estimate, and only one buyback pays withdrawable money." % pct(PZ_STD_MID * 100, 0),
+        body,
+        crumbs=[("/", "Home"), (None, "Courtyard vs Packz")],
+        updated=COLLECTED, structured=faq_ld))
+
+
+def build_calculator():
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Pack EV calculator</h1>
+    <p class="lede">Enter the odds any ripping site publishes and see what a pack is actually worth: the average card value, the expected loss per pack, and your chance of beating the price. Runs entirely in your browser, no account needed.</p>
+  </div>
+
+  <div class="calc">
+    <div class="calc-grid">
+      <label class="field">Pack price ($)
+        <input type="number" id="price" min="0" step="0.01" value="50">
+      </label>
+      <label class="field">Buyback rate (%)
+        <input type="number" id="buyback" min="0" max="100" step="0.5" value="90">
+      </label>
+    </div>
+
+    <table class="tier-table">
+      <thead><tr><th scope="col">Card value ($)</th><th scope="col">Odds (%)</th><th><span style="position:absolute;left:-9999px">Remove</span></th></tr></thead>
+      <tbody id="tierBody"></tbody>
+    </table>
+    <p class="odds-note" id="oddsNote" aria-live="polite"></p>
+
+    <div class="btn-row">
+      <button class="btn" type="button" id="addTier">Add tier</button>
+      <button class="btn" type="button" id="loadPackz">Packz $25 Starter</button>
+      <button class="btn" type="button" id="loadCourtyard">Courtyard $50 Pok&eacute;mon Pro</button>
+      <button class="btn" type="button" id="clearTiers">Clear</button>
+    </div>
+
+    <div class="result" aria-live="polite">
+      <div class="result-inner">
+        <div class="metric wide"><b id="evOut">$0</b><span>Average card value per pack</span></div>
+        <div class="metric"><b id="retOut">0%</b><span>Return on the pack price</span></div>
+        <div class="metric"><b id="bbOut">$0</b><span>Average cash back if you sell every card back</span></div>
+        <div class="metric"><b id="lossOut">$0</b><span>Average gain or loss per pack, selling back</span></div>
+        <div class="metric"><b id="tenOut">$0</b><span>Over ten packs, selling back</span></div>
+        <div class="metric"><b id="hitOut">0%</b><span>Chance of a card worth more than the pack price</span></div>
+        <p class="verdict-line" id="verdict">Add value tiers to see the maths.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>How to use it</h2>
+  <p>Most ripping sites publish odds as dollar ranges rather than exact values, for example a 44% chance of a card worth $12.50 to $17.50. To use a range, enter its midpoint. Bear in mind that real card values tend to cluster toward the bottom of a range, because cheap cards are more numerous than expensive ones, so a midpoint estimate is usually slightly optimistic.</p>
+
+  <p>The calculator checks that your odds add up to 100% and will tell you if they do not. If a site's published odds do not total 100%, that is usually display rounding on the smallest tiers rather than an error.</p>
+
+  <h3>What each number means</h3>
+  <ul>
+    <li><strong>Average card value</strong> is the expected value: each tier's value multiplied by its probability, summed. It is what you would average per pack over a very large number of packs.</li>
+    <li><strong>Return</strong> expresses that as a percentage of the price. Below 100% means the pack loses money on average, which is true of every pack we have measured.</li>
+    <li><strong>Average cash back</strong> applies the buyback rate. This is the number that matters if you intend to sell cards back rather than keep them. Check whether a platform's buyback pays withdrawable money or site credit, because they are not equivalent.</li>
+    <li><strong>Chance of beating the price</strong> is how often a single pack produces a card worth more than it cost. It has nothing to do with the average, and two packs with the same expected value can differ enormously here.</li>
+  </ul>
+
+  <div class="callout">
+    <h3>What the calculator cannot tell you</h3>
+    <p>It works from the values a platform publishes. If those valuations are higher than what the cards actually sell for, every figure it produces is correspondingly optimistic. Expected value also describes long-run averages, not your next pack: on a pack with a 1-in-1,000 top tier, almost every individual result will look nothing like the average.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var tierBody=document.getElementById('tierBody');
+  var PRESETS={
+    packz:{price:25,buyback:90,tiers:[[15,44],[21.25,25.6],[31.25,19],[50,9.5],[93.75,1.5],[187.5,0.3],[375,0.1]]},
+    courtyard:{price:50,buyback:90,tiers:[[40,62],[47.5,16],[75,20],[150,2],[500,0.1]]}
+  };
+
+  function addTier(v,o){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><input type="number" min="0" step="0.01" aria-label="Card value in dollars" value="'+(v===undefined?'':v)+'"></td>'+
+      '<td><input type="number" min="0" max="100" step="0.01" aria-label="Odds in percent" value="'+(o===undefined?'':o)+'"></td>'+
+      '<td><button class="icon-btn" type="button" aria-label="Remove tier">&times;</button></td>';
+    tr.querySelector('button').addEventListener('click',function(){tr.remove();calc();});
+    tr.querySelectorAll('input').forEach(function(i){i.addEventListener('input',calc);});
+    tierBody.appendChild(tr);
+  }
+  function money(n){
+    var s=Math.abs(n).toLocaleString(undefined,{style:'currency',currency:'USD'});
+    return (n<0?'\\u2212':'')+s;
+  }
+  function signed(n){return (n>0?'+':'')+money(n);}
+
+  function calc(){
+    var price=parseFloat(document.getElementById('price').value)||0;
+    var bb=(parseFloat(document.getElementById('buyback').value)||0)/100;
+    var ev=0,sum=0,hit=0;
+    tierBody.querySelectorAll('tr').forEach(function(tr){
+      var ins=tr.querySelectorAll('input');
+      var v=parseFloat(ins[0].value), o=parseFloat(ins[1].value);
+      if(isNaN(v)||isNaN(o))return;
+      ev+=v*(o/100); sum+=o;
+      if(v>price)hit+=o;
+    });
+
+    var note=document.getElementById('oddsNote');
+    if(sum===0){note.textContent='';note.className='odds-note';}
+    else if(Math.abs(sum-100)>0.05){
+      note.textContent='Your odds add up to '+sum.toFixed(2)+'%. They should total 100%.';
+      note.className='odds-note bad';
+    } else {note.textContent='Odds total 100%.';note.className='odds-note';}
+
+    var bbVal=ev*bb, per=bbVal-price, ret=price>0?ev/price*100:0;
+    document.getElementById('evOut').textContent=money(ev);
+    document.getElementById('retOut').textContent=(price>0&&sum>0)?Math.round(ret)+'%':'\\u2014';
+    document.getElementById('bbOut').textContent=money(bbVal);
+    var l=document.getElementById('lossOut');
+    l.textContent=signed(per); l.className=per>=0?'pos':'neg';
+    var t=document.getElementById('tenOut');
+    t.textContent=signed(per*10); t.className=per>=0?'pos':'neg';
+    document.getElementById('hitOut').textContent=hit.toFixed(1)+'%';
+
+    var verdict=document.getElementById('verdict');
+    if(sum===0||price===0){verdict.textContent='Add value tiers to see the maths.';return;}
+    if(ret>=100){
+      verdict.textContent='On average the cards in this pack are worth '+Math.round(ret)+'% of the price. A return at or above 100% is rare, so it is worth checking the listed values against recent sold prices.';
+    } else {
+      verdict.textContent='On average the cards are worth '+Math.round(ret)+'% of the price. Selling everything back at this buyback rate, you would expect to lose about '+money(Math.abs(per))+' per pack.';
+    }
+  }
+
+  function load(key){
+    var p=PRESETS[key];
+    tierBody.innerHTML='';
+    p.tiers.forEach(function(t){addTier(t[0],t[1]);});
+    document.getElementById('price').value=p.price;
+    document.getElementById('buyback').value=p.buyback;
+    calc();
+  }
+
+  document.getElementById('addTier').addEventListener('click',function(){addTier();});
+  document.getElementById('loadPackz').addEventListener('click',function(){load('packz');});
+  document.getElementById('loadCourtyard').addEventListener('click',function(){load('courtyard');});
+  document.getElementById('clearTiers').addEventListener('click',function(){
+    tierBody.innerHTML=''; addTier(); calc();
+  });
+  ['price','buyback'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',calc);
+  });
+
+  load('packz');
+})();
+</script>
+"""
+    ld = jsonld({
+        "@context": "https://schema.org", "@type": "WebApplication",
+        "name": "Pack EV calculator",
+        "url": BASE_URL + "/calculator/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Any",
+        "description": "Calculates the expected value, buyback return and hit rate of a mystery card pack from its published odds.",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
+    })
+    return pages_written("/calculator/", page(
+        "/calculator/",
+        "Pack EV calculator — work out what a card pack is really worth",
+        "Free calculator for mystery card packs. Enter a site's published odds to get the average card value, expected loss per pack and your chance of beating the pack price.",
+        body, crumbs=[("/", "Home"), (None, "Pack EV calculator")],
+        structured=ld))
+
+
+def build_methodology():
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>How we rate card ripping platforms</h1>
+    <p class="lede">What goes into a score, what we refuse to guess at, and how we handle the money side so you can judge whether our numbers deserve your trust.</p>
+  </div>
+
+  <h2>The scoring weights</h2>
+  <p>Most of the weight sits on things that can be measured rather than impressions of a website. A platform's score is out of 10.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <thead><tr><th scope="col">Factor</th><th scope="col" class="num">Weight</th><th scope="col">What it measures</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Pack expected value against price</th><td class="num">35%</td><td>What the average pack returns, calculated from published odds and checked against real sold prices</td></tr>
+    <tr><th scope="row">Buyback quality</th><td class="num">25%</td><td>The rate, and crucially whether it pays withdrawable money or site credit</td></tr>
+    <tr><th scope="row">Odds transparency</th><td class="num">20%</td><td>Whether a buyer can work out their own expected value before spending</td></tr>
+    <tr><th scope="row">Payouts and shipping</th><td class="num">10%</td><td>Getting the card or the money out, and what that costs</td></tr>
+    <tr><th scope="row">Trust and support</th><td class="num">10%</td><td>Track record, dispute handling, how clearly terms are stated</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>Where the numbers come from</h2>
+  <p>We collect each platform's published odds directly from its own pack pages and record the date. Those collections are published as CSV files on our <a href="/data/">open data page</a> so anyone can check our arithmetic or redo it themselves.</p>
+
+  <p>Where a platform publishes an exact expected value, as Courtyard does, we report that figure and say that it is the platform's own. Where a platform publishes only value ranges, as Packz does, we calculate a band and report the midpoint as the headline with the full span alongside it. Where a platform publishes no values at all, as Arena Club does, we say the expected value cannot be calculated rather than inventing one.</p>
+
+  <h2>What we will not do</h2>
+  <ul>
+    <li><strong>Publish a score before we have the data.</strong> A platform shows no rating here until we have collected its odds ourselves. An empty cell is more useful than a guess.</li>
+    <li><strong>Pass off a platform's valuations as verified.</strong> Every expected value on this site currently rests on the platform's own view of what its cards are worth. We label that clearly, and checking a sample against real sold prices is our current priority.</li>
+    <li><strong>Reuse another site's data.</strong> Other trackers exist and some do good work. We link to them where useful and build our own ratings only on numbers we have collected.</li>
+    <li><strong>Let a commission move a score.</strong> See below.</li>
+  </ul>
+
+  <h2>How we make money, and what that cannot buy</h2>
+  <p>Some outbound links on this site are affiliate links, which means we may earn a commission if you sign up or buy through them. Every such link is marked and the disclosure appears in the footer of every page.</p>
+  <p>Commissions do not affect a score, a ranking, or any published number. We will publish an unfavourable finding about a platform we earn from, and we have no agreement with any platform that restricts what we can write. If a platform ever asks for one, we will say so on this page.</p>
+  <p>We also send each platform our figures before publishing and invite corrections. If a platform improves its disclosure or raises its buyback, we re-score it and say so.</p>
+
+  <h2>Corrections</h2>
+  <p>If you think a number here is wrong, tell us and show your working. We date every dataset so that a figure can be checked against what the platform published at the time, and we note changes rather than quietly overwriting them. Platforms do change their odds, and a corrected figure is a better outcome for everyone than a confident wrong one.</p>
+</div>
+"""
+    return pages_written("/methodology/", page(
+        "/methodology/",
+        "How we rate card ripping platforms — methodology",
+        "Our scoring weights, where our odds data comes from, what we refuse to estimate, and how affiliate commissions are kept out of the ratings.",
+        body, crumbs=[("/", "Home"), (None, "How we rate")]))
+
+
+def build_gambling():
+    faq_html, faq_ld = faq_block([
+        ("Is card ripping legal in the United States?",
+         "<p>Digital pack ripping is not currently banned outright, and the major platforms operate openly in the US. But the legal position is unsettled and varies by state. Lawyers advising operators identify gambling and lottery law as the biggest risk, on the basis that paying money for a random prize of uncertain value can meet the legal test for an unlawful lottery. Several cases are testing that question now, so the honest answer is that it is legally grey rather than clearly settled.</p>"),
+        ("Are there lawsuits against pack ripping sites?",
+         "<p>Yes. A California False Claims Act suit filed in 2025 targets Whatnot and Fanatics Live over what it characterises as unlicensed box-break lotteries. PackDraw faces suits in Minnesota and New York alleging it drew a minor into offshore crypto gambling. Those allegations are untested in court and none of the cases has produced a final ruling, so they indicate regulatory attention rather than a settled legal conclusion.</p>"),
+        ("Is ripping a good way to make money?",
+         "<p>No. Every pack we have measured returns less than it costs on average, which is by design: operators set the return below the price the same way a casino sets a house edge. Published odds across the platforms we have checked imply returns of roughly 92%% to 100%% of the pack price, and after a buyback of 90%% or less the realistic cash return is in the low-to-mid 80s. Treat money spent ripping as the cost of entertainment rather than an investment.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Is card ripping gambling?</h1>
+    <p class="lede">Digital pack ripping sits in a legal grey area that is being tested in court right now. Whatever the law decides, the mathematics already works like a casino game.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Whether digital pack ripping is legally gambling is unresolved and may differ by state. What is not in question is the economics: on every pack we have measured, the average payout is less than the pack price, which is the same structure as a house edge.</p>
+  </div>
+
+  <h2>How a digital rip works</h2>
+  <p>You pay for a pack. A random card is revealed. You receive a real graded collectible, which you can keep, have shipped, or sell back to the platform at its buyback rate. Platforms argue that because you always receive something of value, this is a retail purchase rather than a wager.</p>
+
+  <h2>The legal argument against that</h2>
+  <p>The counter-argument is that the three classic elements of gambling are all present: you pay consideration, the outcome turns on chance, and the prize varies in value. Lawyers advising operators in this sector flag gambling and lottery law as the most serious risk they face, and some regulators and plaintiffs have argued that these products amount to unlicensed lotteries.</p>
+
+  <p>That question is live. A California False Claims Act suit filed in 2025 targets Whatnot and Fanatics Live over what it describes as unlicensed box-break lotteries, and PackDraw faces suits in Minnesota and New York alleging it recruited a minor into offshore crypto gambling. Those allegations have not been tested in court. The outcome matters beyond the named companies, because a ruling that these products are gambling would reshape the whole category.</p>
+
+  <p>Pok&eacute;mon packs sharpen the issue, because the audience skews young and age verification across the sector is inconsistent. Several platforms are restricted to adults; not all of them check carefully.</p>
+
+  <h2>What the maths says, regardless of the law</h2>
+  <p>Every pack we have measured returns less than it costs on average. Courtyard publishes an expected value of 95% of the pack price on most of its packs. Packz's published odds imply around {pzstd} at midpoint values, and less on its cheapest packs. Once you apply a buyback of 90% or less, the realistic cash return on a sell-back is in the low-to-mid 80s as a percentage of what you spent.</p>
+
+  <p>That is not a criticism of any particular operator. It is how the product has to work for the business to exist, exactly as a slot machine's return-to-player sits below 100%. The difference is that regulated casinos are generally required to publish their return-to-player figure, while in this sector publishing an expected value is currently a voluntary choice that most platforms do not make.</p>
+
+  <div class="callout danger">
+    <h3>Rip with a budget</h3>
+    <p>Decide what you are willing to lose before you start and treat it as the price of the entertainment. Do not chase losses by buying another pack to recover the last one; the odds on the next pack are identical regardless of what just happened. These products are for adults.</p>
+    <p>If ripping has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <p class="small muted">Nothing on this page is legal advice. We are not lawyers, and if you are operating in this sector or making a decision that turns on the legal position, get advice from someone who is.</p>
+</div>
+""".format(pzstd=pct(PZ_STD_MID * 100, 0), faq=faq_html)
+
+    return pages_written("/is-card-ripping-gambling/", page(
+        "/is-card-ripping-gambling/",
+        "Is card ripping gambling? The legal position and the maths",
+        "Digital pack ripping is legally unsettled and being tested in court. What the gambling and lottery arguments are, which lawsuits are live, and why every pack loses money on average.",
+        body, crumbs=[("/", "Home"), (None, "Is it gambling?")],
+        structured=faq_ld))
+
+
+def build_data():
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Open data</h1>
+    <p class="lede">Every odds table we have collected, published as CSV with the date it was collected. Check our arithmetic, redo it differently, or use it in your own work.</p>
+  </div>
+
+  <p>We publish the raw data because a rating is only worth as much as the numbers behind it. Each file records the odds exactly as the platform displayed them on the collection date. Platforms do change their odds, so dated snapshots also let us show what changed and when.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <thead><tr><th scope="col">Dataset</th><th scope="col">Contents</th><th scope="col">Collected</th><th scope="col">Download</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="name">Courtyard pack odds</td>
+      <td>{cyn} packs: price, dollar-range tiers, odds per tier, and Courtyard's posted expected value</td>
+      <td>{collected}</td>
+      <td><a href="/data/courtyard_odds_2026-09-21.csv">CSV</a></td>
+    </tr>
+    <tr>
+      <td class="name">Packz pack odds</td>
+      <td>{pzn} packs: price, dollar-range tiers and odds per tier</td>
+      <td>{collected}</td>
+      <td><a href="/data/packz_odds_2026-09-21.csv">CSV</a></td>
+    </tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h3>Format</h3>
+  <p>Both files use the same columns: <code>platform</code>, <code>category</code>, <code>pack_name</code>, <code>pack_price</code>, <code>tier_min</code>, <code>tier_max</code>, <code>odds_pct</code>, one row per value tier. The Courtyard file additionally carries a row per pack in the form <code>EV,[pack_name],[value]</code> holding the expected value Courtyard publishes for that pack.</p>
+
+  <h3>Licence and citation</h3>
+  <p>Free to use with attribution, under a <a href="https://creativecommons.org/licenses/by/4.0/" rel="nofollow">CC BY 4.0</a> licence. Please cite as: {site}, &ldquo;{cy} pack odds,&rdquo; collected {collected}, {base}/data/.</p>
+
+  <h3>Not yet published</h3>
+  <p>Arena Club publishes per-card hit rates with no values attached, so there is no comparable odds table to release. We have collected two complete card checklists and will publish them once the card identifiers are detailed enough to be matched to real sale prices.</p>
+</div>
+""".format(cyn=CY_N, pzn=PZ_N, collected=COLLECTED, site=SITE_NAME,
+           cy="Courtyard and Packz", base=BASE_URL)
+
+    ld = jsonld({
+        "@context": "https://schema.org", "@type": "DataCatalog",
+        "name": "%s pack odds datasets" % SITE_NAME,
+        "url": BASE_URL + "/data/",
+        "description": "Published odds tables collected from online card ripping platforms.",
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "dataset": [
+            {"@type": "Dataset", "name": "Courtyard pack odds and expected values",
+             "url": BASE_URL + "/platforms/courtyard/", "dateModified": COLLECTED},
+            {"@type": "Dataset", "name": "Packz pack odds",
+             "url": BASE_URL + "/platforms/packz/", "dateModified": COLLECTED},
+        ],
+    })
+    return pages_written("/data/", page(
+        "/data/",
+        "Open data — card ripping pack odds datasets",
+        "Download the raw odds tables we collected from Courtyard and Packz as CSV, dated and free to reuse with attribution.",
+        body, crumbs=[("/", "Home"), (None, "Open data")],
+        updated=COLLECTED, structured=ld))
+
+
+# ================================================================== assets
+FAVICON = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+<rect width="32" height="32" rx="5" fill="#2447B0"/>
+<rect x="9" y="6" width="14" height="20" rx="2" fill="#fff"/>
+<rect x="11.5" y="9" width="9" height="2" rx="1" fill="#2447B0"/>
+<rect x="11.5" y="13" width="9" height="2" rx="1" fill="#9BB4F2"/>
+<rect x="11.5" y="17" width="6" height="2" rx="1" fill="#9BB4F2"/>
+</svg>"""
+
+ROBOTS = """# {site} — all crawlers welcome, including AI crawlers.
+
+User-agent: *
+Allow: /
+
+# AI and answer-engine crawlers, named explicitly so there is no ambiguity.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Amazonbot
+Allow: /
+
+User-agent: cohere-ai
+Allow: /
+
+User-agent: DuckAssistBot
+Allow: /
+
+User-agent: MistralAI-User
+Allow: /
+
+User-agent: YouBot
+Allow: /
+
+Sitemap: {base}/sitemap.xml
+""".format(site=SITE_NAME, base=BASE_URL)
+
+
+def write_sitemap(paths):
+    urls = []
+    priorities = {"/": "1.0", "/platforms/": "0.9",
+                  "/compare/courtyard-vs-packz/": "0.9", "/calculator/": "0.9"}
+    for p in paths:
+        urls.append(
+            "  <url>\n    <loc>%s%s</loc>\n    <lastmod>%s</lastmod>\n"
+            "    <changefreq>weekly</changefreq>\n    <priority>%s</priority>\n  </url>"
+            % (BASE_URL, p, UPDATED, priorities.get(p, "0.8")))
+    xml = ('<?xml version="1.0" encoding="UTF-8"?>\n'
+           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+           + "\n".join(urls) + "\n</urlset>\n")
+    with open(os.path.join(OUT, "sitemap.xml"), "w", encoding="utf-8") as fh:
+        fh.write(xml)
+
+
+def main():
+    if os.path.isdir(OUT):
+        shutil.rmtree(OUT)
+    os.makedirs(OUT)
+
+    paths = [
+        build_home(),
+        build_platforms_index(),
+        build_courtyard(),
+        build_packz(),
+        build_arena_club(),
+        build_clutch(),
+        build_fanatics(),
+        build_crown_rips(),
+        build_tilt(),
+        build_compare(),
+        build_calculator(),
+        build_methodology(),
+        build_gambling(),
+        build_data(),
+    ]
+
+    shutil.copy("styles.css", os.path.join(OUT, "styles.css"))
+    with open(os.path.join(OUT, "favicon.svg"), "w", encoding="utf-8") as fh:
+        fh.write(FAVICON)
+    with open(os.path.join(OUT, "robots.txt"), "w", encoding="utf-8") as fh:
+        fh.write(ROBOTS)
+    write_sitemap(paths)
+
+    os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
+    for f in ("courtyard_odds_2026-09-21.csv", "packz_odds_2026-09-21.csv"):
+        shutil.copy(f, os.path.join(OUT, "data", f))
+
+    # Vercel config: clean URLs, noindex the preview host, cache assets.
+    with open(os.path.join(OUT, "..", "vercel.json"), "w", encoding="utf-8") as fh:
+        fh.write("""{
+  "cleanUrls": true,
+  "trailingSlash": true,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "(?<h>.*\\\\.vercel\\\\.app)" }],
+      "headers": [{ "key": "X-Robots-Tag", "value": "noindex" }]
+    },
+    {
+      "source": "/styles.css",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/data/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }]
+    }
+  ]
+}
+""")
+
+    print("Built %d pages:" % len(paths))
+    for p in paths:
+        print("  " + p)
+
+
+if __name__ == "__main__":
+    main()

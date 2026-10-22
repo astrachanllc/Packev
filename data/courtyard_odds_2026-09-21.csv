@@ -1,0 +1,540 @@
+platform,category,pack_name,pack_price,tier_min,tier_max,odds_pct
+courtyard,pokemon,Pokémon Starter Pack,25,17,21,44.0
+courtyard,pokemon,Pokémon Starter Pack,25,21,25,41.0
+courtyard,pokemon,Pokémon Starter Pack,25,25,50,13.0
+courtyard,pokemon,Pokémon Starter Pack,25,50,400,2.0
+EV,Pokémon Starter Pack,23.75
+courtyard,pokemon,Pokémon Pro Pack,50,35,45,62.0
+courtyard,pokemon,Pokémon Pro Pack,50,45,50,16.0
+courtyard,pokemon,Pokémon Pro Pack,50,50,100,20.0
+courtyard,pokemon,Pokémon Pro Pack,50,100,200,2.0
+courtyard,pokemon,Pokémon Pro Pack,50,200,800,0.1
+EV,Pokémon Pro Pack,47.50
+courtyard,pokemon,Pokémon Master Pack,100,70,85,55.0
+courtyard,pokemon,Pokémon Master Pack,100,85,100,25.0
+courtyard,pokemon,Pokémon Master Pack,100,100,200,18.0
+courtyard,pokemon,Pokémon Master Pack,100,200,400,2.0
+courtyard,pokemon,Pokémon Master Pack,100,400,1600,0.2
+EV,Pokémon Master Pack,95
+courtyard,pokemon,Pokémon Ultra (Spicy),249,125,185,57.0
+courtyard,pokemon,Pokémon Ultra (Spicy),249,185,249,15.0
+courtyard,pokemon,Pokémon Ultra (Spicy),249,249,498,22.0
+courtyard,pokemon,Pokémon Ultra (Spicy),249,498,996,5.0
+courtyard,pokemon,Pokémon Ultra (Spicy),249,996,8000,0.8
+EV,Pokémon Ultra (Spicy),236.55
+courtyard,pokemon,Pokémon Ultra Pack,250,175,215,63.0
+courtyard,pokemon,Pokémon Ultra Pack,250,215,250,16.0
+courtyard,pokemon,Pokémon Ultra Pack,250,250,500,19.0
+courtyard,pokemon,Pokémon Ultra Pack,250,500,1000,2.0
+courtyard,pokemon,Pokémon Ultra Pack,250,1000,4000,0.1
+EV,Pokémon Ultra Pack,237.50
+courtyard,pokemon,Pokémon Platinum (Spicy),499,250.2,375,44.0
+courtyard,pokemon,Pokémon Platinum (Spicy),499,375,499,30.0
+courtyard,pokemon,Pokémon Platinum (Spicy),499,499,998,20.0
+courtyard,pokemon,Pokémon Platinum (Spicy),499,998,1900,5.0
+courtyard,pokemon,Pokémon Platinum (Spicy),499,1900,15900,0.6
+EV,Pokémon Platinum (Spicy),474.05
+courtyard,pokemon,Pokémon Platinum Pack,500,350,425,53.0
+courtyard,pokemon,Pokémon Platinum Pack,500,425,500,27.0
+courtyard,pokemon,Pokémon Platinum Pack,500,500,1000,18.0
+courtyard,pokemon,Pokémon Platinum Pack,500,1000,2000,2.0
+courtyard,pokemon,Pokémon Platinum Pack,500,2000,8000,0.1
+EV,Pokémon Platinum Pack,475
+courtyard,pokemon,Pokémon Diamond (Spicy),999,500,750,50.0
+courtyard,pokemon,Pokémon Diamond (Spicy),999,750,999,23.0
+courtyard,pokemon,Pokémon Diamond (Spicy),999,999,1900,21.0
+courtyard,pokemon,Pokémon Diamond (Spicy),999,1900,3900,5.0
+courtyard,pokemon,Pokémon Diamond (Spicy),999,3900,31900,0.6
+EV,Pokémon Diamond (Spicy),949.05
+courtyard,pokemon,Pokémon Diamond Pack,1000,700.6,850,47.0
+courtyard,pokemon,Pokémon Diamond Pack,1000,850,1000,32.0
+courtyard,pokemon,Pokémon Diamond Pack,1000,1000,2000,19.0
+courtyard,pokemon,Pokémon Diamond Pack,1000,2000,4000,2.0
+courtyard,pokemon,Pokémon Diamond Pack,1000,4000,16000,0.1
+EV,Pokémon Diamond Pack,950
+courtyard,pokemon,Pokémon Legend (Spicy),2499,1200,1800,43.0
+courtyard,pokemon,Pokémon Legend (Spicy),2499,1800,2400,32.0
+courtyard,pokemon,Pokémon Legend (Spicy),2499,2400,4900,20.0
+courtyard,pokemon,Pokémon Legend (Spicy),2499,4900,9900,5.0
+courtyard,pokemon,Pokémon Legend (Spicy),2499,9900,79900,0.5
+EV,Pokémon Legend (Spicy),2400
+courtyard,pokemon,Pokémon Legend Pack,2500,1700,2100,49.0
+courtyard,pokemon,Pokémon Legend Pack,2500,2100,2500,31.0
+courtyard,pokemon,Pokémon Legend Pack,2500,2500,5000,18.0
+courtyard,pokemon,Pokémon Legend Pack,2500,5000,10000,2.0
+courtyard,pokemon,Pokémon Legend Pack,2500,10000,40000,0.1
+EV,Pokémon Legend Pack,2400
+courtyard,pokemon,Pokémon Mythic Pack,5000,3500,4200,62.0
+courtyard,pokemon,Pokémon Mythic Pack,5000,4200,5000,17.0
+courtyard,pokemon,Pokémon Mythic Pack,5000,5000,10000,19.0
+courtyard,pokemon,Pokémon Mythic Pack,5000,10000,20000,2.0
+courtyard,pokemon,Pokémon Mythic Pack,5000,20000,80000,0.1
+EV,Pokémon Mythic Pack,4800
+courtyard,sneakers,Sneakers Pack (US Men's 8-8.5),275,192,235,40.0
+courtyard,sneakers,Sneakers Pack (US Men's 8-8.5),275,235,275,41.0
+courtyard,sneakers,Sneakers Pack (US Men's 8-8.5),275,275,550,18.0
+courtyard,sneakers,Sneakers Pack (US Men's 8-8.5),275,550,4400,1.0
+EV,Sneakers Pack (US Men's 8-8.5),261.25
+courtyard,sneakers,Sneakers Pack (US Men's 9-9.5),275,189,230,44.0
+courtyard,sneakers,Sneakers Pack (US Men's 9-9.5),275,230,275,37.0
+courtyard,sneakers,Sneakers Pack (US Men's 9-9.5),275,275,550,17.0
+courtyard,sneakers,Sneakers Pack (US Men's 9-9.5),275,550,4400,2.0
+EV,Sneakers Pack (US Men's 9-9.5),261.25
+courtyard,onepiece,One Piece Pro Pack,50,35,45,61.0
+courtyard,onepiece,One Piece Pro Pack,50,45,50,18.0
+courtyard,onepiece,One Piece Pro Pack,50,50,100,19.0
+courtyard,onepiece,One Piece Pro Pack,50,100,200,2.0
+courtyard,onepiece,One Piece Pro Pack,50,200,800,0.2
+EV,One Piece Pro Pack,47.50
+courtyard,onepiece,One Piece Master Pack,100,70.3,85,57.0
+courtyard,onepiece,One Piece Master Pack,100,85,100,25.0
+courtyard,onepiece,One Piece Master Pack,100,100,200,16.0
+courtyard,onepiece,One Piece Master Pack,100,200,400,2.0
+courtyard,onepiece,One Piece Master Pack,100,400,1600,0.1
+EV,One Piece Master Pack,95
+courtyard,onepiece,One Piece Ultra Pack,250,177.1,215,50.0
+courtyard,onepiece,One Piece Ultra Pack,250,215,250,30.0
+courtyard,onepiece,One Piece Ultra Pack,250,250,500,18.0
+courtyard,onepiece,One Piece Ultra Pack,250,500,4000,2.0
+EV,One Piece Ultra Pack,237.50
+courtyard,onepiece,One Piece Platinum Pack,500,352.6,425,40.0
+courtyard,onepiece,One Piece Platinum Pack,500,425,500,38.0
+courtyard,onepiece,One Piece Platinum Pack,500,500,1000,20.0
+courtyard,onepiece,One Piece Platinum Pack,500,1000,2000,2.0
+courtyard,onepiece,One Piece Platinum Pack,500,2000,8000,0.1
+EV,One Piece Platinum Pack,475
+courtyard,onepiece,One Piece Diamond Pack,1000,702.2,850,63.0
+courtyard,onepiece,One Piece Diamond Pack,1000,850,1000,17.0
+courtyard,onepiece,One Piece Diamond Pack,1000,1000,2000,17.0
+courtyard,onepiece,One Piece Diamond Pack,1000,2000,4000,3.0
+courtyard,onepiece,One Piece Diamond Pack,1000,4000,16000,0.2
+EV,One Piece Diamond Pack,950
+courtyard,wildcard,Wildcard Basic Pack,15,10.5,13,60.0
+courtyard,wildcard,Wildcard Basic Pack,15,13,15,25.0
+courtyard,wildcard,Wildcard Basic Pack,15,15,30,14.0
+courtyard,wildcard,Wildcard Basic Pack,15,30,240,1.0
+EV,Wildcard Basic Pack,14.25
+courtyard,wildcard,Wildcard Starter Pack,25,17.5,21,40.0
+courtyard,wildcard,Wildcard Starter Pack,25,21,25,43.0
+courtyard,wildcard,Wildcard Starter Pack,25,25,50,16.0
+courtyard,wildcard,Wildcard Starter Pack,25,50,400,1.0
+EV,Wildcard Starter Pack,23.75
+courtyard,wildcard,Wildcard Pro Pack,50,35,45,62.0
+courtyard,wildcard,Wildcard Pro Pack,50,45,50,17.0
+courtyard,wildcard,Wildcard Pro Pack,50,50,100,19.0
+courtyard,wildcard,Wildcard Pro Pack,50,100,200,2.0
+courtyard,wildcard,Wildcard Pro Pack,50,200,800,0.1
+EV,Wildcard Pro Pack,47.50
+courtyard,wildcard,Wildcard Master Pack,100,70,85,50.0
+courtyard,wildcard,Wildcard Master Pack,100,85,100,29.0
+courtyard,wildcard,Wildcard Master Pack,100,100,200,19.0
+courtyard,wildcard,Wildcard Master Pack,100,200,400,2.0
+courtyard,wildcard,Wildcard Master Pack,100,400,1600,0.1
+EV,Wildcard Master Pack,95
+courtyard,wildcard,Wildcard Ultra Pack,250,175,215,53.0
+courtyard,wildcard,Wildcard Ultra Pack,250,215,250,27.0
+courtyard,wildcard,Wildcard Ultra Pack,250,250,500,18.0
+courtyard,wildcard,Wildcard Ultra Pack,250,500,1000,2.0
+courtyard,wildcard,Wildcard Ultra Pack,250,1000,4000,0.1
+EV,Wildcard Ultra Pack,237.50
+courtyard,wildcard,Wildcard Platinum Pack,500,350,425,45.0
+courtyard,wildcard,Wildcard Platinum Pack,500,425,500,34.0
+courtyard,wildcard,Wildcard Platinum Pack,500,500,1000,19.0
+courtyard,wildcard,Wildcard Platinum Pack,500,1000,2000,2.0
+courtyard,wildcard,Wildcard Platinum Pack,500,2000,8000,0.2
+EV,Wildcard Platinum Pack,475
+courtyard,wildcard,Wildcard Diamond Pack,1000,700,850,54.0
+courtyard,wildcard,Wildcard Diamond Pack,1000,850,1000,25.0
+courtyard,wildcard,Wildcard Diamond Pack,1000,1000,2000,19.0
+courtyard,wildcard,Wildcard Diamond Pack,1000,2000,4000,2.0
+courtyard,wildcard,Wildcard Diamond Pack,1000,4000,16000,0.1
+EV,Wildcard Diamond Pack,950
+courtyard,sports,Sports Basic Pack,15,10,13,63.0
+courtyard,sports,Sports Basic Pack,15,13,15,21.0
+courtyard,sports,Sports Basic Pack,15,15,30,14.0
+courtyard,sports,Sports Basic Pack,15,30,60,2.0
+courtyard,sports,Sports Basic Pack,15,60,240,0.1
+EV,Sports Basic Pack,14.25
+courtyard,sports,Sports Starter Pack,25,10,18,54.0
+courtyard,sports,Sports Starter Pack,25,18,25,16.0
+courtyard,sports,Sports Starter Pack,25,25,50,24.0
+courtyard,sports,Sports Starter Pack,25,50,100,5.0
+courtyard,sports,Sports Starter Pack,25,100,400,0.7
+EV,Sports Starter Pack,23.75
+courtyard,sports,Sports Pro Pack,50,35,45,60.0
+courtyard,sports,Sports Pro Pack,50,45,50,16.0
+courtyard,sports,Sports Pro Pack,50,50,100,21.0
+courtyard,sports,Sports Pro Pack,50,100,200,3.0
+courtyard,sports,Sports Pro Pack,50,200,800,0.2
+EV,Sports Pro Pack,47.50
+courtyard,sports,Sports Master Pack,100,70,85,54.0
+courtyard,sports,Sports Master Pack,100,85,100,25.0
+courtyard,sports,Sports Master Pack,100,100,200,19.0
+courtyard,sports,Sports Master Pack,100,200,400,2.0
+courtyard,sports,Sports Master Pack,100,400,1600,0.1
+EV,Sports Master Pack,95
+courtyard,sports,Sports Ultra Pack,250,175,215,56.0
+courtyard,sports,Sports Ultra Pack,250,215,250,22.0
+courtyard,sports,Sports Ultra Pack,250,250,500,19.0
+courtyard,sports,Sports Ultra Pack,250,500,1000,3.0
+courtyard,sports,Sports Ultra Pack,250,1000,4000,0.1
+EV,Sports Ultra Pack,237.50
+courtyard,sports,Sports Platinum Pack,500,350,425,53.0
+courtyard,sports,Sports Platinum Pack,500,425,500,26.0
+courtyard,sports,Sports Platinum Pack,500,500,1000,19.0
+courtyard,sports,Sports Platinum Pack,500,1000,2000,2.0
+courtyard,sports,Sports Platinum Pack,500,2000,8000,0.2
+EV,Sports Platinum Pack,475
+courtyard,sports,Sports Diamond Pack,1000,700,850,60.0
+courtyard,sports,Sports Diamond Pack,1000,850,1000,20.0
+courtyard,sports,Sports Diamond Pack,1000,1000,2000,18.0
+courtyard,sports,Sports Diamond Pack,1000,2000,4000,2.0
+courtyard,sports,Sports Diamond Pack,1000,4000,16000,0.1
+EV,Sports Diamond Pack,950
+courtyard,sports,Sports Cosmic Pack,10000,7100,8500,54.0
+courtyard,sports,Sports Cosmic Pack,10000,8500,10000,24.0
+courtyard,sports,Sports Cosmic Pack,10000,10000,20000,20.0
+courtyard,sports,Sports Cosmic Pack,10000,20000,40000,2.0
+courtyard,sports,Sports Cosmic Pack,10000,40000,160000,0.1
+EV,Sports Cosmic Pack,9500
+courtyard,sports,Sports Legend Pack,2500,1700,2100,61.0
+courtyard,sports,Sports Legend Pack,2500,2100,2500,18.0
+courtyard,sports,Sports Legend Pack,2500,2500,5000,18.0
+courtyard,sports,Sports Legend Pack,2500,5000,10000,3.0
+courtyard,sports,Sports Legend Pack,2500,10000,40000,0.2
+EV,Sports Legend Pack,2400
+courtyard,sports,Sports Mythic Pack,5000,3500,4200,52.0
+courtyard,sports,Sports Mythic Pack,5000,4200,5000,26.0
+courtyard,sports,Sports Mythic Pack,5000,5000,10000,19.0
+courtyard,sports,Sports Mythic Pack,5000,10000,20000,3.0
+courtyard,sports,Sports Mythic Pack,5000,20000,80000,0.2
+EV,Sports Mythic Pack,4800
+courtyard,baseball,Baseball Starter Pack,25,17.5,21,42.0
+courtyard,baseball,Baseball Starter Pack,25,21,25,39.0
+courtyard,baseball,Baseball Starter Pack,25,25,50,17.0
+courtyard,baseball,Baseball Starter Pack,25,50,399.99,2.0
+EV,Baseball Starter Pack,23.75
+courtyard,baseball,Baseball Pro Pack,50,35,45,60.0
+courtyard,baseball,Baseball Pro Pack,50,45,50,17.0
+courtyard,baseball,Baseball Pro Pack,50,50,100,20.0
+courtyard,baseball,Baseball Pro Pack,50,100,200,3.0
+courtyard,baseball,Baseball Pro Pack,50,200,400,0.2
+EV,Baseball Pro Pack,47.50
+courtyard,baseball,Baseball Master Pack,100,70,85,56.0
+courtyard,baseball,Baseball Master Pack,100,85,100,23.0
+courtyard,baseball,Baseball Master Pack,100,100,200,19.0
+courtyard,baseball,Baseball Master Pack,100,200,400,2.0
+courtyard,baseball,Baseball Master Pack,100,400,1600,0.1
+EV,Baseball Master Pack,95
+courtyard,baseball,Baseball Ultra Pack,250,175,215,57.0
+courtyard,baseball,Baseball Ultra Pack,250,215,250,20.0
+courtyard,baseball,Baseball Ultra Pack,250,250,500,20.0
+courtyard,baseball,Baseball Ultra Pack,250,500,1000,3.0
+courtyard,baseball,Baseball Ultra Pack,250,1000,4000,0.2
+EV,Baseball Ultra Pack,237.50
+courtyard,baseball,Baseball Platinum Pack,500,350,425,59.0
+courtyard,baseball,Baseball Platinum Pack,500,425,500,19.0
+courtyard,baseball,Baseball Platinum Pack,500,500,1000,19.0
+courtyard,baseball,Baseball Platinum Pack,500,1000,2000,3.0
+courtyard,baseball,Baseball Platinum Pack,500,2000,8000,0.2
+EV,Baseball Platinum Pack,475
+courtyard,baseball,Baseball Diamond Pack,1000,700,850,65.0
+courtyard,baseball,Baseball Diamond Pack,1000,850,1000,15.0
+courtyard,baseball,Baseball Diamond Pack,1000,1000,2000,18.0
+courtyard,baseball,Baseball Diamond Pack,1000,2000,4000,2.0
+courtyard,baseball,Baseball Diamond Pack,1000,4000,16000,0.1
+EV,Baseball Diamond Pack,950
+courtyard,baseball,Baseball Legend Pack,2500,1700,2100,58.0
+courtyard,baseball,Baseball Legend Pack,2500,2100,2500,19.0
+courtyard,baseball,Baseball Legend Pack,2500,2500,5000,20.0
+courtyard,baseball,Baseball Legend Pack,2500,5000,10000,3.0
+courtyard,baseball,Baseball Legend Pack,2500,10000,40000,0.2
+EV,Baseball Legend Pack,2400
+courtyard,baseball,Baseball Mythic Pack,5000,3500,4200,67.0
+courtyard,baseball,Baseball Mythic Pack,5000,4200,5000,11.0
+courtyard,baseball,Baseball Mythic Pack,5000,5000,10000,19.0
+courtyard,baseball,Baseball Mythic Pack,5000,10000,20000,3.0
+courtyard,baseball,Baseball Mythic Pack,5000,20000,80000,0.3
+EV,Baseball Mythic Pack,4800
+courtyard,basketball,Basketball Starter Pack,25,17.8,21,39.0
+courtyard,basketball,Basketball Starter Pack,25,21,25,40.0
+courtyard,basketball,Basketball Starter Pack,25,25,50,19.0
+courtyard,basketball,Basketball Starter Pack,25,50,100,2.0
+courtyard,basketball,Basketball Starter Pack,25,100,299.99,0.1
+EV,Basketball Starter Pack,23.75
+courtyard,basketball,Basketball Pro Pack,50,35,45,63.0
+courtyard,basketball,Basketball Pro Pack,50,45,50,15.0
+courtyard,basketball,Basketball Pro Pack,50,50,100,20.0
+courtyard,basketball,Basketball Pro Pack,50,100,200,2.0
+courtyard,basketball,Basketball Pro Pack,50,200,800,0.1
+EV,Basketball Pro Pack,47.50
+courtyard,basketball,Basketball Master Pack,100,70,85,54.0
+courtyard,basketball,Basketball Master Pack,100,85,100,26.0
+courtyard,basketball,Basketball Master Pack,100,100,200,18.0
+courtyard,basketball,Basketball Master Pack,100,200,400,2.0
+courtyard,basketball,Basketball Master Pack,100,400,1600,0.1
+EV,Basketball Master Pack,95
+courtyard,basketball,SLAM Pack,120,65,95,19.0
+courtyard,basketball,SLAM Pack,120,95,120,55.0
+courtyard,basketball,SLAM Pack,120,120,240,23.0
+courtyard,basketball,SLAM Pack,120,240,480,3.0
+courtyard,basketball,SLAM Pack,120,480,1400,0.4
+EV,SLAM Pack,114
+courtyard,basketball,Basketball Platinum Pack,500,350.8,425,51.0
+courtyard,basketball,Basketball Platinum Pack,500,425,500,28.0
+courtyard,basketball,Basketball Platinum Pack,500,500,1000,19.0
+courtyard,basketball,Basketball Platinum Pack,500,1000,2000,2.0
+courtyard,basketball,Basketball Platinum Pack,500,2000,8000,0.1
+EV,Basketball Platinum Pack,475
+courtyard,basketball,Basketball Diamond Pack,1000,700,850,58.0
+courtyard,basketball,Basketball Diamond Pack,1000,850,1000,21.0
+courtyard,basketball,Basketball Diamond Pack,1000,1000,2000,18.0
+courtyard,basketball,Basketball Diamond Pack,1000,2000,4000,3.0
+courtyard,basketball,Basketball Diamond Pack,1000,4000,16000,0.1
+EV,Basketball Diamond Pack,950
+courtyard,basketball,Basketball Legend Pack,2500,1700,2100,66.0
+courtyard,basketball,Basketball Legend Pack,2500,2100,2500,13.0
+courtyard,basketball,Basketball Legend Pack,2500,2500,5000,19.0
+courtyard,basketball,Basketball Legend Pack,2500,5000,10000,2.0
+courtyard,basketball,Basketball Legend Pack,2500,10000,40000,0.1
+EV,Basketball Legend Pack,2400
+courtyard,basketball,Basketball Mythic Pack,5000,3500,4200,59.0
+courtyard,basketball,Basketball Mythic Pack,5000,4200,5000,19.0
+courtyard,basketball,Basketball Mythic Pack,5000,5000,10000,19.0
+courtyard,basketball,Basketball Mythic Pack,5000,10000,20000,3.0
+courtyard,basketball,Basketball Mythic Pack,5000,20000,80000,0.2
+EV,Basketball Mythic Pack,4800
+courtyard,football,Football Starter Pack,25,17.7,21,58.0
+courtyard,football,Football Starter Pack,25,21,25,18.0
+courtyard,football,Football Starter Pack,25,25,50,21.0
+courtyard,football,Football Starter Pack,25,50,100,3.0
+courtyard,football,Football Starter Pack,25,100,400,0.2
+EV,Football Starter Pack,23.75
+courtyard,football,Football Master Pack,100,70.4,85,56.0
+courtyard,football,Football Master Pack,100,85,100,23.0
+courtyard,football,Football Master Pack,100,100,200,19.0
+courtyard,football,Football Master Pack,100,200,400,2.0
+courtyard,football,Football Master Pack,100,400,1600,0.1
+EV,Football Master Pack,95
+courtyard,football,Football Ultra Pack,250,175,215,54.0
+courtyard,football,Football Ultra Pack,250,215,250,28.0
+courtyard,football,Football Ultra Pack,250,250,500,16.0
+courtyard,football,Football Ultra Pack,250,500,4000,2.0
+EV,Football Ultra Pack,237.50
+courtyard,football,Football Platinum Pack,500,350.5,425,49.0
+courtyard,football,Football Platinum Pack,500,425,500,28.0
+courtyard,football,Football Platinum Pack,500,500,1000,20.0
+courtyard,football,Football Platinum Pack,500,1000,2000,3.0
+courtyard,football,Football Platinum Pack,500,2000,8000,0.1
+EV,Football Platinum Pack,475
+courtyard,football,Football Diamond Pack,1000,700.1,850,53.0
+courtyard,football,Football Diamond Pack,1000,850,1000,27.0
+courtyard,football,Football Diamond Pack,1000,1000,2000,18.0
+courtyard,football,Football Diamond Pack,1000,2000,4000,2.0
+courtyard,football,Football Diamond Pack,1000,4000,16000,0.1
+EV,Football Diamond Pack,950
+courtyard,football,Football Legend Pack,2500,1700,2100,65.0
+courtyard,football,Football Legend Pack,2500,2100,2500,15.0
+courtyard,football,Football Legend Pack,2500,2500,5000,17.0
+courtyard,football,Football Legend Pack,2500,5000,10000,3.0
+courtyard,football,Football Legend Pack,2500,10000,40000,0.2
+EV,Football Legend Pack,2400
+courtyard,football,Football Mythic Pack,5000,3500,4200,39.0
+courtyard,football,Football Mythic Pack,5000,4200,5000,41.0
+courtyard,football,Football Mythic Pack,5000,5000,10000,18.0
+courtyard,football,Football Mythic Pack,5000,10000,20000,2.0
+courtyard,football,Football Mythic Pack,5000,20000,80000,0.1
+EV,Football Mythic Pack,4800
+courtyard,soccer,Soccer Starter Pack,25,18.1,22,44.0
+courtyard,soccer,Soccer Starter Pack,25,22,25,35.0
+courtyard,soccer,Soccer Starter Pack,25,25,50,19.0
+courtyard,soccer,Soccer Starter Pack,25,50,100,2.0
+courtyard,soccer,Soccer Starter Pack,25,100,399.99,0.1
+EV,Soccer Starter Pack,23.75
+courtyard,soccer,Soccer Pro Pack,50,35,45,62.0
+courtyard,soccer,Soccer Pro Pack,50,45,50,14.0
+courtyard,soccer,Soccer Pro Pack,50,50,100,21.0
+courtyard,soccer,Soccer Pro Pack,50,100,200,3.0
+courtyard,soccer,Soccer Pro Pack,50,200,800,0.2
+EV,Soccer Pro Pack,47.50
+courtyard,soccer,Soccer Master Pack,100,70,85,52.0
+courtyard,soccer,Soccer Master Pack,100,85,100,26.0
+courtyard,soccer,Soccer Master Pack,100,100,200,19.0
+courtyard,soccer,Soccer Master Pack,100,200,400,3.0
+courtyard,soccer,Soccer Master Pack,100,400,1600,0.2
+EV,Soccer Master Pack,95
+courtyard,soccer,Soccer Platinum Pack,500,350,425,54.0
+courtyard,soccer,Soccer Platinum Pack,500,425,500,23.0
+courtyard,soccer,Soccer Platinum Pack,500,500,1000,20.0
+courtyard,soccer,Soccer Platinum Pack,500,1000,2000,3.0
+courtyard,soccer,Soccer Platinum Pack,500,2000,8000,0.1
+EV,Soccer Platinum Pack,475
+courtyard,hockey,Hockey Starter Pack,25,17.6,21,32.0
+courtyard,hockey,Hockey Starter Pack,25,21,25,47.0
+courtyard,hockey,Hockey Starter Pack,25,25,50,19.0
+courtyard,hockey,Hockey Starter Pack,25,50,100,2.0
+courtyard,hockey,Hockey Starter Pack,25,100,399.99,0.1
+EV,Hockey Starter Pack,23.75
+courtyard,hockey,Hockey Pro Pack,50,35,45,65.0
+courtyard,hockey,Hockey Pro Pack,50,45,50,11.0
+courtyard,hockey,Hockey Pro Pack,50,50,100,21.0
+courtyard,hockey,Hockey Pro Pack,50,100,200,3.0
+courtyard,hockey,Hockey Pro Pack,50,200,800,0.2
+EV,Hockey Pro Pack,47.50
+courtyard,hockey,Hockey Master Pack,100,70,85,56.0
+courtyard,hockey,Hockey Master Pack,100,85,100,23.0
+courtyard,hockey,Hockey Master Pack,100,100,200,19.0
+courtyard,hockey,Hockey Master Pack,100,200,400,2.0
+courtyard,hockey,Hockey Master Pack,100,400,1600,0.1
+EV,Hockey Master Pack,95
+courtyard,hockey,Hockey Ultra Pack,250,175,215,48.0
+courtyard,hockey,Hockey Ultra Pack,250,215,250,32.0
+courtyard,hockey,Hockey Ultra Pack,250,250,500,18.0
+courtyard,hockey,Hockey Ultra Pack,250,500,1000,2.0
+courtyard,hockey,Hockey Ultra Pack,250,1000,4000,0.1
+EV,Hockey Ultra Pack,237.50
+courtyard,hockey,Hockey Platinum Pack,500,355.5,430,58.0
+courtyard,hockey,Hockey Platinum Pack,500,430,500,20.0
+courtyard,hockey,Hockey Platinum Pack,500,500,1000,19.0
+courtyard,hockey,Hockey Platinum Pack,500,1000,2000,3.0
+courtyard,hockey,Hockey Platinum Pack,500,2000,8000,0.2
+EV,Hockey Platinum Pack,475
+courtyard,comics,Modern Age Pack,100,50,75,47.0
+courtyard,comics,Modern Age Pack,100,75,100,27.0
+courtyard,comics,Modern Age Pack,100,100,200,20.0
+courtyard,comics,Modern Age Pack,100,200,400,5.0
+courtyard,comics,Modern Age Pack,100,400,1600,0.8
+EV,Modern Age Pack,95
+courtyard,comics,Bronze Age Pack,200,110,155,49.0
+courtyard,comics,Bronze Age Pack,200,155,200,24.0
+courtyard,comics,Bronze Age Pack,200,200,400,22.0
+courtyard,comics,Bronze Age Pack,200,400,800,4.0
+courtyard,comics,Bronze Age Pack,200,800,3200,0.6
+EV,Bronze Age Pack,190
+courtyard,comics,Silver Age Pack,500,304,400,50.0
+courtyard,comics,Silver Age Pack,500,400,500,26.0
+courtyard,comics,Silver Age Pack,500,500,1000,21.0
+courtyard,comics,Silver Age Pack,500,1000,2000,3.0
+courtyard,comics,Silver Age Pack,500,2000,8000,0.2
+EV,Silver Age Pack,475
+courtyard,comics,Comic Diamond Pack,1000,700,850,57.0
+courtyard,comics,Comic Diamond Pack,1000,850,1000,23.0
+courtyard,comics,Comic Diamond Pack,1000,1000,2000,17.0
+courtyard,comics,Comic Diamond Pack,1000,2000,4000,3.0
+courtyard,comics,Comic Diamond Pack,1000,4000,16000,0.1
+EV,Comic Diamond Pack,950
+courtyard,watches,Classic Watch Box,5000,3400,4200,57.0
+courtyard,watches,Classic Watch Box,5000,4200,5000,24.0
+courtyard,watches,Classic Watch Box,5000,5000,10000,17.0
+courtyard,watches,Classic Watch Box,5000,10000,20000,2.0
+courtyard,watches,Classic Watch Box,5000,20000,30000,0.1
+EV,Classic Watch Box,4800
+courtyard,watches,Premier Watch Box,10000,8000,9000,50.0
+courtyard,watches,Premier Watch Box,10000,9000,10000,38.0
+courtyard,watches,Premier Watch Box,10000,10000,20000,11.0
+courtyard,watches,Premier Watch Box,10000,20000,100000,1.0
+EV,Premier Watch Box,9500
+courtyard,coins,$100 Ancient Coins Pack,100,77,90,47.0
+courtyard,coins,$100 Ancient Coins Pack,100,90,100,36.0
+courtyard,coins,$100 Ancient Coins Pack,100,100,200,16.0
+courtyard,coins,$100 Ancient Coins Pack,100,200,1600,1.0
+EV,$100 Ancient Coins Pack,95
+courtyard,coins,$150 U.S. Coins Pack,150,105,130,70.0
+courtyard,coins,$150 U.S. Coins Pack,150,130,150,7.0
+courtyard,coins,$150 U.S. Coins Pack,150,150,300,20.0
+courtyard,coins,$150 U.S. Coins Pack,150,300,600,3.0
+courtyard,coins,$150 U.S. Coins Pack,150,600,2400,0.1
+EV,$150 U.S. Coins Pack,142.50
+courtyard,coins,$250 Ancient Coins Pack,250,176,215,71.0
+courtyard,coins,$250 Ancient Coins Pack,250,215,250,12.0
+courtyard,coins,$250 Ancient Coins Pack,250,250,500,15.0
+courtyard,coins,$250 Ancient Coins Pack,250,500,1000,2.0
+courtyard,coins,$250 Ancient Coins Pack,250,1000,4000,0.1
+EV,$250 Ancient Coins Pack,237.50
+courtyard,coins,$500 Shipwreck Coins Pack,500,350,425,48.0
+courtyard,coins,$500 Shipwreck Coins Pack,500,425,500,26.0
+courtyard,coins,$500 Shipwreck Coins Pack,500,500,1000,24.0
+courtyard,coins,$500 Shipwreck Coins Pack,500,1000,2000,2.0
+courtyard,coins,$500 Shipwreck Coins Pack,500,2000,7200,0.2
+EV,$500 Shipwreck Coins Pack,475
+courtyard,coins,$500 U.S. Coins Pack,500,355,430,63.0
+courtyard,coins,$500 U.S. Coins Pack,500,430,500,21.0
+courtyard,coins,$500 U.S. Coins Pack,500,500,1000,14.0
+courtyard,coins,$500 U.S. Coins Pack,500,1000,8000,2.0
+EV,$500 U.S. Coins Pack,475
+courtyard,coins,$1500 U.S. Coins Pack,1500,1000,1200,47.0
+courtyard,coins,$1500 U.S. Coins Pack,1500,1200,1500,36.0
+courtyard,coins,$1500 U.S. Coins Pack,1500,1500,3000,15.0
+courtyard,coins,$1500 U.S. Coins Pack,1500,3000,6000,2.0
+courtyard,coins,$1500 U.S. Coins Pack,1500,6000,24000,0.1
+EV,$1500 U.S. Coins Pack,1400
+courtyard,limited,30th Anniversary: Red,19,10,15,44.0
+courtyard,limited,30th Anniversary: Red,19,15,19,34.0
+courtyard,limited,30th Anniversary: Red,19,19,38,19.0
+courtyard,limited,30th Anniversary: Red,19,38,76,3.0
+courtyard,limited,30th Anniversary: Red,19,76,608,0.2
+EV,30th Anniversary: Red,18.05
+courtyard,limited,30th Anniversary: Blue,39,25,32,45.0
+courtyard,limited,30th Anniversary: Blue,39,32,39,34.0
+courtyard,limited,30th Anniversary: Blue,39,39,78,18.0
+courtyard,limited,30th Anniversary: Blue,39,78,156,3.0
+courtyard,limited,30th Anniversary: Blue,39,156,624,0.1
+EV,30th Anniversary: Blue,37.05
+courtyard,limited,30th Anniversary: Crystal,59,40,50,44.0
+courtyard,limited,30th Anniversary: Crystal,59,50,59,35.0
+courtyard,limited,30th Anniversary: Crystal,59,59,118,18.0
+courtyard,limited,30th Anniversary: Crystal,59,118,236,3.0
+courtyard,limited,30th Anniversary: Crystal,59,236,944,0.2
+EV,30th Anniversary: Crystal,56.05
+courtyard,limited,30th Anniversary: Gold,79,56,70,68.0
+courtyard,limited,30th Anniversary: Gold,79,70,79,9.0
+courtyard,limited,30th Anniversary: Gold,79,79,158,20.0
+courtyard,limited,30th Anniversary: Gold,79,158,316,3.0
+courtyard,limited,30th Anniversary: Gold,79,316,1200,0.3
+EV,30th Anniversary: Gold,75.05
+courtyard,limited,30th Anniversary: Emerald,99,70,85,55.0
+courtyard,limited,30th Anniversary: Emerald,99,85,99,25.0
+courtyard,limited,30th Anniversary: Emerald,99,99,198,18.0
+courtyard,limited,30th Anniversary: Emerald,99,198,396,2.0
+courtyard,limited,30th Anniversary: Emerald,99,396,1600,0.2
+EV,30th Anniversary: Emerald,94.05
+courtyard,limited,30th Anniversary: Yellow,119,83,100,57.0
+courtyard,limited,30th Anniversary: Yellow,119,100,119,21.0
+courtyard,limited,30th Anniversary: Yellow,119,119,238,19.0
+courtyard,limited,30th Anniversary: Yellow,119,238,476,3.0
+courtyard,limited,30th Anniversary: Yellow,119,476,1900,0.2
+EV,30th Anniversary: Yellow,113.05
+courtyard,limited,30th Anniversary: Silver,139,97.1,120,57.0
+courtyard,limited,30th Anniversary: Silver,139,120,139,22.0
+courtyard,limited,30th Anniversary: Silver,139,139,278,18.0
+courtyard,limited,30th Anniversary: Silver,139,278,556,3.0
+courtyard,limited,30th Anniversary: Silver,139,556,2200,0.2
+EV,30th Anniversary: Silver,132.05
+courtyard,limited,Sports Just the Hits! (Spicy),499,254,375,48.0
+courtyard,limited,Sports Just the Hits! (Spicy),499,375,499,27.0
+courtyard,limited,Sports Just the Hits! (Spicy),499,499,998,21.0
+courtyard,limited,Sports Just the Hits! (Spicy),499,998,1900,4.0
+courtyard,limited,Sports Just the Hits! (Spicy),499,1900,15900,0.5
+EV,Sports Just the Hits! (Spicy),474.05
+courtyard,mtg,Sealed Magic: The Gathering Booster ($50),50,31,40,57.0
+courtyard,mtg,Sealed Magic: The Gathering Booster ($50),50,40,50,16.0
+courtyard,mtg,Sealed Magic: The Gathering Booster ($50),50,50,100,23.0
+courtyard,mtg,Sealed Magic: The Gathering Booster ($50),50,100,200,3.0
+courtyard,mtg,Sealed Magic: The Gathering Booster ($50),50,200,800,0.6
+EV,Sealed Magic: The Gathering Booster ($50),47.50
+courtyard,sealedbooster,Sealed Pokémon Booster ($15),15,11.4,13,76.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($15),15,13,15,5.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($15),15,15,30,16.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($15),15,30,60,3.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($15),15,60,240,0.3
+EV,Sealed Pokémon Booster ($15),14.25
+courtyard,sealedbooster,Sealed Pokémon Booster ($25),25,16.9,21,60.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($25),25,21,25,17.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($25),25,25,50,20.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($25),25,50,400,3.0
+EV,Sealed Pokémon Booster ($25),23.75
+courtyard,sealedbooster,Sealed Pokémon Booster ($50),50,32.7,40,53.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($50),50,40,50,27.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($50),50,50,100,19.0
+courtyard,sealedbooster,Sealed Pokémon Booster ($50),50,200,800,0.7
+EV,Sealed Pokémon Booster ($50),47.50

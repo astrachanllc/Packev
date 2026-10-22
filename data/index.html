@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open data — card ripping pack odds datasets</title>
+<meta name="description" content="Download the raw odds tables we collected from Courtyard and Packz as CSV, dated and free to reuse with attribution.">
+<link rel="canonical" href="https://packev.io/data/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PackEV">
+<meta property="og:title" content="Open data — card ripping pack odds datasets">
+<meta property="og:description" content="Download the raw odds tables we collected from Courtyard and Packz as CSV, dated and free to reuse with attribution.">
+<meta property="og:url" content="https://packev.io/data/">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://packev.io/"},{"@type":"ListItem","position":2,"name":"Open data"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"DataCatalog","name":"PackEV pack odds datasets","url":"https://packev.io/data/","description":"Published odds tables collected from online card ripping platforms.","license":"https://creativecommons.org/licenses/by/4.0/","dataset":[{"@type":"Dataset","name":"Courtyard pack odds and expected values","url":"https://packev.io/platforms/courtyard/","dateModified":"2026-09-21"},{"@type":"Dataset","name":"Packz pack odds","url":"https://packev.io/platforms/packz/","dateModified":"2026-09-21"}]}</script>
+
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="mark" href="/"><span class="chip" aria-hidden="true"></span>PackEV</a>
+    <nav class="site-nav" aria-label="Main"><a href="/platforms/">Platforms</a><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a><a href="/calculator/">Pack EV calculator</a><a href="/methodology/">How we rate</a><a href="/data/" aria-current="page">Data</a></nav>
+    <span class="age-badge">21+</span>
+  </div>
+</header>
+<nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><a href="/">Home</a><span aria-hidden="true">/</span><span class='muted'>Open data</span></div></nav>
+<main>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Open data</h1>
+    <p class="lede">Every odds table we have collected, published as CSV with the date it was collected. Check our arithmetic, redo it differently, or use it in your own work.</p>
+  </div>
+
+  <p>We publish the raw data because a rating is only worth as much as the numbers behind it. Each file records the odds exactly as the platform displayed them on the collection date. Platforms do change their odds, so dated snapshots also let us show what changed and when.</p>
+
+  <div class="table-wrap">
+  <table class="plain">
+  <thead><tr><th scope="col">Dataset</th><th scope="col">Contents</th><th scope="col">Collected</th><th scope="col">Download</th></tr></thead>
+  <tbody>
+    <tr>
+      <td class="name">Courtyard pack odds</td>
+      <td>92 packs: price, dollar-range tiers, odds per tier, and Courtyard's posted expected value</td>
+      <td>2026-09-21</td>
+      <td><a href="/data/courtyard_odds_2026-09-21.csv">CSV</a></td>
+    </tr>
+    <tr>
+      <td class="name">Packz pack odds</td>
+      <td>14 packs: price, dollar-range tiers and odds per tier</td>
+      <td>2026-09-21</td>
+      <td><a href="/data/packz_odds_2026-09-21.csv">CSV</a></td>
+    </tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h3>Format</h3>
+  <p>Both files use the same columns: <code>platform</code>, <code>category</code>, <code>pack_name</code>, <code>pack_price</code>, <code>tier_min</code>, <code>tier_max</code>, <code>odds_pct</code>, one row per value tier. The Courtyard file additionally carries a row per pack in the form <code>EV,[pack_name],[value]</code> holding the expected value Courtyard publishes for that pack.</p>
+
+  <h3>Licence and citation</h3>
+  <p>Free to use with attribution, under a <a href="https://creativecommons.org/licenses/by/4.0/" rel="nofollow">CC BY 4.0</a> licence. Please cite as: PackEV, &ldquo;Courtyard and Packz pack odds,&rdquo; collected 2026-09-21, https://packev.io/data/.</p>
+
+  <h3>Not yet published</h3>
+  <p>Arena Club publishes per-card hit rates with no values attached, so there is no comparable odds table to release. We have collected two complete card checklists and will publish them once the card identifiers are detailed enough to be matched to real sale prices.</p>
+</div>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <nav class="footer-nav" aria-label="Footer"><a href="/">Home</a><a href="/platforms/">Platforms</a><a href="/calculator/">Pack EV calculator</a><a href="/methodology/">How we rate</a><a href="/is-card-ripping-gambling/">Is it gambling?</a><a href="/data/">Open data</a></nav>
+    <p><strong>Affiliate disclosure:</strong> some links on PackEV are affiliate links. If you sign up or buy through them we may earn a commission at no extra cost to you. Commissions never change a rating, a ranking, or a published number.</p>
+    <p>PackEV is independent and not affiliated with any platform listed here. Platform and product names are trademarks of their owners. Nothing here is financial or legal advice. Intended for adults; check your local laws before using any pack ripping site. Data on this page collected 2026-09-21.</p>
+    <p>&copy; 2026 PackEV</p>
+  </div>
+</footer>
+</body>
+</html>

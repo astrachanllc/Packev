@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pack EV calculator — work out what a card pack is really worth</title>
+<meta name="description" content="Free calculator for mystery card packs. Enter a site&#x27;s published odds to get the average card value, expected loss per pack and your chance of beating the pack price.">
+<link rel="canonical" href="https://packev.io/calculator/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PackEV">
+<meta property="og:title" content="Pack EV calculator — work out what a card pack is really worth">
+<meta property="og:description" content="Free calculator for mystery card packs. Enter a site&#x27;s published odds to get the average card value, expected loss per pack and your chance of beating the pack price.">
+<meta property="og:url" content="https://packev.io/calculator/">
+<meta name="twitter:card" content="summary">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://packev.io/"},{"@type":"ListItem","position":2,"name":"Pack EV calculator"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Pack EV calculator","url":"https://packev.io/calculator/","applicationCategory":"UtilityApplication","operatingSystem":"Any","description":"Calculates the expected value, buyback return and hit rate of a mystery card pack from its published odds.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="mark" href="/"><span class="chip" aria-hidden="true"></span>PackEV</a>
+    <nav class="site-nav" aria-label="Main"><a href="/platforms/">Platforms</a><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a><a href="/calculator/" aria-current="page">Pack EV calculator</a><a href="/methodology/">How we rate</a><a href="/data/">Data</a></nav>
+    <span class="age-badge">21+</span>
+  </div>
+</header>
+<nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><a href="/">Home</a><span aria-hidden="true">/</span><span class='muted'>Pack EV calculator</span></div></nav>
+<main>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Pack EV calculator</h1>
+    <p class="lede">Enter the odds any ripping site publishes and see what a pack is actually worth: the average card value, the expected loss per pack, and your chance of beating the price. Runs entirely in your browser, no account needed.</p>
+  </div>
+
+  <div class="calc">
+    <div class="calc-grid">
+      <label class="field">Pack price ($)
+        <input type="number" id="price" min="0" step="0.01" value="50">
+      </label>
+      <label class="field">Buyback rate (%)
+        <input type="number" id="buyback" min="0" max="100" step="0.5" value="90">
+      </label>
+    </div>
+
+    <table class="tier-table">
+      <thead><tr><th scope="col">Card value ($)</th><th scope="col">Odds (%)</th><th><span style="position:absolute;left:-9999px">Remove</span></th></tr></thead>
+      <tbody id="tierBody"></tbody>
+    </table>
+    <p class="odds-note" id="oddsNote" aria-live="polite"></p>
+
+    <div class="btn-row">
+      <button class="btn" type="button" id="addTier">Add tier</button>
+      <button class="btn" type="button" id="loadPackz">Packz $25 Starter</button>
+      <button class="btn" type="button" id="loadCourtyard">Courtyard $50 Pok&eacute;mon Pro</button>
+      <button class="btn" type="button" id="clearTiers">Clear</button>
+    </div>
+
+    <div class="result" aria-live="polite">
+      <div class="result-inner">
+        <div class="metric wide"><b id="evOut">$0</b><span>Average card value per pack</span></div>
+        <div class="metric"><b id="retOut">0%</b><span>Return on the pack price</span></div>
+        <div class="metric"><b id="bbOut">$0</b><span>Average cash back if you sell every card back</span></div>
+        <div class="metric"><b id="lossOut">$0</b><span>Average gain or loss per pack, selling back</span></div>
+        <div class="metric"><b id="tenOut">$0</b><span>Over ten packs, selling back</span></div>
+        <div class="metric"><b id="hitOut">0%</b><span>Chance of a card worth more than the pack price</span></div>
+        <p class="verdict-line" id="verdict">Add value tiers to see the maths.</p>
+      </div>
+    </div>
+  </div>
+
+  <h2>How to use it</h2>
+  <p>Most ripping sites publish odds as dollar ranges rather than exact values, for example a 44% chance of a card worth $12.50 to $17.50. To use a range, enter its midpoint. Bear in mind that real card values tend to cluster toward the bottom of a range, because cheap cards are more numerous than expensive ones, so a midpoint estimate is usually slightly optimistic.</p>
+
+  <p>The calculator checks that your odds add up to 100% and will tell you if they do not. If a site's published odds do not total 100%, that is usually display rounding on the smallest tiers rather than an error.</p>
+
+  <h3>What each number means</h3>
+  <ul>
+    <li><strong>Average card value</strong> is the expected value: each tier's value multiplied by its probability, summed. It is what you would average per pack over a very large number of packs.</li>
+    <li><strong>Return</strong> expresses that as a percentage of the price. Below 100% means the pack loses money on average, which is true of every pack we have measured.</li>
+    <li><strong>Average cash back</strong> applies the buyback rate. This is the number that matters if you intend to sell cards back rather than keep them. Check whether a platform's buyback pays withdrawable money or site credit, because they are not equivalent.</li>
+    <li><strong>Chance of beating the price</strong> is how often a single pack produces a card worth more than it cost. It has nothing to do with the average, and two packs with the same expected value can differ enormously here.</li>
+  </ul>
+
+  <div class="callout">
+    <h3>What the calculator cannot tell you</h3>
+    <p>It works from the values a platform publishes. If those valuations are higher than what the cards actually sell for, every figure it produces is correspondingly optimistic. Expected value also describes long-run averages, not your next pack: on a pack with a 1-in-1,000 top tier, almost every individual result will look nothing like the average.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var tierBody=document.getElementById('tierBody');
+  var PRESETS={
+    packz:{price:25,buyback:90,tiers:[[15,44],[21.25,25.6],[31.25,19],[50,9.5],[93.75,1.5],[187.5,0.3],[375,0.1]]},
+    courtyard:{price:50,buyback:90,tiers:[[40,62],[47.5,16],[75,20],[150,2],[500,0.1]]}
+  };
+
+  function addTier(v,o){
+    var tr=document.createElement('tr');
+    tr.innerHTML='<td><input type="number" min="0" step="0.01" aria-label="Card value in dollars" value="'+(v===undefined?'':v)+'"></td>'+
+      '<td><input type="number" min="0" max="100" step="0.01" aria-label="Odds in percent" value="'+(o===undefined?'':o)+'"></td>'+
+      '<td><button class="icon-btn" type="button" aria-label="Remove tier">&times;</button></td>';
+    tr.querySelector('button').addEventListener('click',function(){tr.remove();calc();});
+    tr.querySelectorAll('input').forEach(function(i){i.addEventListener('input',calc);});
+    tierBody.appendChild(tr);
+  }
+  function money(n){
+    var s=Math.abs(n).toLocaleString(undefined,{style:'currency',currency:'USD'});
+    return (n<0?'\u2212':'')+s;
+  }
+  function signed(n){return (n>0?'+':'')+money(n);}
+
+  function calc(){
+    var price=parseFloat(document.getElementById('price').value)||0;
+    var bb=(parseFloat(document.getElementById('buyback').value)||0)/100;
+    var ev=0,sum=0,hit=0;
+    tierBody.querySelectorAll('tr').forEach(function(tr){
+      var ins=tr.querySelectorAll('input');
+      var v=parseFloat(ins[0].value), o=parseFloat(ins[1].value);
+      if(isNaN(v)||isNaN(o))return;
+      ev+=v*(o/100); sum+=o;
+      if(v>price)hit+=o;
+    });
+
+    var note=document.getElementById('oddsNote');
+    if(sum===0){note.textContent='';note.className='odds-note';}
+    else if(Math.abs(sum-100)>0.05){
+      note.textContent='Your odds add up to '+sum.toFixed(2)+'%. They should total 100%.';
+      note.className='odds-note bad';
+    } else {note.textContent='Odds total 100%.';note.className='odds-note';}
+
+    var bbVal=ev*bb, per=bbVal-price, ret=price>0?ev/price*100:0;
+    document.getElementById('evOut').textContent=money(ev);
+    document.getElementById('retOut').textContent=(price>0&&sum>0)?Math.round(ret)+'%':'\u2014';
+    document.getElementById('bbOut').textContent=money(bbVal);
+    var l=document.getElementById('lossOut');
+    l.textContent=signed(per); l.className=per>=0?'pos':'neg';
+    var t=document.getElementById('tenOut');
+    t.textContent=signed(per*10); t.className=per>=0?'pos':'neg';
+    document.getElementById('hitOut').textContent=hit.toFixed(1)+'%';
+
+    var verdict=document.getElementById('verdict');
+    if(sum===0||price===0){verdict.textContent='Add value tiers to see the maths.';return;}
+    if(ret>=100){
+      verdict.textContent='On average the cards in this pack are worth '+Math.round(ret)+'% of the price. A return at or above 100% is rare, so it is worth checking the listed values against recent sold prices.';
+    } else {
+      verdict.textContent='On average the cards are worth '+Math.round(ret)+'% of the price. Selling everything back at this buyback rate, you would expect to lose about '+money(Math.abs(per))+' per pack.';
+    }
+  }
+
+  function load(key){
+    var p=PRESETS[key];
+    tierBody.innerHTML='';
+    p.tiers.forEach(function(t){addTier(t[0],t[1]);});
+    document.getElementById('price').value=p.price;
+    document.getElementById('buyback').value=p.buyback;
+    calc();
+  }
+
+  document.getElementById('addTier').addEventListener('click',function(){addTier();});
+  document.getElementById('loadPackz').addEventListener('click',function(){load('packz');});
+  document.getElementById('loadCourtyard').addEventListener('click',function(){load('courtyard');});
+  document.getElementById('clearTiers').addEventListener('click',function(){
+    tierBody.innerHTML=''; addTier(); calc();
+  });
+  ['price','buyback'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',calc);
+  });
+
+  load('packz');
+})();
+</script>
+
+</main>
+<footer class="site-footer">
+  <div class="wrap">
+    <nav class="footer-nav" aria-label="Footer"><a href="/">Home</a><a href="/platforms/">Platforms</a><a href="/calculator/">Pack EV calculator</a><a href="/methodology/">How we rate</a><a href="/is-card-ripping-gambling/">Is it gambling?</a><a href="/data/">Open data</a></nav>
+    <p><strong>Affiliate disclosure:</strong> some links on PackEV are affiliate links. If you sign up or buy through them we may earn a commission at no extra cost to you. Commissions never change a rating, a ranking, or a published number.</p>
+    <p>PackEV is independent and not affiliated with any platform listed here. Platform and product names are trademarks of their owners. Nothing here is financial or legal advice. Intended for adults; check your local laws before using any pack ripping site.</p>
+    <p>&copy; 2026 PackEV</p>
+  </div>
+</footer>
+</body>
+</html>
