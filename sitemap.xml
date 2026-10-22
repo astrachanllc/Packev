@@ -73,6 +73,18 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://packev.xyz/platforms/packed/</loc>
+    <lastmod>2026-10-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://packev.xyz/platforms/fast-rips/</loc>
+    <lastmod>2026-10-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://packev.xyz/guides/buyback-rates/</loc>
     <lastmod>2026-10-21</lastmod>
     <changefreq>weekly</changefreq>

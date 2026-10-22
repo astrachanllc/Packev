@@ -48,6 +48,14 @@ AFFILIATE = {
                  "within 48 hours if you don't scratch it",
         "we_get": "the same scratch card",
     },
+    "packed": {
+        "name": "Packed",
+        "url": "https://playpacked.onelink.me/vPDF/MM44FA",
+        "code": "MM44FA",
+        "kind": "referral code",
+        "offer": "free packs on signup, per Packed's own wording",
+        "we_get": "a referral credit when you sign up and buy",
+    },
 }
 
 
@@ -56,18 +64,21 @@ def affiliate_cta(key):
     a = AFFILIATE.get(key)
     if not a:
         return ""
+    code = ('<p class="small">Code: <code>%s</code></p>' % E(a["code"])
+            if a.get("code") else "")
     return (
         '<div class="affiliate">'
         '<p><strong>Signing up with our %s:</strong> %s gives you %s. '
         'We get %s, which is why this is marked as a %s and not a '
         'recommendation.</p>'
+        '%s'
         '<p class="small muted">Using it costs you nothing extra and changes '
         'nothing on this page. Read the findings above before you decide &mdash; '
         'we would rather you skip the link than buy a pack you regret.</p>'
         '<p><a class="btn primary" href="%s" rel="sponsored nofollow noopener" '
         'target="_blank">Visit %s</a></p>'
         '</div>' % (E(a["kind"]), E(a["name"]), a["offer"], E(a["we_get"]),
-                    E(a["kind"]), E(a["url"]), E(a["name"]))
+                    E(a["kind"]), code, E(a["url"]), E(a["name"]))
     )
 
 
@@ -200,6 +211,8 @@ def build_home():
     <tr><td class="num">5</td><td class="name"><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a></td><td>Checklist of contents, no pull rates; third-party card valuations</td><td>Not calculable</td><td>84.6% effective, credit only</td></tr>
     <tr><td class="num">6</td><td class="name"><a href="/platforms/crown-rips/">Crown Rips</a></td><td>Minimum and maximum pull value only, no rates</td><td>Not calculable</td><td>100% claimed, unverified</td></tr>
     <tr><td class="num">7</td><td class="name"><a href="/platforms/tilt-rips/">Tilt Rips</a></td><td>Top prizes only, no rates and no floor</td><td>Not calculable</td><td>90%, withdrawable in cash or crypto</td></tr>
+    <tr><td class="num">8</td><td class="name"><a href="/platforms/packed/">Packed</a></td><td>Terms require Value Band odds to be shown, but nothing is published on the web</td><td>Not calculable</td><td>100%, withdrawable &mdash; within a one-day window</td></tr>
+    <tr><td class="num">9</td><td class="name"><a href="/platforms/fast-rips/">Fast Rips</a></td><td>No prices or odds published at all</td><td>Not calculable</td><td>100% advertised; terms say credit, non-withdrawable</td></tr>
   </tbody>
   </table>
   </div>
@@ -404,6 +417,32 @@ def build_platforms_index():
       </dl>
       <p>The largest catalogue and the least odds disclosure. Its sell-back is the best cash route we have verified, but the platform sets the valuation and says the price cannot be disputed.</p>
       <p class="more"><a href="/platforms/tilt-rips/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/packed/">Packed</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>21, no prices shown</dd>
+        <dt>Prices</dt><dd>Not published</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>100%, withdrawable</dd>
+      </dl>
+      <p>The best cash terms we have verified and the shortest clock. Its terms require odds to be published and give you one day to hold a card before it is taken back.</p>
+      <p class="more"><a href="/platforms/packed/">Full breakdown &rarr;</a></p>
+    </article>
+
+    <article class="card">
+      <h3><a href="/platforms/fast-rips/">Fast Rips</a></h3>
+      <dl>
+        <dt>Packs</dt><dd>7, no prices shown</dd>
+        <dt>Prices</dt><dd>Not published</dd>
+        <dt>Posted EV</dt><dd>No</dd>
+        <dt>Return</dt><dd>Not calculable</dd>
+        <dt>Buyback</dt><dd>100% advertised</dd>
+      </dl>
+      <p>Advertises a 100% buyback paid to your bank account. Its own Terms of Use say Platform Credit has no cash value outside the platform and is not withdrawable.</p>
+      <p class="more"><a href="/platforms/fast-rips/">Full breakdown &rarr;</a></p>
     </article>
   </div>
 
@@ -752,7 +791,7 @@ def build_arena_club():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all seven platforms</a>.</li>
+    <li><a href="/platforms/">Compare all nine platforms</a>.</li>
     <li><a href="/methodology/">How we rate platforms</a>, including how we handle a platform that publishes no values.</li>
   </ul>
 </div>
@@ -824,7 +863,7 @@ def build_tilt():
   <h2>The best cash route in the category</h2>
   <p>On every other platform we have examined, the headline buyback rate erodes somewhere: Fanatics deducts a 6% marketplace fee and pays in credit you cannot withdraw, Packz pays credit that can only buy more packs, Courtyard's advertised 90% has been independently measured nearer 85%. Tilt Rips pays 90% of market value into a wallet you can withdraw from in US dollars or several cryptocurrencies, with no fees or commissions beyond those shown in the app.</p>
 
-  <p>Taken at face value that is the strongest sell-back of the seven platforms here. Crown Rips claims 100% but is unverified and in closed beta; Arena Club's 90% to a Stripe-connected bank account is the closest comparison and is equally good. Tilt Rips also vaults cards free with no storage fees and no time limit, so holding a card costs nothing.</p>
+  <p>Taken at face value that is the strongest sell-back we have been able to verify. Fast Rips advertises 100%, but its own terms describe non-withdrawable credit, so we do not count it. Crown Rips claims 100% but is unverified and in closed beta; Arena Club's 90% to a Stripe-connected bank account is the closest comparison and is equally good. Tilt Rips also vaults cards free with no storage fees and no time limit, so holding a card costs nothing.</p>
 
   <div class="callout">
     <h3>The catch is who decides what 90% is 90% of</h3>
@@ -888,7 +927,7 @@ def build_tilt():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">Fanatics Instant Rips</a>, the useful contrast on valuation sourcing</li>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the only platform publishing observed results</li>
-    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/platforms/">Compare all nine platforms</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows=rows, faq=faq_html)
@@ -905,7 +944,7 @@ def build_tilt():
 def build_fanatics():
     faq_html, faq_ld = faq_block([
         ("Does Fanatics Instant Rips publish pack odds?",
-         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the seven platforms we track.</p>"),
+         "<p>No. Fanatics publishes a checklist of the cards available in a series, and has said it intends to move from a static checklist to a dynamic one showing what is still unpulled, but it does not publish pull rates or probabilities against those cards. Knowing what is in a pack without knowing the odds of each card is not enough to work out an expected value. Fanatics is the largest brand in this category and currently discloses the least about odds of the nine platforms we track.</p>"),
         ("What is the real Fanatics instant offer percentage?",
          "<p>Effectively 84.6% of a card's appraised value, not the 90% headline. Fanatics' own worked example takes a $200 card, applies the 90% rate to get $180, then deducts a 6% marketplace fee of $10.80, leaving an offer of $169.20. That is 84.6% of the card's value. The formula is 0.90 multiplied by 0.94. The 90% figure is accurate as far as it goes, but it is not what arrives.</p>"),
         ("Can you withdraw Fanatics Instant Rips credits as cash?",
@@ -965,7 +1004,7 @@ def build_fanatics():
 
   <h2>Where Fanatics is genuinely best in class</h2>
   <p>Card valuations come from Card Ladder, a third-party sales-data service, rather than from Fanatics itself.</p>
-  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the seven platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
+  <p>This matters more than it sounds. On Courtyard, Packz and Arena Club, the company paying the buyback also decides what the card is worth, and Arena Club additionally grades some of its own inventory. Every expected value on those platforms rests on a number the platform set. Fanatics outsources that number to a dataset anyone can check. Of the nine platforms we track, it is the only one to remove that conflict, and it deserves credit for it even while it publishes no odds at all.</p>
 
   <h2>Pack prices</h2>
   <div class="table-wrap">
@@ -1014,7 +1053,7 @@ def build_fanatics():
   <h2>Next</h2>
   <ul>
     <li><a href="/platforms/clutch-packs/">Clutch Packs</a>, the opposite approach: 158,556 published pull outcomes</li>
-    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/platforms/">Compare all nine platforms</a></li>
     <li><a href="/calculator/">Pack EV calculator</a></li>
   </ul>
 </div>
@@ -1169,7 +1208,7 @@ def build_clutch():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/platforms/">Compare all nine platforms</a></li>
     <li><a href="/platforms/courtyard/">Courtyard</a>, the only other platform that publishes a return figure</li>
     <li><a href="/methodology/">How we rate platforms</a></li>
   </ul>
@@ -1217,7 +1256,7 @@ def build_crown_rips():
         ("What is Crown Rips?",
          "<p>Crown Rips is a digital card ripping feature inside Crown Coins Casino, a sweepstakes casino. It opened as a 500-person beta announced on 27 July 2026, with selected existing customers given early access. Users open mystery packs of sports and Pok&eacute;mon cards and can keep a card in a vault, have the physical card shipped, or sell it back.</p>"),
         ("What is the expected value of a Crown Rips pack?",
-         "<p>It cannot be calculated. Crown Rips publishes a minimum and maximum pull value for each pack but no pull rates or probabilities, so there is no way to work out an average. The platform's marketing promises &ldquo;no dead pulls&rdquo; but publishes no numbers behind that. Of the four platforms we track, Crown Rips and Arena Club are the two whose expected value a buyer cannot determine before spending.</p>"),
+         "<p>It cannot be calculated. Crown Rips publishes a minimum and maximum pull value for each pack but no pull rates or probabilities, so there is no way to work out an average. The platform's marketing promises &ldquo;no dead pulls&rdquo; but publishes no numbers behind that. Crown Rips is one of five platforms we track whose expected value a buyer cannot determine before spending.</p>"),
         ("What are the Crown Rips pack prices?",
          "<p>Reporting from the beta lists ten Pok&eacute;mon packs: Starter at $1, Basic at $5, Signature at $10, Bronze at $25, Silver at $50, Gold at $100, Sapphire at $250, Amethyst at $500, Ultimate at $1,000 and Diamond at $2,500. The $1 Starter pack is the cheapest entry point of any platform we track, where the next cheapest is Packz at $5.</p>"),
         ("Does Crown Rips really buy cards back at 100%?",
@@ -1314,7 +1353,7 @@ def build_crown_rips():
 
   <h2>Next</h2>
   <ul>
-    <li><a href="/platforms/">Compare all seven platforms</a></li>
+    <li><a href="/platforms/">Compare all nine platforms</a></li>
     <li><a href="/is-card-ripping-gambling/">Why the sweepstakes framing matters</a></li>
   </ul>
 </div>
@@ -1781,7 +1820,7 @@ def build_bonuses():
 <div class="wrap narrow">
   <div class="page-head">
     <h1>Pack ripping bonuses, ranked by what they are actually worth</h1>
-    <p class="lede">Every sign-up offer we could verify across seven platforms, with the arithmetic. One of them is plausibly worth more than it costs. Most are worth less than they look, and one platform that everyone lists as having an offer does not have one.</p>
+    <p class="lede">Every sign-up offer we could verify across the platforms we track, with the arithmetic. One of them is plausibly worth more than it costs. Most are worth less than they look, and one platform that everyone lists as having an offer does not have one.</p>
   </div>
 
   <div class="finding">
@@ -1797,7 +1836,7 @@ def build_bonuses():
   <h2>Every offer, ranked</h2>
   <div class="table-wrap">
   <table>
-  <caption>Sign-up and first-pack offers across the seven platforms we track, {collected}.</caption>
+  <caption>Sign-up and first-pack offers across the nine platforms we track, {collected}.</caption>
   <thead><tr><th scope="col">Platform</th><th scope="col">Offer</th><th scope="col">Type</th><th scope="col" class="num">What it's worth</th><th scope="col">Catch</th></tr></thead>
   <tbody>{offer_rows}</tbody>
   </table>
@@ -1895,6 +1934,260 @@ def build_bonuses():
         updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
 
 
+def build_packed():
+    faq_html, faq_ld = faq_block([
+        ("How long can you keep a card on Packed?",
+         "<p>One day. Section 6.3 of the Terms of Use states &ldquo;You may only store a Collectible for a maximum of one (1) day,&rdquo; and adds that Packed may change that period &ldquo;at any time, in its sole discretion and without prior notice to you.&rdquo; Section 6.1 says that once the window closes, inventory &ldquo;will be automatically returned to Packed.&rdquo; To keep a card you have to request shipment inside that window, and shipping requires completed identity verification. It is the shortest holding period of any platform we track, against seven days at Crown Rips and indefinite free vaulting at Courtyard, Arena Club, Fanatics and Tilt Rips.</p>"),
+        ("Does Packed really buy back at 100%?",
+         "<p>At 100% of its own fair market value, yes, and unlike most of the category you can withdraw the proceeds &mdash; to a debit card, bank account, PayPal or Venmo, with a minimum around $5 to $10. Two conditions matter. The offer only stands for the storage window, which the terms set at one day. And the FMV is Packed's own figure, produced by what the FAQ calls a &ldquo;semi-automated proprietary system&rdquo; which Packed does not claim matches external market calculations.</p>"),
+        ("Does Packed publish pack odds?",
+         "<p>Its terms require it to. Section 6.2(b) obliges Packed to display each Value Band's probabilities, which may be shown as ranges, and section 6.2(e) states that the likelihood of allocation from each band falls within the published range. That is a stronger commitment than most of this category offers, and it is written into the contract rather than the marketing. The methodology behind the bands is proprietary and not disclosed, and we have not yet confirmed first-hand what the in-app figures look like.</p>"),
+        ("Is the minimum item value on a Packed pack guaranteed?",
+         "<p>No. Section 6.2(c) says &ldquo;The Minimum Item Value is an estimate only and is not a guaranteed amount,&rdquo; and section 6.2(f) states that the item you receive may have a fair market value below the minimum shown at purchase. Every other platform that advertises a floor presents it as a floor. Here the advertised minimum is explicitly an estimate you can land beneath.</p>"),
+        ("Do you lose your deposit bonus if you withdraw from Packed?",
+         "<p>Yes. Section 7.5 states that unused Promotional Credit &ldquo;will be forfeited&rdquo; upon a withdrawal, and section 7.3(b) says &ldquo;You may only withdraw Sale Proceeds. You cannot withdraw Purchase Credit or Promotional Credit.&rdquo; So the advertised deposit bonuses &mdash; $50 on $500, $30 on $300, $15 on $150 &mdash; are spendable on eligible packs but cannot be cashed out, and taking money out destroys whatever is left of them.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Packed: a real 100% buyback with a one-day clock on it</h1>
+    <p class="lede">Packed pays 100% of fair market value and the money genuinely reaches your bank &mdash; the best cash terms we have verified. Its Terms of Use also give you one day to decide before the card is taken back automatically.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Section 6.3: &ldquo;You may only store a Collectible for a maximum of one (1) day,&rdquo; changeable by Packed &ldquo;at any time, in its sole discretion and without prior notice.&rdquo; After the window, section 6.1 says inventory &ldquo;will be automatically returned to Packed.&rdquo; That is the shortest holding period in the category by a factor of seven, and it is the condition attached to the strongest buyback in the category.</p>
+    <p class="small muted">Read from playpacked.com, its FAQ and its Terms of Use on {collected}. We have not yet verified the in-app experience first-hand.</p>
+  </div>
+
+  <h2>What Packed does better than anyone else</h2>
+  <p>It is worth leading with this, because on two counts Packed sets the standard for the category.</p>
+
+  <p><strong>Odds disclosure is written into the contract.</strong> Section 6.2(b) obliges Packed to display each Value Band's probabilities, and 6.2(e) commits that the real likelihood falls within the published range. Most platforms here either publish nothing (<a href="/platforms/tilt-rips/">Tilt Rips</a>, <a href="/platforms/fast-rips/">Fast Rips</a>) or disclose at their own discretion. Packed is the only one we have found that contractually binds itself to publish.</p>
+
+  <p><strong>The money actually comes out.</strong> Withdrawals go to a debit card, bank account, PayPal or Venmo, with a minimum of about $5 to $10 and instant transfers averaging roughly ten minutes per the FAQ. Set that against <a href="/platforms/packz/">Packz</a> and <a href="/platforms/fanatics-instant-rips/">Fanatics</a>, where the buyback pays credit that cannot be withdrawn at all.</p>
+
+  <p><strong>And the valuation is locked at the pull.</strong> Section 6.4 fixes a collectible's FMV at the moment it comes out of the pack. That protects you from a downward revision between the pull and your decision, which matters more than it sounds on a platform that sets its own values.</p>
+
+  <h2>Four terms that cut the other way</h2>
+
+  <h3>1. One day to decide</h3>
+  <p>The storage window is the sharpest term on any platform we have read. <a href="/platforms/crown-rips/">Crown Rips</a> reportedly auto-sells after seven days and we called that the most consequential term on that platform. Packed does it in one, reserves the right to shorten it without notice, and shipping a card out requires completed identity verification &mdash; so if you pull something you want to keep before you have verified, the clock is running while you do the paperwork.</p>
+
+  <h3>2. The minimum is not a minimum</h3>
+  <p>Section 6.2(c): &ldquo;The Minimum Item Value is an estimate only and is not a guaranteed amount.&rdquo; Section 6.2(f) goes further and says the item you receive may have an FMV below the minimum shown at purchase. Across this category we have compared floors as a percentage of pack price &mdash; roughly 70% at Courtyard, 50% at Packz, 30% at Crown Rips. Packed's is not a floor at all in the sense those are.</p>
+
+  <h3>3. Withdrawing forfeits your bonus</h3>
+  <p>Packed advertises deposit bonuses of $50 on $500, $30 on $300 and $15 on $150. Section 7.3(b) says you may only withdraw Sale Proceeds, not Purchase Credit or Promotional Credit. Section 7.5 says unused Promotional Credit &ldquo;will be forfeited&rdquo; on a withdrawal.</p>
+  <p>So the bonus is spendable but not cashable, and the act of taking money out destroys whatever remains of it. That is a familiar structure from online casinos and an unfamiliar one in collectibles; it is also the mechanism that makes a deposit bonus into a reason not to withdraw.</p>
+
+  <h3>4. Ten minutes or two weeks</h3>
+  <p>The FAQ says instant withdrawals average about ten minutes. Section 7.3 of the terms says withdrawals are processed &ldquo;within two weeks.&rdquo; Both can be true &mdash; the terms setting an outer bound, the FAQ describing the norm &mdash; but it is the familiar pattern of the marketing figure and the contractual figure being very far apart.</p>
+
+  <h2>Compared with the rest</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>How Packed's terms compare on the two things that decide what a buyback is worth, {collected}.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col" class="num">Buyback</th><th scope="col">Withdrawable</th><th scope="col">How long you can hold a card</th></tr></thead>
+  <tbody>
+    <tr><td class="name">Packed</td><td class="num">100%</td><td><strong class="pos">Yes</strong>, card, bank, PayPal, Venmo</td><td><strong class="neg">1 day</strong></td></tr>
+    <tr><td class="name">Arena Club</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, to a bank via Stripe</td><td>Indefinite</td></tr>
+    <tr><td class="name">Tilt Rips</td><td class="num">90%</td><td><strong class="pos">Yes</strong>, cash or crypto</td><td>Indefinite, free vaulting</td></tr>
+    <tr><td class="name">Courtyard</td><td class="num">90% advertised</td><td>USDC, unconfirmed</td><td>Indefinite, vaulted and insured</td></tr>
+    <tr><td class="name">Fanatics</td><td class="num">84.6% effective</td><td><strong class="neg">No</strong>, credit only</td><td>Indefinite, free, no time limit</td></tr>
+    <tr><td class="name">Packz</td><td class="num">90%</td><td><strong class="neg">No</strong>, packs only</td><td>Not stated</td></tr>
+    <tr><td class="name">Crown Rips</td><td class="num">100% claimed</td><td>Unconfirmed</td><td>7 days, reportedly</td></tr>
+    <tr><td class="name">Fast Rips</td><td class="num">100% advertised</td><td><strong class="neg">No</strong> per its terms</td><td>Not stated</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <p>Read that table as a single trade. Packed pays the most and lets you take it out, and in exchange gives you the least time to think. Arena Club and Tilt Rips pay ten points less with no clock at all. Which is better depends entirely on whether you intend to keep anything.</p>
+
+  <h2>What we cannot yet tell you</h2>
+  <p>No prices or odds appear on the website for any of the 21 packs across Pok&eacute;mon, basketball, baseball and One Piece. The terms require odds to be shown, so they presumably appear in the iOS app at the point of purchase, but a buyer researching beforehand cannot see a single number. Until we collect the in-app Value Bands we cannot calculate an expected value for any Packed pack, and the platform is unrated for that reason.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Categories</th><td>Pok&eacute;mon, basketball, baseball, One Piece &mdash; 21 packs</td></tr>
+    <tr><th scope="row">Pack prices</th><td>Not published on the web</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>Required by &sect;6.2(b) to display Value Band probabilities; not shown on the website</td></tr>
+    <tr><th scope="row">Expected value</th><td>Not calculable from published information</td></tr>
+    <tr><th scope="row">Buyback</th><td>100% of Packed's FMV, locked at the moment of the pull</td></tr>
+    <tr><th scope="row">Storage window</th><td>One day (&sect;6.3), changeable without notice</td></tr>
+    <tr><th scope="row">Withdrawals</th><td>Debit card, bank, PayPal, Venmo; ~$5&ndash;$10 minimum; instant averages ~10 min per the FAQ, &ldquo;within two weeks&rdquo; per &sect;7.3</td></tr>
+    <tr><th scope="row">Tax thresholds</th><td>Forms required above $600 (FAQ) or $2,500 per calendar year (&sect;7.3)</td></tr>
+    <tr><th scope="row">Deposit bonuses</th><td>$50 on $500, $30 on $300, $15 on $150 &mdash; not withdrawable, forfeited on withdrawal</td></tr>
+    <tr><th scope="row">Refunds</th><td>&ldquo;All purchases, winning Bids, and Tips are final and binding&rdquo; (&sect;7.4.2)</td></tr>
+    <tr><th scope="row">Also offers</th><td>Live streamed rips and live auctions</td></tr>
+    <tr><th scope="row">Eligibility</th><td>18+, US only, government ID and liveness check via Footprint</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <h3>Our relationship with Packed, and why it is worth knowing</h3>
+    <p><strong>We hold a Packed referral code and earn from signups made through it.</strong> The link appears below. You should weigh everything on this page knowing that.</p>
+    <p>Packed's affiliate terms prohibit affiliates from describing Packed as gambling, from stating odds or pull rates Packed has not published, and from disparaging the company. We have published the one-day storage limit, the non-guaranteed minimum item value and the bonus forfeiture clause anyway, because they are quotations from Packed's own Terms of Use and a reader deciding whether to deposit needs them. If that costs us the code, the findings stay and the code goes.</p>
+    <p>Packed also pays the lowest affiliate rate we have seen in this category: a tiered revenue share from 0.50% to 2.50% of referred pack purchases over a 90-day attribution window. <a href="/methodology/">Our policy on commissions is here.</a></p>
+  </div>
+
+  {cta}
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a buyback is actually worth, across every platform</a></li>
+    <li><a href="/platforms/fast-rips/">Fast Rips, where the terms contradict the marketing</a></li>
+    <li><a href="/platforms/">All nine platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html, cta=affiliate_cta("packed"))
+
+    return pages_written("/platforms/packed/", page(
+        "/platforms/packed/",
+        "Packed review — 100% buyback, but you get one day to decide",
+        "Packed pays 100% of FMV withdrawable to a bank, PayPal or Venmo. Section 6.3 of its terms gives you one day to hold a card before it is automatically returned.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Packed")],
+        updated=UPDATED, structured=faq_ld))
+
+
+def build_fast_rips():
+    faq_html, faq_ld = faq_block([
+        ("Does Fast Rips really buy cards back at 100%?",
+         "<p>Its homepage advertises &ldquo;100% FMV Buyback&rdquo; and &ldquo;Cash Out to Bank.&rdquo; Its Terms of Use set no fixed buyback rate at all, and its Platform Statement says there is no buyback programme as such. What the terms describe is an optional return for certain Mystery Box contents, paid in Platform Credit rather than money, and only &ldquo;where applicable.&rdquo; We could not reconcile the two, and the terms themselves state that they control in the event of a conflict.</p>"),
+        ("Can you withdraw money from Fast Rips?",
+         "<p>The homepage says &ldquo;Withdraw proceeds to your bank account.&rdquo; Section 6.3 of the Terms of Use says Platform Credit &ldquo;has no cash value outside the Platform&rdquo; and is not withdrawable, and the Platform Statement calls it &ldquo;Non-cash, not legal tender, and for Platform use only.&rdquo; Withdrawals appear only as a discretionary possibility: &ldquo;If and when the Company, in its sole discretion, offers the ability to withdraw certain balances.&rdquo; It is possible that cashing out is a separate flow from the credit return and simply is not documented, but as published the two statements conflict.</p>"),
+        ("Does Fast Rips publish pack odds?",
+         "<p>Not currently. No odds, pull rates or prices appear on its website for any of its seven packs. The Terms say odds are disclosed &ldquo;where required by law or where the Company, in its sole discretion, chooses to do so,&rdquo; and that odds &ldquo;are subject to change over time.&rdquo; The Platform Statement says that where odds are shown, &ldquo;the applicable Odds are those shown at the time of your transaction.&rdquo; Odds may therefore appear inside the iOS app even though none are published on the web.</p>"),
+        ("How does Fast Rips decide what a card is worth?",
+         "<p>It decides itself. The Terms describe fair market value as &ldquo;a proprietary, Platform-administered valuation used exclusively for internal Platform purposes,&rdquo; which can change without notice and carries &ldquo;no guarantee&rdquo; that it reflects any resale price. Since the advertised buyback is a percentage of that figure, the company sets both the rate and the number the rate is applied to.</p>"),
+    ])
+
+    body = """
+<div class="wrap">
+  <div class="page-head">
+    <h1>Fast Rips: the homepage and the terms do not agree</h1>
+    <p class="lede">Fast Rips advertises a 100% buyback paid out to your bank account, which would be the best terms of any platform we track. Its own Terms of Use say Platform Credit has no cash value outside the platform and is not withdrawable.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">The homepage says &ldquo;100% FMV Buyback&rdquo; and &ldquo;Withdraw proceeds to your bank account.&rdquo; Section 6.3 of the Terms of Use says Platform Credit &ldquo;has no cash value outside the Platform&rdquo; and is not withdrawable, and the Platform Statement describes no buyback programme at all &mdash; only an optional return paid in credit, &ldquo;not a cash refund unless we explicitly state otherwise.&rdquo;</p>
+    <p class="small muted">Read from fastrips.com, its Terms of Use and its Platform Statement on {collected}. The Terms state that they control in the event of a conflict.</p>
+  </div>
+
+  <h2>What each document says</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Fast Rips' marketing claims against its own published terms, {collected}.</caption>
+  <thead><tr><th scope="col">Question</th><th scope="col">Homepage</th><th scope="col">Terms of Use and Platform Statement</th></tr></thead>
+  <tbody>
+    <tr>
+      <th scope="row">Is there a buyback?</th>
+      <td>&ldquo;100% FMV Buyback,&rdquo; stated twice</td>
+      <td>No fixed rate anywhere in the terms. The Platform Statement says there is no buyback programme as such, only an optional return &ldquo;where applicable&rdquo;</td>
+    </tr>
+    <tr>
+      <th scope="row">What do you get paid in?</th>
+      <td>&ldquo;Cash Out to Bank&rdquo;</td>
+      <td>&ldquo;Platform Credit equal to the item(s)' calculated FMV&rdquo; &mdash; &ldquo;not a cash refund unless we explicitly state otherwise&rdquo;</td>
+    </tr>
+    <tr>
+      <th scope="row">Can you withdraw it?</th>
+      <td>&ldquo;Withdraw proceeds to your bank account&rdquo;</td>
+      <td>Platform Credit &ldquo;has no cash value outside the Platform&rdquo; and is not withdrawable (&sect;6.3). Withdrawals exist only &ldquo;if and when the Company, in its sole discretion, offers&rdquo; them</td>
+    </tr>
+    <tr>
+      <th scope="row">Who values the card?</th>
+      <td>Not stated</td>
+      <td>&ldquo;A proprietary, Platform-administered valuation used exclusively for internal Platform purposes,&rdquo; changeable without notice, with &ldquo;no guarantee&rdquo; it reflects resale price (&sect;4.5)</td>
+    </tr>
+    <tr>
+      <th scope="row">Are there fees?</th>
+      <td>Not mentioned</td>
+      <td>Users pay &ldquo;payment processing fees, marketplace commissions, withdrawal fees&rdquo; (&sect;6.4)</td>
+    </tr>
+    <tr>
+      <th scope="row">Are odds published?</th>
+      <td>No odds or prices shown for any pack</td>
+      <td>Disclosed &ldquo;where required by law or where the Company, in its sole discretion, chooses to do so&rdquo; (&sect;3.1)</td>
+    </tr>
+  </tbody>
+  </table>
+  </div>
+
+  <h2>The fair reading</h2>
+  <p>We are not alleging that Fast Rips will refuse to pay anyone, and there is a plausible innocent explanation. The return option described in the terms covers Mystery Box contents and pays credit; the cash-out advertised on the homepage may be a separate flow for what the Platform Statement calls &ldquo;Eligible Funds,&rdquo; which it says may be withdrawable subject to verification, limits, delays and AML and KYC checks. On that reading both statements can be true at once and the terms simply do not document the cash path.</p>
+
+  <p>But that reading has to be inferred, and a buyer should not have to infer it. As published, the homepage makes an unconditional promise &mdash; 100%, to your bank account &mdash; and the governing document says the credit it pays has no cash value outside the platform and that withdrawals are at the company's sole discretion. The terms state that they control in a conflict, which means the document that wins is the one that promises less.</p>
+
+  <div class="callout danger">
+    <h3>What to confirm before you deposit</h3>
+    <p>Ask Fast Rips directly, in writing, and keep the answer: is the 100% buyback paid in withdrawable funds or in Platform Credit, what fees are deducted, and what is the minimum and typical processing time for a withdrawal to a bank account? If the answer is credit, the advertised 100% is worth materially less than the 90% that Arena Club and Tilt Rips pay into withdrawable wallets.</p>
+    <p>We have contacted Fast Rips for clarification and will update this page with their response.</p>
+  </div>
+
+  <h2>Everything else is undisclosed</h2>
+  <p>Seven packs are listed &mdash; Fresh, Basic, Pro, Bronze, Silver, Gold and Diamond &mdash; and <strong>not one shows a price</strong>. Every price field on the site renders as a dash. There are no odds, no value tiers, no floor, no ceiling and no expected value for any of them.</p>
+
+  <p>That may simply be because the product lives in the iOS app rather than on the web; the Platform Statement says that where odds are shown, &ldquo;the applicable Odds are those shown at the time of your transaction,&rdquo; which implies they appear somewhere. But a prospective buyer researching the platform before downloading anything can learn neither what a pack costs nor what is in it.</p>
+
+  <h2>The language rule</h2>
+  <p>One clause is worth noting on its own. Section 3.4 prohibits users from describing the platform as a gambling product, or from using the words &ldquo;bet,&rdquo; &ldquo;wager,&rdquo; &ldquo;jackpot,&rdquo; &ldquo;stake&rdquo; or &ldquo;payout&rdquo; when promoting it, unless the company approves. The Terms also assert that buying a Mystery Box &ldquo;is not a form of gambling, a wager on a sporting event or contest, a lottery.&rdquo;</p>
+
+  <p>Every platform in this category makes some version of that argument, and as our <a href="/is-card-ripping-gambling/">page on the legal position</a> sets out, the question is genuinely unsettled and being tested in court. What is unusual here is contractually restricting what customers may call it. A company's terms cannot determine how a regulator classifies its product, and a rule of that kind is aimed at affiliates and reviewers rather than at regulators.</p>
+
+  <h2>Platform facts</h2>
+  <div class="table-wrap">
+  <table class="plain">
+  <tbody>
+    <tr><th scope="row">Product</th><td>Mystery Boxes, randomised, one physical card per pack, raw or PSA-graded</td></tr>
+    <tr><th scope="row">Also offered</th><td>Collectible Packs, with contents disclosed before purchase and not randomised</td></tr>
+    <tr><th scope="row">Packs</th><td>Fresh, Basic, Pro, Bronze, Silver, Gold, Diamond &mdash; no prices published</td></tr>
+    <tr><th scope="row">Odds disclosure</th><td>None on the web; discretionary under the terms</td></tr>
+    <tr><th scope="row">Expected value</th><td>Not published and not calculable</td></tr>
+    <tr><th scope="row">Advertised buyback</th><td>100% of FMV</td></tr>
+    <tr><th scope="row">Buyback in the terms</th><td>Platform Credit, non-withdrawable; no fixed rate stated</td></tr>
+    <tr><th scope="row">Valuation</th><td>Proprietary and internal; no guarantee it matches resale value</td></tr>
+    <tr><th scope="row">Refunds</th><td>Purchases &ldquo;generally deemed final and non-refundable&rdquo; (&sect;6.2)</td></tr>
+    <tr><th scope="row">Inventory</th><td>Held in a US warehouse; ships within a week, delivered in about two</td></tr>
+    <tr><th scope="row">Availability</th><td>iOS app; 18+ or local age of majority; some jurisdictions restricted, VPNs prohibited</td></tr>
+    <tr><th scope="row">Third-party coverage</th><td>None found</td></tr>
+  </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <h3>Why this page has no rating</h3>
+    <p>We score platforms on pack expected value, buyback quality, odds transparency, payouts and trust. Fast Rips publishes no prices and no odds, so three of those cannot be assessed, and its buyback terms contradict its marketing, so the fourth cannot be stated with confidence. A score would imply a precision we do not have. <a href="/methodology/">Our methodology</a> explains why we leave a cell empty rather than guess.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Next</h2>
+  <ul>
+    <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays, across every platform</a></li>
+    <li><a href="/platforms/">All nine platforms compared</a></li>
+    <li><a href="/is-card-ripping-gambling/">Where the law currently stands</a></li>
+  </ul>
+</div>
+""".format(collected=UPDATED, faq=faq_html)
+
+    return pages_written("/platforms/fast-rips/", page(
+        "/platforms/fast-rips/",
+        "Fast Rips review — the 100% buyback its own terms do not describe",
+        "Fast Rips advertises a 100% buyback paid to your bank account. Its Terms of Use say Platform Credit has no cash value outside the platform and is not withdrawable.",
+        body,
+        crumbs=[("/", "Home"), ("/platforms/", "Platforms"), (None, "Fast Rips")],
+        updated=UPDATED, structured=faq_ld))
+
+
 def build_buyback():
     def ratecell(v):
         return pct(v * 100, 1).replace(".0%", "%") if v is not None else "Not disclosed"
@@ -1969,7 +2262,7 @@ def build_buyback():
 <div class="wrap narrow">
   <div class="page-head">
     <h1>Every site advertises a 90% buyback. Here is what you actually get back.</h1>
-    <p class="lede">Five of the seven platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
+    <p class="lede">Five of the nine platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
   </div>
 
   <div class="finding">
@@ -1980,7 +2273,7 @@ def build_buyback():
   <h2>The headline against the reality</h2>
   <div class="table-wrap">
   <table>
-  <caption>Advertised and effective buyback rates across the seven platforms we track, {collected}.</caption>
+  <caption>Advertised and effective buyback rates across the nine platforms we track, {collected}.</caption>
   <thead><tr>
     <th scope="col">Platform</th><th scope="col" class="num">Advertised</th>
     <th scope="col" class="num">Effective</th><th scope="col" class="num">Withdrawable</th>
@@ -2034,7 +2327,7 @@ def build_buyback():
   <p><strong>On four platforms the round trip cannot be costed at all</strong>, because either the odds or the buyback terms are missing. That is not a neutral fact about those platforms; it is the thing that makes them impossible to evaluate.</p>
 
   <h2>Who decides what your card is worth</h2>
-  <p>A rate is only as meaningful as the valuation it is applied to, and on five of the seven platforms the company paying the buyback also sets the number it is paying a percentage of.</p>
+  <p>A rate is only as meaningful as the valuation it is applied to, and on five of the eight platforms the company paying the buyback also sets the number it is paying a percentage of.</p>
 
   <p>Fanatics is the exception worth naming: it uses Card Ladder, a third-party sales-data service, so the valuation can in principle be checked against data a buyer can also reach. That is the best practice in the category, and it belongs to the platform with the worst effective rate. Tilt Rips sits at the other end, paying the highest withdrawable rate against a valuation from an unnamed source that it states cannot be disputed.</p>
 
@@ -2062,7 +2355,7 @@ def build_buyback():
   <ul>
     <li><a href="/platforms/fanatics-instant-rips/">How the Fanatics 90% becomes 84.6%</a></li>
     <li><a href="/platforms/packz/">Why the Packz buyback pays credit, not cash</a></li>
-    <li><a href="/platforms/">All seven platforms compared</a></li>
+    <li><a href="/platforms/">All nine platforms compared</a></li>
   </ul>
 </div>
 """.format(collected=CLUTCH_COLLECTED, rows="".join(rows), conv="".join(conv),
@@ -2411,6 +2704,8 @@ def main():
         build_compare(),
         build_chase(),
         build_bonuses(),
+        build_packed(),
+        build_fast_rips(),
         build_buyback(),
         build_calculator(),
         build_methodology(),

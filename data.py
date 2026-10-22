@@ -229,6 +229,16 @@ BUYBACK_TERMS = [
     ("Clutch Packs", None, None, None,
      "No buyback or sell-back terms disclosed anywhere",
      "Market value at the time of the pull, source not named"),
+    ("Packed", 1.00, 1.00, True,
+     "Withdrawable to debit card, bank, PayPal or Venmo &mdash; but only "
+     "within a storage window the terms set at one day",
+     "Packed, via a &ldquo;semi-automated proprietary system&rdquo;; locked "
+     "at the moment of the pull"),
+    ("Fast Rips", 1.00, None, False,
+     "Marketing says cash to a bank; the terms say Platform Credit, "
+     "non-withdrawable, with withdrawals at the company's sole discretion",
+     "&ldquo;Proprietary, Platform-administered valuation used exclusively "
+     "for internal Platform purposes&rdquo;"),
 ]
 
 
