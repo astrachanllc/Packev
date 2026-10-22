@@ -51,6 +51,10 @@ body{
 
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
 .narrow{max-width:760px}
+/* Let wide tables in an article column break out to the full measure. */
+.narrow .table-wrap{width:min(var(--maxw), calc(100vw - 40px));
+  margin-left:50%;transform:translateX(-50%)}
+@media (max-width:860px){.narrow .table-wrap{width:100%;margin-left:0;transform:none}}
 
 h1,h2,h3,h4{line-height:1.1;margin:0;font-weight:800;font-stretch:80%;font-variation-settings:"wdth" 80;letter-spacing:-.005em}
 h1{font-size:clamp(2.1rem,5.2vw,3.6rem)}

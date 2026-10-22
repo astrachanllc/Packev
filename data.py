@@ -202,6 +202,36 @@ def clutch_stats():
     }
 
 
+# What each platform's buyback actually converts to. `effective` is the rate
+# after any deducted fee; None where the platform publishes nothing usable.
+# `cash` is True only where proceeds reach a bank account or wallet the holder
+# controls, False where they are locked to platform spend, None where unknown.
+BUYBACK_TERMS = [
+    # name, headline, effective, cash?, payout form, who sets the valuation
+    ("Arena Club", 0.90, 0.90, True,
+     "Arena Club Wallet, withdrawable to a bank account or debit card via Stripe",
+     "Arena Club, which also grades some of the cards itself"),
+    ("Tilt Rips", 0.90, 0.90, True,
+     "Wallet, withdrawable in US dollars or several cryptocurrencies",
+     "&ldquo;Live market data,&rdquo; source not named; price cannot be disputed"),
+    ("Packz", 0.90, 0.90, False,
+     "Site credit that cannot be withdrawn and can only buy more packs",
+     "Packz"),
+    ("Courtyard", 0.90, 0.85, None,
+     "Settles in USDC; independent tracking measured actual offers nearer 85%",
+     "Courtyard"),
+    ("Fanatics Instant Rips", 0.90, 0.846, False,
+     "Fanatics Live credits, spendable across Fanatics Live but not withdrawable",
+     "Card Ladder, a third-party sales-data service"),
+    ("Crown Rips", 1.00, None, None,
+     "Claimed at 100% of fair market value; form of proceeds unconfirmed",
+     "Crown Rips"),
+    ("Clutch Packs", None, None, None,
+     "No buyback or sell-back terms disclosed anywhere",
+     "Market value at the time of the pull, source not named"),
+]
+
+
 def slugify(s):
     out = []
     for ch in s.lower():

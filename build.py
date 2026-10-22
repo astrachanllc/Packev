@@ -5,7 +5,7 @@ import os
 import shutil
 from collections import Counter
 
-from data import (load_courtyard, load_packz, ARENA_CLUB_PACKS,
+from data import (load_courtyard, load_packz, ARENA_CLUB_PACKS, BUYBACK_TERMS,
                   CROWN_RIPS_PACKS, CLUTCH_PACKS, CLUTCH_BAND_LABELS,
                   CLUTCH_COLLECTED, clutch_stats,
                   money, pct, COLLECTED, UPDATED)
@@ -267,6 +267,7 @@ def build_home():
   <ul>
     <li><a href="/guides/chase-card-odds/">The real odds of pulling the Cooper Flagg card</a> &mdash; 1 in 5,000, and what that costs.</li>
     <li><a href="/guides/bonus-offers/">Bonus offers ranked by what they're worth</a> &mdash; only one is plausibly positive-EV.</li>
+    <li><a href="/guides/buyback-rates/">What a 90% buyback actually pays</a> &mdash; five sites say 90% and mean five different things.</li>
     <li><a href="/platforms/clutch-packs/">What 158,556 real pulls show</a> &mdash; the only observed return data in the category.</li>
     <li><a href="/compare/courtyard-vs-packz/">Courtyard vs Packz</a> &mdash; the two platforms that publish enough to compare directly.</li>
     <li><a href="/methodology/">How we rate platforms</a> &mdash; what goes into a score and what does not.</li>
@@ -1894,6 +1895,197 @@ def build_bonuses():
         updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
 
 
+def build_buyback():
+    def ratecell(v):
+        return pct(v * 100, 1).replace(".0%", "%") if v is not None else "Not disclosed"
+
+    rows = []
+    for name, head, eff, cash, form, _who in BUYBACK_TERMS:
+        if cash is True:
+            cashcell = '<strong class="pos">Yes</strong>'
+        elif cash is False:
+            cashcell = '<strong class="neg">No</strong>'
+        else:
+            cashcell = "Unconfirmed"
+        gap = ""
+        if head and eff and eff < head - 0.001:
+            gap = ' <span class="muted small">(&minus;%s)</span>' % pct((head - eff) * 100, 1)
+        rows.append(
+            '<tr><td class="name">%s</td><td class="num">%s</td>'
+            '<td class="num"><strong>%s</strong>%s</td><td class="num">%s</td>'
+            '<td>%s</td></tr>' % (
+                E(name), ratecell(head), ratecell(eff), gap, cashcell, form))
+
+    # $100 of card value, converted
+    conv = []
+    for name, _h, eff, cash, _f, _w in BUYBACK_TERMS:
+        if eff is None:
+            conv.append('<tr><td class="name">%s</td><td class="num">Unknown</td>'
+                        '<td>Not disclosed</td></tr>' % E(name))
+        else:
+            kind = "cash you can withdraw" if cash else (
+                "credit, packs only" if cash is False else "USDC, withdrawal unconfirmed")
+            conv.append('<tr><td class="name">%s</td>'
+                        '<td class="num"><strong>%s</strong></td><td>%s</td></tr>'
+                        % (E(name), money(eff * 100), kind))
+
+    # round trip on a $100 pack
+    trips = [
+        ("Courtyard", 0.95, 0.85, "Posted EV 95%, buyback measured at ~85%"),
+        ("Packz", 1.0029, 0.90, "Estimated EV ~100%, but the 90% is credit only"),
+        ("Fanatics Instant Rips", None, 0.846, "No pull rates published, so no EV"),
+        ("Clutch Packs", 1.010, None, "Observed EV 1.01&times;, but no buyback terms"),
+        ("Arena Club", None, 0.90, "No card values published, so no EV"),
+        ("Tilt Rips", None, 0.90, "No odds published, so no EV"),
+    ]
+    trip_rows = []
+    for name, ev, bb, note in trips:
+        if ev and bb:
+            back = ev * bb * 100
+            trip_rows.append(
+                '<tr><td class="name">%s</td><td class="num">%s</td>'
+                '<td class="num">%s</td>'
+                '<td class="num"><strong class="neg">%s</strong></td>'
+                '<td class="num">%s</td></tr>' % (
+                    E(name), pct(ev * 100, 0), pct(bb * 100, 1),
+                    money(back), money(100 - back)))
+        else:
+            trip_rows.append(
+                '<tr><td class="name">%s</td><td class="num" colspan="4">%s</td></tr>'
+                % (E(name), note))
+
+    faq_html, faq_ld = faq_block([
+        ("Which card ripping site has the best buyback?",
+         "<p>Arena Club and Tilt Rips, because both pay 90% into a wallet you can withdraw from &mdash; Arena Club to a bank account or debit card through Stripe, Tilt Rips in US dollars or cryptocurrency. Packz also advertises 90% but pays site credit that cannot be withdrawn and can only buy more packs, and Fanatics' 90% becomes 84.6% after a 6% marketplace fee and is also paid in credit. Crown Rips claims 100% but we have not been able to verify it, and Clutch Packs discloses no buyback terms at all.</p>"),
+        ("Is the Fanatics instant offer really 90%?",
+         "<p>No, it is 84.6% in practice. Fanatics' own published example takes a $200 card, applies the 90% rate to reach $180, then deducts a 6% marketplace fee of $10.80, leaving an offer of $169.20. That is 84.6% of the card's appraised value. The formula is 0.90 multiplied by 0.94. The 90% figure is accurate as a rate; it is just not what arrives in your account.</p>"),
+        ("What do you actually get back if you sell a card straight back?",
+         "<p>On a $100 Courtyard pack, about $80.75. The pack's posted expected value is 95% of the price, so the average card is worth about $95, and applying the measured ~85% instant offer to that leaves roughly $80.75. On Packz the same round trip returns about $90, but in credit that can only buy more packs rather than money you can take out. Those are averages across many packs, not what any single pack returns.</p>"),
+        ("Can you withdraw money from card ripping sites?",
+         "<p>It depends entirely on the platform, and the advertised buyback rate tells you nothing about it. Arena Club and Tilt Rips pay into withdrawable wallets. Packz and Fanatics pay credit locked to the platform. Courtyard settles in USDC, though we have not verified the withdrawal path ourselves. On the platforms that pay credit, the only route to actual money is to decline the offer, have the physical card shipped, and sell it yourself &mdash; which costs shipping and time, and on a low-value pull usually costs more than the card is worth.</p>"),
+    ])
+
+    body = """
+<div class="wrap narrow">
+  <div class="page-head">
+    <h1>Every site advertises a 90% buyback. Here is what you actually get back.</h1>
+    <p class="lede">Five of the seven platforms we track advertise a 90% buyback. On close reading the phrase means five different things, and on three of them the money cannot leave the platform at all.</p>
+  </div>
+
+  <div class="finding">
+    <p class="big">Five platforms advertise 90%. One of them pays 84.6% after fees. Three pay in credit that cannot be withdrawn. Only two &mdash; Arena Club and Tilt Rips &mdash; pay 90% into a wallet you can actually take money out of. The headline rate is the least informative number on the page.</p>
+    <p class="small muted">Compiled from each platform's own published terms and worked examples, {collected}. Rates change; check before you buy.</p>
+  </div>
+
+  <h2>The headline against the reality</h2>
+  <div class="table-wrap">
+  <table>
+  <caption>Advertised and effective buyback rates across the seven platforms we track, {collected}.</caption>
+  <thead><tr>
+    <th scope="col">Platform</th><th scope="col" class="num">Advertised</th>
+    <th scope="col" class="num">Effective</th><th scope="col" class="num">Withdrawable</th>
+    <th scope="col">Payout form</th>
+  </tr></thead>
+  <tbody>{rows}</tbody>
+  </table>
+  </div>
+
+  <h2>What $100 of card value is really worth</h2>
+  <p>The cleanest way to compare is to hold the card constant. Pull a card the platform values at $100, accept the instant offer, and this is what lands:</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>A card valued at $100, converted through each platform's buyback.</caption>
+  <thead><tr><th scope="col">Platform</th><th scope="col" class="num">You receive</th><th scope="col">In what form</th></tr></thead>
+  <tbody>{conv}</tbody>
+  </table>
+  </div>
+
+  <p>The spread between the best and worst of the five that say 90% is $5.40 on every $100 of card value. That is the small part. The large part is that on Packz and Fanatics, the $90 and $84.60 are not money &mdash; they are a balance that can only be spent back inside the platform.</p>
+
+  <h2>Credit is not cash</h2>
+  <p>This is the single biggest thing the headline rates conceal, and it is worth being precise about.</p>
+
+  <p><strong>On Packz, a sell-back is a re-roll, not a refund.</strong> The credit can only buy more packs. If you pull a card worth less than you paid and accept the 90%, you have not recovered 90% of your money; you have converted a bad pull into a slightly smaller stake in the next one. The only route to actual money is to have the card shipped and sell it yourself, which on a $2 card costs more than the card is worth.</p>
+
+  <p><strong>On Fanatics the door is wider but still inside the same building.</strong> Fanatics Live credits work across any Fanatics Live purchase rather than packs alone. There is also a genuine cash route, and it is not the instant offer: decline it, take the card, and list it on the Fanatics Collect marketplace, where sales pay out with free ACH withdrawal. That costs 1% to 3% in fulfilment and 3 to 15 business days. So the convenient option is the expensive one.</p>
+
+  <p><strong>On Arena Club and Tilt Rips the money reaches you.</strong> Arena Club credits an in-house wallet that withdraws to a bank account or debit card through Stripe. Tilt Rips withdraws in dollars or crypto with no fees beyond those shown in the app. Of everything here, those are the two buybacks that behave the way the word implies.</p>
+
+  <h2>The round trip</h2>
+  <p>Buy a $100 pack, reveal the card, accept the instant offer. Where both the expected value and the buyback rate are published, the whole journey can be costed:</p>
+
+  <div class="table-wrap">
+  <table>
+  <caption>A $100 pack bought and sold straight back, on average. These are long-run averages across many packs, not what any single pack returns.</caption>
+  <thead><tr>
+    <th scope="col">Platform</th><th scope="col" class="num">Avg card value</th>
+    <th scope="col" class="num">Buyback</th><th scope="col" class="num">You end with</th>
+    <th scope="col" class="num">Average loss</th>
+  </tr></thead>
+  <tbody>{trip_rows}</tbody>
+  </table>
+  </div>
+
+  <p><strong>About $80.75 back on a $100 Courtyard pack.</strong> That is the number worth carrying around. Courtyard posts an expected value of 95% on most packs, which is already a 5% house edge, and the buyback takes most of the next 15%. Neither figure is hidden &mdash; Courtyard publishes the EV and advertises the rate &mdash; but nobody multiplies them together for you.</p>
+
+  <p><strong>Packz looks better and is harder to use.</strong> Its published odds imply roughly 100% of face in card value, so a 90% buyback returns about $90 of every $100. That is the best round trip here on paper. It is also credit, so "returning $90" means holding $90 of stake in a product that will do the same thing to it again.</p>
+
+  <p><strong>On four platforms the round trip cannot be costed at all</strong>, because either the odds or the buyback terms are missing. That is not a neutral fact about those platforms; it is the thing that makes them impossible to evaluate.</p>
+
+  <h2>Who decides what your card is worth</h2>
+  <p>A rate is only as meaningful as the valuation it is applied to, and on five of the seven platforms the company paying the buyback also sets the number it is paying a percentage of.</p>
+
+  <p>Fanatics is the exception worth naming: it uses Card Ladder, a third-party sales-data service, so the valuation can in principle be checked against data a buyer can also reach. That is the best practice in the category, and it belongs to the platform with the worst effective rate. Tilt Rips sits at the other end, paying the highest withdrawable rate against a valuation from an unnamed source that it states cannot be disputed.</p>
+
+  <p>A verifiable 84.6% and an unverifiable 90% are not ranked in the order the percentages suggest. We will take that apart properly in a separate piece.</p>
+
+  <h2>What to check before you buy</h2>
+  <ol>
+    <li><strong>Is the payout cash or credit?</strong> This matters more than the rate. Ask whether proceeds can be withdrawn, not just what percentage they are.</li>
+    <li><strong>Is a fee deducted after the percentage?</strong> Fanatics' 6% marketplace fee is the difference between 90% and 84.6%.</li>
+    <li><strong>Who sets the card's value, and can you dispute it?</strong></li>
+    <li><strong>What does shipping cost, and how long does it take?</strong> This is the escape route when the instant offer is poor, and it ranges from 3 to 15 business days at Fanatics to up to six weeks at Tilt Rips.</li>
+    <li><strong>Multiply the buyback by the pack's expected value.</strong> That product, not either number alone, is what you get back.</li>
+  </ol>
+
+  <div class="callout danger">
+    <h3>Worth saying plainly</h3>
+    <p>No buyback on this page turns a pack into a positive-value purchase. The best round trip we can calculate still loses money on average, and the rates above describe what happens to the value you already lost on the pull. Decide what you are willing to spend before you start, and treat it as the cost of the entertainment rather than a position you can trade out of.</p>
+    <p>If this has stopped feeling like fun, free and confidential help is available: call or text <strong>1-800-GAMBLER</strong>.</p>
+  </div>
+
+  <h2>Frequently asked</h2>
+  {faq}
+
+  <h2>Go deeper</h2>
+  <ul>
+    <li><a href="/platforms/fanatics-instant-rips/">How the Fanatics 90% becomes 84.6%</a></li>
+    <li><a href="/platforms/packz/">Why the Packz buyback pays credit, not cash</a></li>
+    <li><a href="/platforms/">All seven platforms compared</a></li>
+  </ul>
+</div>
+""".format(collected=CLUTCH_COLLECTED, rows="".join(rows), conv="".join(conv),
+           trip_rows="".join(trip_rows), faq=faq_html)
+
+    art = jsonld({
+        "@context": "https://schema.org", "@type": "Article",
+        "headline": "Every site advertises a 90% buyback. Here is what you actually get back.",
+        "description": "Five card ripping platforms advertise a 90% buyback. One pays 84.6% after fees, three pay credit that cannot be withdrawn, and only two pay money you can take out.",
+        "datePublished": UPDATED, "dateModified": UPDATED,
+        "author": {"@type": "Organization", "name": SITE_NAME},
+        "publisher": {"@type": "Organization", "name": SITE_NAME},
+        "mainEntityOfPage": BASE_URL + "/guides/buyback-rates/",
+    })
+
+    return pages_written("/guides/buyback-rates/", page(
+        "/guides/buyback-rates/",
+        "Card ripping buyback rates — what 90% actually pays out",
+        "Five pack ripping sites advertise a 90% buyback. One pays 84.6% after fees, three pay non-withdrawable credit, and a $100 Courtyard pack sold straight back returns about $80.75.",
+        body, crumbs=[("/", "Home"), (None, "Buyback rates")],
+        updated=CLUTCH_COLLECTED, structured=[faq_ld, art]))
+
+
 def build_methodology():
     body = """
 <div class="wrap">
@@ -2219,6 +2411,7 @@ def main():
         build_compare(),
         build_chase(),
         build_bonuses(),
+        build_buyback(),
         build_calculator(),
         build_methodology(),
         build_gambling(),

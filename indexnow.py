@@ -24,6 +24,7 @@ URLS = [
     "https://packev.xyz/compare/courtyard-vs-packz/",
     "https://packev.xyz/guides/chase-card-odds/",
     "https://packev.xyz/guides/bonus-offers/",
+    "https://packev.xyz/guides/buyback-rates/",
     "https://packev.xyz/calculator/",
     "https://packev.xyz/methodology/",
     "https://packev.xyz/is-card-ripping-gambling/",
