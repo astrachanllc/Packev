@@ -244,6 +244,59 @@ BUYBACK_TERMS = [
      "within a storage window the terms set at one day",
      "Packed, via a &ldquo;semi-automated proprietary system&rdquo;; locked "
      "at the moment of the pull"),
+    ("SAJA", 1.00, 1.00, True,
+     "100% of displayed value, locked at the pull, good for 7 days; paid to "
+     "the SAJA balance and withdrawn through Stripe. Deposited funds must be "
+     "spent once before they can be withdrawn, and every withdrawal is "
+     "subject to a discretionary hold",
+     "<strong>Third-party market pricing services</strong> &mdash; one of "
+     "only three platforms we track that does not set its own values"),
+    ("LastPack", 1.00, 1.00, True,
+     "The FAQ says user-initiated sellback is &ldquo;100% of fair market "
+     "value, credited to your Lastpack balance,&rdquo; cashable through "
+     "Coinflow or USDC-on-Solana, capped at $10,000 per 7 days (&sect;5.3a). "
+     "But &sect;4.5 says the credit is &ldquo;additional pack purchase "
+     "credits&rdquo; &mdash; the two contradict each other",
+     "LastPack, from &ldquo;realtime sales statistics&rdquo; via a "
+     "&ldquo;proprietary system&rdquo;; &sect;4.4 says it &ldquo;may not "
+     "match published market values&rdquo;; locked at the time of purchase"),
+    ("Underdog Rips", 0.85, None, None,
+     "Underdog&rsquo;s own help centre states no rate and no payout form. "
+     "Phygitals, the named third party that powers it, documents &ldquo;85% "
+     "of FMV&rdquo; with &ldquo;all buyback payouts&hellip; denominated and "
+     "paid in USDC&rdquo; to a wallet. We could not confirm which applies on "
+     "Underdog",
+     "Phygitals, from &ldquo;industry-standard pricing providers for graded "
+     "collectibles&rdquo; &mdash; third-party sourced, though the providers "
+     "are not named; fixed at the time of the pull"),
+    ("Rip Station", 0.83, 0.83, None,
+     "&ldquo;Lands in your wallet.&rdquo; The FAQ describes no withdrawal "
+     "process, no minimum and no cap &mdash; the only mention of withdrawing "
+     "is in the answer about the service shutting down. 83% of estimated "
+     "market value, within 7 days, &ldquo;not guaranteed liquidity&rdquo;",
+     "Rip Station, from &ldquo;real recent sales across the trading card "
+     "market&rdquo;; the same data sets the buyback"),
+    ("CatchBack", 0.90, 0.90, None,
+     "90% of value, displayed beside the odds. A paid &ldquo;Boost&rdquo; "
+     "add-on raises it to 110% on a winning pull and &ldquo;Insurance&rdquo; "
+     "guarantees a 70%-of-price floor, each within five minutes. We could not "
+     "reach the terms to confirm the payout form",
+     "CatchBack; the full available-hits pool and its per-card values are "
+     "published on the pack page, which is more than most"),
+    ("Holofoil", 0.90, None, False,
+     "Holofoil Credit only. &sect;4: credit &ldquo;cannot be withdrawn, "
+     "cashed out, sold, or transferred,&rdquo; and Holofoil &ldquo;does not "
+     "offer cash payouts for sell-backs, vault conversions, promotions, or "
+     "returns.&rdquo; The only exit is shipping the physical card",
+     "Holofoil, by its own methods; &sect;8 makes its determination "
+     "&ldquo;final,&rdquo; appealable only through the obvious-error process "
+     "in &sect;9"),
+    ("Gotya", 0.90, 0.90, True,
+     "Credited to the Wallet as internal ledger credit (&sect;20), then "
+     "withdrawn to a verified bank account in the holder's own legal name "
+     "(&sect;21); the free-pack page puts the cash-out floor at a $25 balance",
+     "Gotya, as &ldquo;a good-faith internal estimate&rdquo; (&sect;&sect;2, "
+     "14); &sect;24 refuses returns for &ldquo;Disagreement with FMV&rdquo;"),
     ("Rips by Triumph", 1.00, None, True,
      "Withdrawable to debit card, bank, PayPal or Venmo; $6 minimum, up to "
      "$10,000 a day at Triumph's discretion, Venmo capped at $4,000 per "
@@ -298,8 +351,8 @@ BUYBACK_TERMS = [
 # Short, scannable risk labels. Every flag must trace to a quoted term or a
 # figure we published; nothing here is a vibe.
 FLAGS = {
-    "cash": ("Cash-out verified", "pos",
-             "Buyback proceeds reach a bank account, card or wallet you control"),
+    "cash": ("Pays cash, not credit", "pos",
+             "The platform’s own terms describe buyback proceeds reaching a bank account, card or wallet you control. We have not withdrawn from any platform ourselves"),
     "credit": ("Credit only", "neg",
                "Buyback pays platform credit that cannot be withdrawn"),
     "clock": ("Short clock", "neg",
@@ -318,6 +371,12 @@ FLAGS = {
                  "Operated outside the US under non-US law"),
     "shipdefault": ("Card ships by default", "pos",
                     "Do nothing and the card is sent to you, not sold back"),
+    "forfeit": ("Can confiscate your cards", "neg",
+                "Terms allow voiding transactions and forfeiting vaulted cards on suspicion alone"),
+    "thirdparty": ("Third-party valuations", "pos",
+                   "Card values come from an outside pricing service, not the platform itself"),
+    "sidebets": ("Sells paid side bets", "neg",
+                 "Optional wagers sold on top of the pack, at the moment of purchase"),
     "keepdefault": ("Keeps by default", "pos",
                     "Do nothing and you keep the card; the platform does not sell it"),
     "storefront": ("Physical storefront", "pos",
@@ -342,6 +401,13 @@ PLATFORM_FLAGS = {
     "rare-candy": ["odds", "credit", "keepdefault"],
     "swishx": ["odds", "ev", "cash", "clock"],
     "triumph": ["noodds", "cash", "conflict", "clock"],
+    "gotya": ["odds", "ev", "cash", "offshore"],
+    "holofoil": ["odds", "credit", "clock"],
+    "catchback": ["odds", "ev", "sidebets", "clock"],
+    "rip-station": ["noodds", "offshore", "clock"],
+    "underdog": ["odds", "ev", "clock"],
+    "lastpack": ["odds", "ev", "cash", "clock"],
+    "saja": ["odds", "ev", "cash", "thirdparty", "forfeit"],
 }
 
 # --------------------------------------------------------------- availability
@@ -363,15 +429,93 @@ UNKNOWN_AVAILABILITY = ["Arena Club", "Clutch Packs", "Tilt Rips",
 
 # ------------------------------------------------------------------ changelog
 # Dated record of what we collected and what changed. Newest first.
+# SAJA — Silver Pack rarity rates, from the saja.com marketing page, 2026-10-23.
+# SAJA publishes percentages only; no value ranges are given anywhere public,
+# so no expected value can be computed from the outside.
+SAJA_COLLECTED = "2026-10-23"
+
+SAJA_PACK = {
+    "name": "Silver Pack", "price": 10.00, "posted_ev": "PACK EV 100%",
+    "bands": [
+        ("Common", 54.5), ("Uncommon", 24.5), ("Rare", 12.0),
+        ("Epic", 5.0), ("Legendary", 2.5), ("Grail", 0.5), ("God Pack", 0.1),
+    ],
+}
+
+
+def saja_stats():
+    psum = sum(q for _, q in SAJA_PACK["bands"])
+    return {"psum": psum, "gap": 100.0 - psum,
+            "n": len(SAJA_PACK["bands"]), "price": SAJA_PACK["price"]}
+
+
 CHANGELOG = [
-    ("2026-10-22", "Rips by Triumph added &mdash; and its terms match MintPull's, clause for clause",
+    ("2026-10-23", "Correction: the “Cash-out verified” label overstated what we had done",
+     "That chip appeared on eleven platform pages and said “verified.” We had "
+     "read each platform’s terms and help pages describing a withdrawal path; we "
+     "had not withdrawn money from any of them. The label now reads “Pays cash, "
+     "not credit,” and its description says plainly that we have not tested it. "
+     "No underlying figure changed.",
+     "/changelog/"),
+    ("2026-10-23", "SAJA added — the best headline terms, and the broadest forfeiture clause",
+     "100% expected value and a 100% buyback, card values from third-party "
+     "pricing services, ownership passing at the pull, a free vault with no "
+     "deadline, and a cash refund when SAJA prices a card above market. The "
+     "same terms let SAJA void every transaction and confiscate vaulted cards "
+     "on suspicion, &ldquo;without any obligation to investigate or to prove "
+     "it.&rdquo;",
+     "/platforms/saja/"),
+    ("2026-10-23", "LastPack added — and the shared terms template turns up a third time",
+     "LastPack posts a sell-back rate, min and max value, a GROSS EV and a "
+     "full rarity table on every pack page, and lets you verify a pull "
+     "afterwards. Its &sect;4.3 and &sect;4.4 are the same clauses we found in "
+     "Triumph&rsquo;s and MintPull&rsquo;s terms. And &sect;4.5 contradicts its "
+     "own FAQ about whether sell-back proceeds are cash or pack credit.",
+     "/platforms/lastpack/"),
+    ("2026-10-22", "Underdog Rips added, and Phygitals documented",
+     "Underdog&rsquo;s help centre gives a three-day window and no buyback "
+     "rate. Phygitals, the third party that sources, vaults and ships the "
+     "cards, documents 85% of FMV paid in USDC &mdash; and buyback windows of "
+     "30 minutes, 3 days or 7 days depending on card type. A 30-minute window "
+     "would be the shortest on this site.",
+     "/platforms/underdog/"),
+    ("2026-10-22", "Rip Station added — an EV page with no EV on it",
+     "Rip Station publishes a dedicated &ldquo;EV &amp; Odds&rdquo; page. On "
+     "the day we read it, all ten packs showed &ldquo;Data unavailable &mdash; "
+     "inventory not verified.&rdquo; Its buyback is 83%, the lowest advertised "
+     "figure we have found, and it is operated by a Panama company under a "
+     "Delaware parent.",
+     "/platforms/rip-station/"),
+    ("2026-10-22", "CatchBack added — the first platform selling side bets on the pack",
+     "Publishes full band odds summing to exactly 100%, a posted expected "
+     "value and the entire card pool with values. It also sells two optional "
+     "wagers at $3.75 each on a $25 pack: a &ldquo;Boost&rdquo; that pays for "
+     "itself only above $18.75 of card value, and &ldquo;Insurance&rdquo; "
+     "capped at a $10.30 payout. Both expire in five minutes.",
+     "/platforms/catchback/"),
+    ("2026-10-22", "Holofoil added — the only platform with no cash exit at all",
+     "&sect;4: Holofoil Credit &ldquo;cannot be withdrawn, cashed out, sold, or "
+     "transferred,&rdquo; and there are no cash payouts for sell-backs, vault "
+     "conversions, promotions or returns. &sect;10 converts vaulted cards to "
+     "that same credit after 30 days. Shipping the physical card is the only "
+     "way value leaves. Its &sect;5 does contractually require pull rates on "
+     "every product page.",
+     "/platforms/holofoil/"),
+    ("2026-10-22", "Gotya added, and its central claim checks out",
+     "Gotya says &ldquo;each pack&rsquo;s expected value equals its price.&rdquo; "
+     "We collected five packs: every odds table sums to exactly 100%, and the "
+     "midpoint expected value averages 100.5% of price. The free $10 pack is "
+     "the one exception, at 92.6%. Governed by the law of England and Wales, "
+     "and &sect;30 converts vaulted cards to credit after 180 days idle.",
+     "/platforms/gotya/"),
+    ("2026-10-22", "Rips by Triumph added — and its terms match MintPull's, clause for clause",
      "The largest platform we track, at 1M+ installs. Its FAQ headlines a "
      "&ldquo;100% BUYBACK GUARANTEE&rdquo;; &sect;5.5 of its terms says "
      "Triumph &ldquo;is under no obligation to&rdquo; offer a Return. Its "
      "&sect;5.2&ndash;5.5 share capitalised sentences and section numbering "
      "with MintPull's, verbatim.",
      "/platforms/triumph/"),
-    ("2026-10-22", "SwishX added &mdash; the most complete disclosure we have found",
+    ("2026-10-22", "SwishX added — the most complete disclosure we have found",
      "Posts an expected value on every pack, publishes per-tier odds with an "
      "explicit target FMV and the named card pool, states packs are "
      "&ldquo;designed to a 100% value target,&rdquo; and publishes its buyback "
@@ -476,6 +620,22 @@ PLATFORMS = [
         "age": ("Not stated", ""), "states": ("None published", ""),
     },
     {
+        "slug": "lastpack", "name": "LastPack", "path": "/platforms/lastpack/",
+        "blurb": "Shows the EV, the odds, the sell-back rate and a per-pull fairness check &mdash; on a terms template whose clauses contradict its own FAQ.",
+        "packs": "5 price points &times; 4 collections", "prices": "$1&ndash;$2,500",
+        "odds": ("Full rarity table per pack, summing to 100%", "ok"),
+        "ev": ("&ldquo;GROSS EV&rdquo; posted on every pack", "ok"),
+        "ret": ("95% posted; bands imply more", ""),
+        "buyback": ("100% of FMV, shown on the pack", "ok"),
+        "cash": ("Yes &mdash; Coinflow or USDC; $10k per 7 days", "ok"),
+        "valuer": ("LastPack; &sect;4.4 &ldquo;may not match published market values&rdquo;", "neg"),
+        "clock": ("5 days, then auto-sold at the purchase-time FMV", "neg"),
+        "operator": "Lotus Digital Inc., a Delaware corporation",
+        "juris": ("United States &mdash; California law", "ok"),
+        "age": ("18+, US phone and government ID", "ok"),
+        "states": ("None published; may restrict any jurisdiction", ""),
+    },
+    {
         "slug": "courtyard", "name": "Courtyard", "path": "/platforms/courtyard/",
         "blurb": "Publishes an exact expected value on every pack &mdash; the strongest disclosure we have found.",
         "packs": "92", "prices": "$10&ndash;$5,000",
@@ -504,6 +664,38 @@ PLATFORMS = [
         "age": ("18+", "ok"), "states": ("US only", ""),
     },
     {
+        "slug": "saja", "name": "SAJA", "path": "/platforms/saja/",
+        "blurb": "100% EV and a 100% buyback on third-party valuations &mdash; alongside terms that can void every transaction and forfeit your cards.",
+        "packs": "Tiered, in-app", "prices": "$1&ndash;$1,000",
+        "odds": ("Rarity rates published; no value ranges public", ""),
+        "ev": ("&ldquo;PACK EV 100%&rdquo; claimed per pack", "ok"),
+        "ret": ("100% claimed; not independently calculable", ""),
+        "buyback": ("100% of value, 7-day window", "ok"),
+        "cash": ("Yes &mdash; Stripe; deposits need 1&times; use first", "ok"),
+        "valuer": ("<strong>Third-party market pricing services</strong>", "ok"),
+        "clock": ("None on the vault; 7 days on the instant offer", "ok"),
+        "operator": "Zodiac Games Company, Inc., a Delaware corporation",
+        "juris": ("United States &mdash; Delaware law", "ok"),
+        "age": ("18+, one account per person", "ok"),
+        "states": ("None published; US-operated", ""),
+    },
+    {
+        "slug": "holofoil", "name": "Holofoil", "path": "/platforms/holofoil/",
+        "blurb": "Contractually commits to publishing pull rates, then makes shipping the card the only way value ever leaves.",
+        "packs": "4 types", "prices": "$9.20&ndash;$26.26, dynamic",
+        "odds": ("Per-card rates, required by &sect;5", "ok"),
+        "ev": ("No, not calculable", ""),
+        "ret": ("Not calculable", ""),
+        "buyback": ("90% of Holofoil's estimated value", ""),
+        "cash": ("No &mdash; credit &ldquo;cannot be withdrawn&rdquo; (&sect;4)", "neg"),
+        "valuer": ("Holofoil; &sect;8 calls its determination &ldquo;final&rdquo;", "neg"),
+        "clock": ("30 days, then converted to credit (&sect;10)", "neg"),
+        "operator": "First Edition TCG LLC, an Oregon company",
+        "juris": ("United States &mdash; Oregon law", "ok"),
+        "age": ("18+ or local majority", "ok"),
+        "states": ("US and Canada only", ""),
+    },
+    {
         "slug": "arena-club", "name": "Arena Club", "path": "/platforms/arena-club/",
         "blurb": "Every pull is a graded slab, with per-card odds but no card values attached.",
         "packs": "9 tiers &times; 9 categories", "prices": "$25&ndash;$5,000",
@@ -530,6 +722,22 @@ PLATFORMS = [
         "clock": ("1 year, then shipped to you free", "ok"),
         "operator": "Poke-Collect, Madison, Alabama", "juris": ("United States", "ok"),
         "age": ("None stated", "neg"), "states": ("US shipping only", ""),
+    },
+    {
+        "slug": "underdog", "name": "Underdog Rips", "path": "/platforms/underdog/",
+        "blurb": "A major fantasy operator entering rips on third-party rails that publish an EV, provable fairness and outsourced valuations.",
+        "packs": "Not published", "prices": "&ldquo;Various price points&rdquo;",
+        "odds": ("Claimed &ldquo;up front&rdquo;; we could not read figures", ""),
+        "ev": ("Phygitals shows an EV per pack; unverified", ""),
+        "ret": ("Not calculable", "neg"),
+        "buyback": ("85% per Phygitals; Underdog states none", ""),
+        "cash": ("USDC per Phygitals; unconfirmed on Underdog", ""),
+        "valuer": ("Third-party pricing providers, unnamed", "ok"),
+        "clock": ("3 days on Underdog; 30 min to 7 days on Phygitals", "neg"),
+        "operator": "Underdog Sports, with Phygitals sourcing and vaulting",
+        "juris": ("United States", "ok"),
+        "age": ("Not established", ""),
+        "states": ("&ldquo;Not available in all states&rdquo;; no list found", ""),
     },
     {
         "slug": "fanatics-instant-rips", "name": "Fanatics Instant Rips",
@@ -618,6 +826,22 @@ PLATFORMS = [
         "age": ("18+", "ok"), "states": ("Not published", "neg"),
     },
     {
+        "slug": "rip-station", "name": "Rip Station", "path": "/platforms/rip-station/",
+        "blurb": "Built an expected-value page and left it empty. The lowest advertised buyback in the category, stated plainly.",
+        "packs": "10 listed", "prices": "$25&ndash;$500",
+        "odds": ("A page exists; every figure read unavailable", "neg"),
+        "ev": ("&ldquo;Data unavailable &mdash; inventory not verified&rdquo;", "neg"),
+        "ret": ("Not calculable", "neg"),
+        "buyback": ("83% &mdash; the lowest advertised anywhere", "neg"),
+        "cash": ("Unconfirmed; &ldquo;lands in your wallet&rdquo;", ""),
+        "valuer": ("Rip Station, from recent market sales", ""),
+        "clock": ("7 days from each rip", ""),
+        "operator": "Byzantine Port Technologies Inc. (Panama), under Byzantion Inc. (Delaware)",
+        "juris": ("Panama, under a Delaware parent", "neg"),
+        "age": ("18+ or local majority", "ok"),
+        "states": ("Sanctioned and prohibited jurisdictions only", ""),
+    },
+    {
         "slug": "fast-rips", "name": "Fast Rips", "path": "/platforms/fast-rips/",
         "blurb": "Advertises a 100% cash buyback its own Terms of Use do not describe.",
         "packs": "7", "prices": "Not published",
@@ -676,6 +900,38 @@ PLATFORMS = [
         "operator": "Not named; &ldquo;Powered by Swish Breaks&rdquo;",
         "juris": ("United States", "ok"),
         "age": ("18+, one account each", "ok"),
+        "states": ("None published", ""),
+    },
+    {
+        "slug": "gotya", "name": "Gotya", "path": "/platforms/gotya/",
+        "blurb": "Says each pack's expected value equals its price. We checked five packs and it does &mdash; then the clock is a 180-day dormancy clause.",
+        "packs": "10 listed, 5 collected", "prices": "$15&ndash;$100",
+        "odds": ("Value bands per pack, on the web, summing to 100%", "ok"),
+        "ev": ("&ldquo;Average item value&rdquo; posted per pack", "ok"),
+        "ret": ("~100.5% midpoint; ~90% round trip", "ok"),
+        "buyback": ("90% standing offer", "ok"),
+        "cash": ("Yes &mdash; Wallet, then bank at a $25 floor", "ok"),
+        "valuer": ("Gotya, &ldquo;good-faith internal estimate&rdquo;; no dispute route (&sect;24)", "neg"),
+        "clock": ("None, but 180 days idle converts cards to credit", ""),
+        "operator": "VBR GROUP LLP (London) with Gotya Collect LLC (Wyoming)",
+        "juris": ("England and Wales", "neg"),
+        "age": ("18+", "ok"),
+        "states": ("None; sanctions jurisdictions only", ""),
+    },
+    {
+        "slug": "catchback", "name": "CatchBack", "path": "/platforms/catchback/",
+        "blurb": "Publishes the odds, the EV and the whole card pool &mdash; then sells you two side bets on the result.",
+        "packs": "10 levels &times; 6 categories", "prices": "$5&ndash;$500+",
+        "odds": ("Bands plus the full card pool, on the web", "ok"),
+        "ev": ("Posted, but 7% above its own bands", ""),
+        "ret": ("97.2% midpoint; $26.00 posted on $25", ""),
+        "buyback": ("90%, or 110% with a paid Boost", ""),
+        "cash": ("Not confirmed &mdash; terms unreachable", ""),
+        "valuer": ("CatchBack, but the pool and its values are published", ""),
+        "clock": ("5 minutes on both paid add-ons", "neg"),
+        "operator": "Not established; terms hosted on a third-party docs subdomain",
+        "juris": ("Not established", ""),
+        "age": ("Not established", ""),
         "states": ("None published", ""),
     },
     {
@@ -895,4 +1151,179 @@ def swishx_stats():
         "min_price": min(r["price"] for r in rows),
         "max_price": max(r["price"] for r in rows),
         "max_gap": max(abs(r["stated"] - r["norm"]) / r["price"] for r in rows),
+    }
+
+
+# ----------------------------------------------------------------- Gotya
+# Collected from gotya.com on 2026-10-22. Gotya states "each pack's expected
+# value equals its price" and publishes a value-band table plus an "Average
+# item value" on every pack page. Bands are stated per card (one card per
+# pack). Odds are recalculated from live vault inventory, so they move.
+# (name, price, stated_avg, [(lo, hi, odds_pct)])
+GOTYA_PACKS = [
+    ("Free $10 Pack", 10.00, 10.00, [
+        (3, 5, 42.7), (6, 10, 40.0), (12, 24, 13.2),
+        (32, 60, 4.0), (80, 200, 0.10)]),
+    ("Pok&eacute;mon Rookie Pack", 15.00, 15.00, [
+        (11, 13, 47.0), (13, 15, 40.8), (15, 30, 10.0),
+        (30, 60, 2.0), (60, 240, 0.20)]),
+    ("Pok&eacute;mon Trainer Pack", 25.00, 25.00, [
+        (17, 21, 40.0), (21, 25, 39.0), (25, 50, 17.8),
+        (50, 100, 3.0), (100, 400, 0.20)]),
+    ("Football Trainer Pack", 25.00, 25.00, [
+        (18, 21, 40.0), (21, 25, 37.9), (25, 50, 20.0),
+        (50, 100, 2.0), (100, 400, 0.10)]),
+    ("Pok&eacute;mon Elite Pack", 50.00, 50.00, [
+        (35, 45, 58.0), (45, 50, 21.3), (50, 100, 17.5),
+        (100, 200, 3.0), (200, 800, 0.20)]),
+]
+
+GOTYA_BUYBACK = 0.90
+
+
+def gotya_rows():
+    out = []
+    for name, price, stated, bands in GOTYA_PACKS:
+        mid = sum((lo + hi) / 2.0 * p / 100.0 for lo, hi, p in bands)
+        low = sum(lo * p / 100.0 for lo, hi, p in bands)
+        high = sum(hi * p / 100.0 for lo, hi, p in bands)
+        psum = sum(p for _lo, _hi, p in bands)
+        out.append({
+            "name": name, "price": price, "stated": stated, "bands": bands,
+            "mid": mid, "low": low, "high": high, "psum": psum,
+            "ratio_mid": mid / price, "ratio_low": low / price,
+            "ratio_high": high / price,
+            "vs_claim": mid / stated,
+            "round_trip": mid * GOTYA_BUYBACK / price,
+        })
+    return out
+
+
+def gotya_stats():
+    rows = gotya_rows()
+    n = len(rows)
+    paid = [r for r in rows if not r["name"].startswith("Free")]
+    return {
+        "n": n, "n_paid": len(paid),
+        "mid_avg": sum(r["ratio_mid"] for r in rows) / n,
+        "paid_avg": sum(r["ratio_mid"] for r in paid) / len(paid),
+        "free_ratio": [r["ratio_mid"] for r in rows if r["name"].startswith("Free")][0],
+        "trip_avg": sum(r["round_trip"] for r in rows) / n,
+        "all_sum_100": all(abs(r["psum"] - 100.0) < 0.05 for r in rows),
+        "min_price": min(r["price"] for r in rows),
+        "max_price": max(r["price"] for r in rows),
+    }
+
+
+# -------------------------------------------------------------- CatchBack
+# Collected from the live catchbackcards.com pack builder on 2026-10-22:
+# $25 Base Pack, Pokemon category, Standard risk. CatchBack posts an expected
+# value, publishes value-band odds AND the full available-hits pool with
+# per-tier values. It also sells two optional side bets on top of the pack.
+CATCHBACK_PACK = {
+    "name": "Base Pack", "category": "Pokemon", "risk": "Standard",
+    "price": 25.00, "posted_ev": 26.00, "buyback": 0.90,
+    "bands": [(5, 25, 72.00), (25, 50, 23.17), (50, 100, 3.57),
+              (100, 200, 1.02), (200, 300, 0.24)],
+    # Observed pool, lowest and highest value seen in each tier.
+    "pool": [("Legendary", 206, 298), ("Epic", 101, 200), ("Rare", 51, 98),
+             ("Uncommon", 25, 50), ("Starter", 8, 21)],
+}
+
+# The two paid add-ons, both priced at $3.75 on a $25 pack.
+CATCHBACK_ADDONS = {
+    "boost": {"cost": 3.75, "rate": 1.10, "base": 0.90, "window_min": 5},
+    "insurance": {"cost": 3.75, "floor_pct": 0.70, "window_min": 5},
+}
+
+
+def catchback_stats():
+    p = CATCHBACK_PACK
+    bands = p["bands"]
+    mid = sum((lo + hi) / 2.0 * q / 100.0 for lo, hi, q in bands)
+    low = sum(lo * q / 100.0 for lo, hi, q in bands)
+    high = sum(hi * q / 100.0 for lo, hi, q in bands)
+    psum = sum(q for _lo, _hi, q in bands)
+
+    b = CATCHBACK_ADDONS["boost"]
+    # Boost lifts the buyback from 90% to 110%: +20 points of card value.
+    uplift = b["rate"] - b["base"]
+    boost_breakeven = b["cost"] / uplift
+
+    i = CATCHBACK_ADDONS["insurance"]
+    floor_usd = p["price"] * i["floor_pct"]
+    # Insurance only pays when 90% of the card's value falls under the floor.
+    ins_threshold = floor_usd / p["buyback"]
+    starter_lo = [t[1] for t in p["pool"] if t[0] == "Starter"][0]
+    ins_max_payout = floor_usd - starter_lo * p["buyback"]
+
+    return {
+        "price": p["price"], "posted": p["posted_ev"],
+        "mid": mid, "low": low, "high": high, "psum": psum,
+        "posted_ratio": p["posted_ev"] / p["price"],
+        "mid_ratio": mid / p["price"],
+        "gap": (p["posted_ev"] - mid) / mid,
+        "trip_posted": p["posted_ev"] * p["buyback"] / p["price"],
+        "trip_mid": mid * p["buyback"] / p["price"],
+        "addon_cost": b["cost"], "addon_pct": b["cost"] / p["price"],
+        "both_pct": (b["cost"] + i["cost"]) / p["price"],
+        "boost_breakeven": boost_breakeven,
+        "ins_floor": floor_usd, "ins_threshold": ins_threshold,
+        "ins_max_payout": ins_max_payout,
+        "bottom_share": bands[0][2],
+    }
+
+
+# -------------------------------------------------------------- LastPack
+# Collected from the live lastpack.com pack builder on 2026-10-23. Each pack
+# page displays a sell-back rate, min and max value, a "GROSS EV" figure and
+# a full rarity table. A volatility selector (Steady / Balanced / Wild)
+# changes the distribution; the posted GROSS EV stayed 95% on both.
+LASTPACK_PACKS = [
+    {"name": "Iron Pack", "collection": "Riftbound", "vol": "Balanced",
+     "price": 1.00, "gross_ev_pct": 95.0, "sellback": 1.00,
+     "min_val": 0.50, "max_val": 122.25,
+     "bands": [("Common", 0.50, 0.70, 30.0), ("Uncommon", 0.70, 1.00, 45.0),
+               ("Rare", 1.00, 1.50, 16.3), ("Epic", 1.50, 3.00, 6.0),
+               ("Mythic", 3.00, 8.00, 2.2), ("Grail", 8.00, 122.25, 0.5)]},
+    {"name": "Noobie Pack", "collection": "Pok&eacute;mon", "vol": "Steady",
+     "price": 1.00, "gross_ev_pct": 95.0, "sellback": 1.00,
+     "min_val": 0.70, "max_val": 500.00,
+     "bands": [("Common", 0.70, 0.70, 0.0), ("Uncommon", 0.70, 1.00, 70.0),
+               ("Rare", 1.00, 1.50, 22.0), ("Epic", 1.50, 3.00, 6.0),
+               ("Mythic", 3.00, 8.00, 1.9), ("Grail", 8.00, 500.00, 0.1)]},
+]
+
+
+def lastpack_rows():
+    out = []
+    for p in LASTPACK_PACKS:
+        bands = p["bands"]
+        mid = sum((lo + hi) / 2.0 * q / 100.0 for _l, lo, hi, q in bands)
+        # Top band is enormously wide; value it at its floor as a sanity check.
+        topfloor = sum(((lo + hi) / 2.0 if lab != "Grail" else lo) * q / 100.0
+                       for lab, lo, hi, q in bands)
+        psum = sum(q for _l, _lo, _hi, q in bands)
+        grail = [b for b in bands if b[0] == "Grail"][0]
+        out.append(dict(p, mid=mid, topfloor=topfloor, psum=psum,
+                        ratio_mid=mid / p["price"],
+                        ratio_topfloor=topfloor / p["price"],
+                        posted_ratio=p["gross_ev_pct"] / 100.0,
+                        grail_width=grail[2] / grail[1],
+                        grail_pct=grail[3]))
+    return out
+
+
+def lastpack_stats():
+    rows = lastpack_rows()
+    n = len(rows)
+    return {
+        "n": n,
+        "posted": rows[0]["gross_ev_pct"],
+        "all_same_ev": len({r["gross_ev_pct"] for r in rows}) == 1,
+        "all_sum_100": all(abs(r["psum"] - 100.0) < 0.05 for r in rows),
+        "mid_avg": sum(r["ratio_mid"] for r in rows) / n,
+        "topfloor_avg": sum(r["ratio_topfloor"] for r in rows) / n,
+        "sellback": rows[0]["sellback"],
+        "max_grail_width": max(r["grail_width"] for r in rows),
     }

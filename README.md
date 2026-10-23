@@ -4,7 +4,7 @@ A static site. No build step, no dependencies, no framework. Every table is
 rendered into the HTML at build time, so crawlers that don't run JavaScript —
 including most AI crawlers — still see all the numbers.
 
-34 pages covering 17 platforms.
+41 pages covering 24 platforms.
 
 ## Deploy
 
@@ -61,6 +61,13 @@ platforms/letsgo/                       "90%" vs "up to 90%", Israeli operator
 platforms/rare-candy/                   Full band odds, 50% floor, Candy has no cash value
 platforms/swishx/                       Posted EV that reconciles; margin is in the buyback
 platforms/triumph/                      1M+ installs; terms match MintPull's verbatim
+platforms/gotya/                        EV-equals-price claim, verified across 5 packs
+platforms/holofoil/                     No cash exit at all; 30-day vault
+platforms/catchback/                    Full odds and pool; paid Boost and Insurance side bets
+platforms/rip-station/                  EV page with every field empty; 83% buyback
+platforms/underdog/                     Disclosure lives at Phygitals, not Underdog
+platforms/lastpack/                     Best pack page; §4.5 contradicts its own FAQ
+platforms/saja/                         100% EV and 100% buyback; no margin stated anywhere
 compare/                                Dynamic comparison tool, pick 2-4
 compare/courtyard-vs-packz/             Head-to-head
 alternatives/courtyard/                 Alternatives pages (3)
